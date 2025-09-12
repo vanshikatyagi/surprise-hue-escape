@@ -2,41 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Surprise Travel Planner - Pastel Design System */
 
 @layer base {
   :root {
+    /* Pastel Color Palette */
+    --primary: 19 44% 83%; /* Peach #F5C9B0 */
+    --primary-foreground: 19 20% 25%;
+    --primary-glow: 19 60% 88%;
+    
+    --secondary: 263 45% 85%; /* Lavender #C9B7F5 */
+    --secondary-foreground: 263 20% 25%;
+    --secondary-glow: 263 60% 90%;
+    
+    --accent: 150 45% 83%; /* Mint #B0F5D1 */
+    --accent-foreground: 150 20% 25%;
+    --accent-glow: 150 60% 88%;
+    
+    --accent-yellow: 45 45% 85%; /* Soft Yellow #F5E6B0 */
+    --accent-yellow-foreground: 45 20% 25%;
+    
+    --accent-coral: 343 45% 83%; /* Pastel Coral #F5B0C9 */
+    --accent-coral-foreground: 343 20% 25%;
+
+    /* Background System */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background-muted: 320 20% 98%;
+    --foreground: 263 20% 25%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Glassmorphism */
+    --glass: 0 0% 100% / 0.15;
+    --glass-border: 0 0% 100% / 0.2;
+    
+    /* Cards */
+    --card: 0 0% 100% / 0.8;
+    --card-foreground: 263 20% 25%;
+    --card-border: 0 0% 100% / 0.2;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Interactive Elements */
+    --muted: 320 20% 95%;
+    --muted-foreground: 263 15% 45%;
+    --border: 320 20% 90%;
+    --input: 0 0% 100% / 0.6;
+    --ring: 19 44% 70%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(19 44% 83%), hsl(263 45% 85%), hsl(150 45% 83%));
+    --gradient-hero: linear-gradient(135deg, hsl(19 60% 88%), hsl(263 60% 90%), hsl(150 60% 88%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100% / 0.15), hsl(0 0% 100% / 0.05));
+    
+    /* Shadows */
+    --shadow-glass: 0 8px 32px hsl(263 45% 85% / 0.15);
+    --shadow-card: 0 10px 40px hsl(19 44% 83% / 0.2);
+    --shadow-floating: 0 20px 60px hsl(263 45% 85% / 0.3);
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -56,41 +80,45 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark mode with charcoal background and pastel highlights */
+    --background: 220 15% 8%;
+    --background-muted: 220 15% 10%;
+    --foreground: 19 60% 88%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 15% 12% / 0.8;
+    --card-foreground: 19 60% 88%;
+    --card-border: 19 44% 83% / 0.1;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --glass: 220 15% 15% / 0.3;
+    --glass-border: 19 44% 83% / 0.2;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 19 60% 88%;
+    --primary-foreground: 220 15% 8%;
+    --primary-glow: 19 70% 90%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 263 60% 90%;
+    --secondary-foreground: 220 15% 8%;
+    --secondary-glow: 263 70% 92%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 150 60% 88%;
+    --accent-foreground: 220 15% 8%;
+    --accent-glow: 150 70% 90%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --muted: 220 15% 15%;
+    --muted-foreground: 263 30% 70%;
+    --border: 220 15% 20%;
+    --input: 220 15% 15% / 0.8;
+    --ring: 19 60% 70%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(19 60% 88%), hsl(263 60% 90%), hsl(150 60% 88%));
+    --gradient-hero: linear-gradient(135deg, hsl(19 70% 90%), hsl(263 70% 92%), hsl(150 70% 90%));
+    --gradient-card: linear-gradient(145deg, hsl(220 15% 15% / 0.4), hsl(220 15% 12% / 0.2));
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Dark shadows with pastel glows */
+    --shadow-glass: 0 8px 32px hsl(19 44% 83% / 0.1);
+    --shadow-card: 0 10px 40px hsl(19 44% 83% / 0.15);
+    --shadow-floating: 0 20px 60px hsl(263 45% 85% / 0.2);
   }
 }
 
@@ -101,5 +129,140 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    background: var(--gradient-hero);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  /* Glassmorphism Components */
+  .glass-card {
+    @apply backdrop-blur-md border rounded-3xl;
+    background: hsl(var(--glass));
+    border-color: hsl(var(--glass-border));
+    box-shadow: var(--shadow-glass);
+  }
+
+  .glass-button {
+    @apply backdrop-blur-md border rounded-2xl px-6 py-3 font-medium transition-all duration-300;
+    background: hsl(var(--glass));
+    border-color: hsl(var(--glass-border));
+    box-shadow: var(--shadow-card);
+  }
+
+  .glass-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-floating);
+  }
+
+  /* Floating Animation */
+  .floating {
+    animation: floating 6s ease-in-out infinite;
+  }
+
+  .floating-delayed {
+    animation: floating 6s ease-in-out infinite 2s;
+  }
+
+  /* Bounce Hover Effect */
+  .bounce-hover {
+    transition: var(--transition-bounce);
+  }
+
+  .bounce-hover:hover {
+    transform: scale(1.1) translateY(-5px);
+  }
+
+  /* Gradient Text */
+  .gradient-text {
+    background: var(--gradient-primary);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+  }
+
+  /* Ripple Effect */
+  .ripple-button {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ripple-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: hsl(var(--primary-glow) / 0.3);
+    transition: width 0.6s, height 0.6s, top 0.6s, left 0.6s;
+    transform: translate(-50%, -50%);
+  }
+
+  .ripple-button:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+}
+
+@layer utilities {
+  /* Custom Animations */
+  @keyframes floating {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-10px) rotate(1deg); }
+    66% { transform: translateY(5px) rotate(-1deg); }
+  }
+
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes bounce-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+    70% {
+      transform: scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Animation Classes */
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out;
+  }
+
+  .animate-bounce-in {
+    animation: bounce-in 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  /* Parallax Classes */
+  .parallax-slow {
+    transform: translateZ(0);
+    will-change: transform;
   }
 }
