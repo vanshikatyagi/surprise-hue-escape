@@ -1,116 +1,305 @@
-import React, { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Plane, MapPin, Calendar, Star, Sparkles, ArrowRight, Search, Globe, 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import {
+  MapPin, Star, Calendar, DollarSign, Globe, Plane, Search,
   Heart, Menu, X, Sun, Moon, ChevronDown, Timer, Users, Camera,
-  Mountain, Waves, Building, Trees, Coffee, Car, Wifi
+  Mountain, Waves, Building, Trees, Coffee, Car, Wifi, Play,
+  ArrowRight, Eye, Gift, Compass, Shield, Award, Quote, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import heroImage from '@/assets/hero-travel.jpg';
 
 const Index = () => {
   const navigate = useNavigate();
-  const [isVisible, setIsVisible] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const [selectedContinent, setSelectedContinent] = useState('All');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [selectedContinent, setSelectedContinent] = useState('All');
+  const [currency, setCurrency] = useState('USD');
+  const [language, setLanguage] = useState('EN');
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [showNewsletterModal, setShowNewsletterModal] = useState(false);
 
   useEffect(() => {
-    setIsVisible(true);
+    const handleScroll = () => {
+      const elements = document.querySelectorAll('.fade-in-on-scroll');
+      elements.forEach((element) => {
+        const elementTop = element.getBoundingClientRect().top;
+        const elementVisible = 150;
+        
+        if (elementTop < window.innerHeight - elementVisible) {
+          element.classList.add('animate-fade-in-up');
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
     // Auto-rotate testimonials
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
     }, 5000);
-    return () => clearInterval(interval);
+
+    // Show newsletter modal after 30 seconds
+    const timer = setTimeout(() => {
+      setShowNewsletterModal(true);
+    }, 30000);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearInterval(interval);
+      clearTimeout(timer);
+    };
   }, []);
 
-  const destinations = [
-    { id: 1, name: 'Santorini, Greece', continent: 'Europe', image: '/api/placeholder/400/300', price: '$299', rating: 4.9 },
-    { id: 2, name: 'Kyoto, Japan', continent: 'Asia', image: '/api/placeholder/400/300', price: '$449', rating: 4.8 },
-    { id: 3, name: 'Bali, Indonesia', continent: 'Asia', image: '/api/placeholder/400/300', price: '$199', rating: 4.7 },
-    { id: 4, name: 'Paris, France', continent: 'Europe', image: '/api/placeholder/400/300', price: '$399', rating: 4.9 },
-    { id: 5, name: 'Maldives', continent: 'Asia', image: '/api/placeholder/400/300', price: '$899', rating: 5.0 },
-    { id: 6, name: 'Iceland', continent: 'Europe', image: '/api/placeholder/400/300', price: '$599', rating: 4.8 },
-    { id: 7, name: 'Dubai, UAE', continent: 'Asia', image: '/api/placeholder/400/300', price: '$349', rating: 4.6 },
-    { id: 8, name: 'New York, USA', continent: 'North America', image: '/api/placeholder/400/300', price: '$499', rating: 4.7 },
-    { id: 9, name: 'Rio de Janeiro, Brazil', continent: 'South America', image: '/api/placeholder/400/300', price: '$299', rating: 4.5 },
-    { id: 10, name: 'Cape Town, South Africa', continent: 'Africa', image: '/api/placeholder/400/300', price: '$399', rating: 4.8 },
-    { id: 11, name: 'Sydney, Australia', continent: 'Oceania', image: '/api/placeholder/400/300', price: '$699', rating: 4.9 },
-    { id: 12, name: 'Morocco', continent: 'Africa', image: '/api/placeholder/400/300', price: '$249', rating: 4.6 },
-  ];
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle('dark');
+  };
 
-  const bestStays = [
-    { id: 1, name: 'Villa Santorini Luxury', location: 'Santorini, Greece', rating: 4.9, price: '$299', image: '/api/placeholder/300/200', amenities: ['Wifi', 'Pool', 'Sea View'] },
-    { id: 2, name: 'Tokyo Modern Hotel', location: 'Tokyo, Japan', rating: 4.8, price: '$189', image: '/api/placeholder/300/200', amenities: ['Wifi', 'Spa', 'Restaurant'] },
-    { id: 3, name: 'Bali Beach Resort', location: 'Bali, Indonesia', rating: 4.7, price: '$159', image: '/api/placeholder/300/200', amenities: ['Pool', 'Beach', 'Spa'] },
-    { id: 4, name: 'Paris Boutique Hotel', location: 'Paris, France', rating: 4.9, price: '$249', image: '/api/placeholder/300/200', amenities: ['Wifi', 'Restaurant', 'City Center'] },
-    { id: 5, name: 'Maldives Water Villa', location: 'Maldives', rating: 5.0, price: '$899', image: '/api/placeholder/300/200', amenities: ['Pool', 'Spa', 'Private Beach'] },
-    { id: 6, name: 'Iceland Cozy Lodge', location: 'Reykjavik, Iceland', rating: 4.8, price: '$199', image: '/api/placeholder/300/200', amenities: ['Hot Tub', 'Northern Lights', 'Breakfast'] },
+  const toggleFavorite = (id: string) => {
+    setFavorites(prev => 
+      prev.includes(id) 
+        ? prev.filter(fav => fav !== id)
+        : [...prev, id]
+    );
+    localStorage.setItem('mystigo-favorites', JSON.stringify(favorites));
+  };
+
+  const destinations = [
+    {
+      id: '1',
+      name: 'Santorini, Greece',
+      country: 'Greece',
+      continent: 'Europe',
+      image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=800&q=80',
+      description: 'Stunning white-washed buildings overlooking the Aegean Sea',
+      price: { USD: '$1,200', EUR: '€1,100', GBP: '£950', INR: '₹99,000' },
+      rating: 4.9,
+      category: 'Luxury'
+    },
+    {
+      id: '2',
+      name: 'Kyoto, Japan',
+      country: 'Japan',
+      continent: 'Asia',
+      image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80',
+      description: 'Ancient temples and traditional culture in Japan\'s former capital',
+      price: { USD: '$980', EUR: '€900', GBP: '£780', INR: '₹81,000' },
+      rating: 4.8,
+      category: 'Cultural'
+    },
+    {
+      id: '3',
+      name: 'Maldives',
+      country: 'Maldives',
+      continent: 'Asia',
+      image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=800&q=80',
+      description: 'Paradise islands with crystal clear waters and luxury resorts',
+      price: { USD: '$2,500', EUR: '€2,300', GBP: '£2,000', INR: '₹2,07,000' },
+      rating: 4.9,
+      category: 'Luxury'
+    },
+    {
+      id: '4',
+      name: 'Swiss Alps',
+      country: 'Switzerland',
+      continent: 'Europe',
+      image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80',
+      description: 'Majestic mountain peaks and pristine alpine lakes',
+      price: { USD: '$1,800', EUR: '€1,650', GBP: '£1,430', INR: '₹1,49,000' },
+      rating: 4.7,
+      category: 'Adventure'
+    },
+    {
+      id: '5',
+      name: 'Bali, Indonesia',
+      country: 'Indonesia',
+      continent: 'Asia',
+      image: 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?auto=format&fit=crop&w=800&q=80',
+      description: 'Tropical paradise with ancient temples and volcanic landscapes',
+      price: { USD: '$750', EUR: '€690', GBP: '£600', INR: '₹62,000' },
+      rating: 4.6,
+      category: 'Cultural'
+    },
+    {
+      id: '6',
+      name: 'Iceland',
+      country: 'Iceland',
+      continent: 'Europe',
+      image: 'https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?auto=format&fit=crop&w=800&q=80',
+      description: 'Land of fire and ice with geysers, waterfalls, and Northern Lights',
+      price: { USD: '$1,400', EUR: '€1,280', GBP: '£1,120', INR: '₹1,16,000' },
+      rating: 4.8,
+      category: 'Adventure'
+    },
+    {
+      id: '7',
+      name: 'Morocco',
+      country: 'Morocco',
+      continent: 'Africa',
+      image: 'https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?auto=format&fit=crop&w=800&q=80',
+      description: 'Vibrant souks, desert adventures, and imperial cities',
+      price: { USD: '$650', EUR: '€600', GBP: '£520', INR: '₹54,000' },
+      rating: 4.5,
+      category: 'Cultural'
+    },
+    {
+      id: '8',
+      name: 'Peru',
+      country: 'Peru',
+      continent: 'South America',
+      image: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=800&q=80',
+      description: 'Ancient Incan heritage and breathtaking mountain landscapes',
+      price: { USD: '$850', EUR: '€780', GBP: '£680', INR: '₹70,000' },
+      rating: 4.7,
+      category: 'Adventure'
+    }
   ];
 
   const testimonials = [
-    { 
-      id: 1, 
-      name: 'Sarah Johnson', 
-      destination: 'Bali, Indonesia', 
-      rating: 5, 
-      text: 'MystiGo surprised me with the most incredible hidden villa in Ubud. The mystery element made it so much more exciting!',
-      image: '/api/placeholder/80/80'
+    {
+      id: 1,
+      name: "Sarah Chen",
+      location: "Discovered in Morocco",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?auto=format&fit=crop&w=150&q=80",
+      text: "MystiGo completely surprised me! I thought I was going somewhere tropical, but ended up in the magical souks of Marrakech. Best decision ever!",
+      rating: 5
     },
-    { 
-      id: 2, 
-      name: 'Mike Chen', 
-      destination: 'Santorini, Greece', 
-      rating: 5, 
-      text: 'Best travel decision ever! They found a perfect sunset spot that I never would have discovered myself.',
-      image: '/api/placeholder/80/80'
+    {
+      id: 2,
+      name: "James Rodriguez",
+      location: "Discovered in Norway",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+      text: "The Northern Lights weren't even on my bucket list until MystiGo sent me to Norway. Now I can't stop thinking about my next mystery trip!",
+      rating: 5
     },
-    { 
-      id: 3, 
-      name: 'Emma Davis', 
-      destination: 'Kyoto, Japan', 
-      rating: 5, 
-      text: 'The surprise factor was amazing. Every detail was perfectly planned, from accommodation to hidden local gems.',
-      image: '/api/placeholder/80/80'
-    },
+    {
+      id: 3,
+      name: "Emily Thompson",
+      location: "Discovered in Peru",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80",
+      text: "Hiking Machu Picchu was incredible, but the real magic was not knowing where I was going until the last minute. Pure adventure!",
+      rating: 5
+    }
   ];
 
-  const continents = ['All', 'Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania'];
+  const packages = [
+    {
+      id: 'weekend',
+      title: 'Weekend Getaway',
+      description: 'Perfect for a quick escape',
+      price: { USD: '$299-899', EUR: '€275-825', GBP: '£240-720', INR: '₹25K-74K' },
+      duration: '2-3 days',
+      icon: Calendar,
+      features: ['Surprise destination reveal 24h before', 'Hotel included', 'Local activity recommendations'],
+      popular: false
+    },
+    {
+      id: 'adventure',
+      title: 'Adventure Seeker',
+      description: 'For thrill seekers and explorers',
+      price: { USD: '$799-2,499', EUR: '€735-2,299', GBP: '£640-2,000', INR: '₹66K-2.1L' },
+      duration: '5-7 days',
+      icon: Mountain,
+      features: ['Adventure activities included', 'Professional guide', 'All gear provided', 'Small group experience'],
+      popular: true
+    },
+    {
+      id: 'luxury',
+      title: 'Luxury Surprise',
+      description: 'Premium comfort meets mystery',
+      price: { USD: '$1,999-5,999', EUR: '€1,840-5,520', GBP: '£1,600-4,800', INR: '₹1.7L-5L' },
+      duration: '7-10 days',
+      icon: Award,
+      features: ['5-star accommodations', 'Private transfers', 'Concierge service', 'Exclusive experiences'],
+      popular: false
+    }
+  ];
+
+  const features = [
+    {
+      icon: Gift,
+      title: "Choose Your Budget",
+      description: "Set your price range and travel preferences, from budget-friendly to luxury experiences."
+    },
+    {
+      icon: Compass,
+      title: "We Plan Your Adventure",
+      description: "Our travel experts craft the perfect surprise trip based on your style and interests."
+    },
+    {
+      icon: Eye,
+      title: "Discover Your Destination",
+      description: "Get your destination revealed 24-48 hours before departure for maximum excitement!"
+    }
+  ];
+
+  const continents = ['All', 'Europe', 'Asia', 'Africa', 'North America', 'South America', 'Oceania'];
+  const currencies = ['USD', 'EUR', 'GBP', 'INR'];
+  const languages = ['EN', 'ES', 'FR', 'DE', 'JA'];
 
   const filteredDestinations = selectedContinent === 'All' 
     ? destinations 
     : destinations.filter(dest => dest.continent === selectedContinent);
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
+    <div className={`min-h-screen ${isDarkMode ? 'dark' : ''}`}>
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
+      <nav className="fixed top-0 w-full z-50 glass-card border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-20">
             <div className="flex items-center">
-              <h1 className="text-2xl font-serif font-bold text-wandernest-navy dark:text-white">MystiGo</h1>
+              <h1 className="text-3xl font-serif font-bold gradient-text">MystiGo</h1>
             </div>
             
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#home" className="nav-link">Home</a>
-              <a href="#destinations" className="nav-link">Destinations</a>
-              <a href="#stays" className="nav-link">Best Stays</a>
-              <a href="#about" className="nav-link">About</a>
-              <a href="#contact" className="nav-link">Contact</a>
+              <a href="#home" className="nav-link hover-scale">Home</a>
+              <a href="#destinations" className="nav-link hover-scale">Destinations</a>
+              <a href="#packages" className="nav-link hover-scale">Packages</a>
+              <a href="#about" className="nav-link hover-scale">About</a>
+              <a href="#contact" className="nav-link hover-scale">Contact</a>
+              
+              {/* Currency Selector */}
+              <select 
+                value={currency} 
+                onChange={(e) => setCurrency(e.target.value)}
+                className="bg-transparent border border-white/20 rounded-lg px-3 py-1 text-sm"
+              >
+                {currencies.map(curr => (
+                  <option key={curr} value={curr}>{curr}</option>
+                ))}
+              </select>
+
+              {/* Language Selector */}
+              <select 
+                value={language} 
+                onChange={(e) => setLanguage(e.target.value)}
+                className="bg-transparent border border-white/20 rounded-lg px-3 py-1 text-sm"
+              >
+                {languages.map(lang => (
+                  <option key={lang} value={lang}>{lang}</option>
+                ))}
+              </select>
+
               <Button 
                 variant="ghost" 
                 size="sm"
-                onClick={() => setDarkMode(!darkMode)}
-                className="ml-4"
+                onClick={toggleDarkMode}
+                className="glass-button hover-scale"
               >
-                {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
-              <Button className="wandernest-button">Book Now</Button>
+              <Button className="glass-button ripple-button" onClick={() => navigate('/preferences')}>
+                Book Mystery Trip
+              </Button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -118,31 +307,33 @@ const Index = () => {
               <Button 
                 variant="ghost" 
                 size="sm"
-                onClick={() => setDarkMode(!darkMode)}
+                onClick={toggleDarkMode}
                 className="mr-2"
               >
-                {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
-                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </Button>
             </div>
           </div>
         </div>
 
         {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              <a href="#home" className="mobile-nav-link">Home</a>
-              <a href="#destinations" className="mobile-nav-link">Destinations</a>
-              <a href="#stays" className="mobile-nav-link">Best Stays</a>
-              <a href="#about" className="mobile-nav-link">About</a>
-              <a href="#contact" className="mobile-nav-link">Contact</a>
-              <Button className="wandernest-button w-full mt-4">Book Now</Button>
+        {isMenuOpen && (
+          <div className="md:hidden glass-card border-t border-white/10 animate-fade-in">
+            <div className="px-4 pt-2 pb-3 space-y-1">
+              <a href="#home" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-white/10">Home</a>
+              <a href="#destinations" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-white/10">Destinations</a>
+              <a href="#packages" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-white/10">Packages</a>
+              <a href="#about" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-white/10">About</a>
+              <a href="#contact" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-white/10">Contact</a>
+              <Button className="glass-button w-full mt-4" onClick={() => navigate('/preferences')}>
+                Book Mystery Trip
+              </Button>
             </div>
           </div>
         )}
@@ -151,78 +342,141 @@ const Index = () => {
       {/* Hero Section */}
       <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden">
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-fixed"
+          className="absolute inset-0 bg-cover bg-center parallax-slow"
           style={{ backgroundImage: `url(${heroImage})` }}
         />
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/60" />
         
-        <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-          <div className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <h1 className="text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight">
-              MystiGo
+        <div className="relative z-10 text-center text-white max-w-6xl mx-auto px-4">
+          <div className="animate-fade-in-up">
+            <h1 className="text-6xl md:text-8xl font-serif font-bold mb-8 leading-tight floating">
+              MystiGo ✈️
             </h1>
-            <h2 className="text-3xl md:text-4xl font-serif mb-8">
-              Discover the World, One Surprise at a Time
+            <h2 className="text-3xl md:text-5xl font-serif mb-8 opacity-90 floating-delayed">
+              Your Next Adventure is a Mystery
             </h2>
-            <p className="text-xl md:text-2xl mb-12 opacity-90">
-              Choose your budget, and we'll craft your mystery adventure
+            <p className="text-xl md:text-2xl mb-12 opacity-80 max-w-4xl mx-auto">
+              Pick your budget, pack your bags, and let us surprise you with your dream trip
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               <Button 
                 size="lg"
-                className="wandernest-button text-lg px-8 py-6"
+                className="glass-button ripple-button text-xl px-12 py-6 bounce-hover"
                 onClick={() => navigate('/preferences')}
               >
-                <Sparkles className="mr-3 h-6 w-6" />
-                Book a Mystery Trip
+                <Gift className="mr-3 h-6 w-6" />
+                Book My Mystery Trip 🎁
               </Button>
               <Button 
                 size="lg"
                 variant="outline"
-                className="text-lg px-8 py-6 border-white text-white hover:bg-white hover:text-gray-900"
+                className="glass-button text-xl px-12 py-6 border-white/30 text-white hover:bg-white/10"
               >
-                <Globe className="mr-3 h-6 w-6" />
-                Explore Destinations
+                <Play className="mr-3 h-6 w-6" />
+                Watch How It Works
               </Button>
+            </div>
+
+            <div className="mt-16 flex justify-center items-center space-x-8 text-sm opacity-80">
+              <div className="flex items-center">
+                <Shield className="h-5 w-5 mr-2" />
+                100% Secure
+              </div>
+              <div className="flex items-center">
+                <Globe className="h-5 w-5 mr-2" />
+                100+ Countries
+              </div>
+              <div className="flex items-center">
+                <Award className="h-5 w-5 mr-2" />
+                Premium Service
+              </div>
             </div>
           </div>
         </div>
 
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <ChevronDown className="h-8 w-8 text-white" />
+          <ChevronDown className="h-8 w-8 text-white/80" />
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-900">
+      <section className="py-24 bg-gradient-to-b from-background to-muted/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-wandernest-navy dark:text-white mb-6">
+          <div className="text-center mb-20 fade-in-on-scroll">
+            <h2 className="text-5xl md:text-6xl font-serif font-bold gradient-text mb-8">
               How MystiGo Works
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Experience the thrill of surprise travel with our simple 4-step process
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Experience the thrill of surprise travel with our simple 3-step process
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-8">
-            {[
-              { icon: <MapPin className="h-12 w-12" />, title: 'Choose Your Budget', description: 'Set your travel budget and let us know your preferences' },
-              { icon: <Sparkles className="h-12 w-12" />, title: 'Select Your Style', description: 'Adventure, luxury, culture, or relaxation - pick your vibe' },
-              { icon: <Plane className="h-12 w-12" />, title: 'Get Your Surprise', description: 'We reveal your mystery destination at the perfect moment' },
-              { icon: <Camera className="h-12 w-12" />, title: 'Pack & Go!', description: 'Everything is planned - just pack your bags and enjoy' },
-            ].map((step, index) => (
-              <Card key={index} className="wandernest-card text-center p-8 hover:shadow-xl transition-all duration-300">
-                <div className="text-wandernest-teal mb-6 flex justify-center">
-                  {step.icon}
+          <div className="grid md:grid-cols-3 gap-12">
+            {features.map((feature, index) => (
+              <Card key={index} className="glass-card text-center p-8 fade-in-on-scroll hover-scale">
+                <div className="mb-8">
+                  <div className="w-20 h-20 mx-auto bg-gradient-primary rounded-full flex items-center justify-center mb-6">
+                    <feature.icon className="h-10 w-10 text-white" />
+                  </div>
+                  <Badge variant="secondary" className="mb-4 px-4 py-2">
+                    Step {index + 1}
+                  </Badge>
+                  <h3 className="text-2xl font-serif font-bold mb-4">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
                 </div>
-                <div className="mb-4">
-                  <Badge className="mb-4">Step {index + 1}</Badge>
-                  <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Mystery Trip Packages */}
+      <section id="packages" className="py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20 fade-in-on-scroll">
+            <h2 className="text-5xl md:text-6xl font-serif font-bold gradient-text mb-8">
+              Mystery Trip Packages
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Choose your adventure style and let us surprise you with the perfect destination
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {packages.map((pkg) => (
+              <Card key={pkg.id} className={`glass-card p-8 fade-in-on-scroll hover-scale relative ${pkg.popular ? 'ring-2 ring-primary' : ''}`}>
+                {pkg.popular && (
+                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground px-4 py-1">
+                    Most Popular
+                  </Badge>
+                )}
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 mx-auto bg-gradient-primary rounded-full flex items-center justify-center mb-6">
+                    <pkg.icon className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-serif font-bold mb-2">{pkg.title}</h3>
+                  <p className="text-muted-foreground mb-4">{pkg.description}</p>
+                  <div className="text-3xl font-bold gradient-text mb-2">{pkg.price[currency as keyof typeof pkg.price]}</div>
+                  <p className="text-sm text-muted-foreground">{pkg.duration}</p>
                 </div>
-                <p className="text-gray-600 dark:text-gray-300">{step.description}</p>
+                
+                <div className="space-y-3 mb-8">
+                  {pkg.features.map((feature, index) => (
+                    <div key={index} className="flex items-center">
+                      <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center mr-3">
+                        <div className="w-2 h-2 rounded-full bg-primary" />
+                      </div>
+                      <span className="text-sm">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <Button className="w-full glass-button ripple-button" onClick={() => navigate('/preferences')}>
+                  <ArrowRight className="mr-2 h-4 w-4" />
+                  Book This Package
+                </Button>
               </Card>
             ))}
           </div>
@@ -230,35 +484,37 @@ const Index = () => {
       </section>
 
       {/* Destinations Explorer */}
-      <section id="destinations" className="py-20">
+      <section id="destinations" className="py-24 bg-gradient-to-b from-muted/20 to-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-wandernest-navy dark:text-white mb-6">
+          <div className="text-center mb-20 fade-in-on-scroll">
+            <h2 className="text-5xl md:text-6xl font-serif font-bold gradient-text mb-8">
               Discover Amazing Destinations
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-12">
               From hidden gems to world-famous landmarks, explore our curated collection of destinations
             </p>
             
             {/* Search Bar */}
-            <div className="max-w-md mx-auto mb-8">
+            <div className="max-w-md mx-auto mb-12">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                 <Input 
                   placeholder="Search destinations..." 
-                  className="pl-10 py-3 text-lg"
+                  className="pl-12 py-4 text-lg glass-card border-white/20"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
 
             {/* Continent Filter */}
-            <div className="flex flex-wrap justify-center gap-3 mb-12">
+            <div className="flex flex-wrap justify-center gap-3 mb-16">
               {continents.map((continent) => (
                 <Button
                   key={continent}
                   variant={selectedContinent === continent ? "default" : "outline"}
                   onClick={() => setSelectedContinent(continent)}
-                  className="px-6 py-2"
+                  className="px-6 py-3 glass-button"
                 >
                   {continent}
                 </Button>
@@ -267,34 +523,43 @@ const Index = () => {
           </div>
 
           {/* Destinations Grid */}
-          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {filteredDestinations.map((destination) => (
-              <Card key={destination.id} className="wandernest-card overflow-hidden group hover:shadow-xl transition-all duration-300">
+              <Card key={destination.id} className="glass-card overflow-hidden group hover-scale fade-in-on-scroll">
                 <div className="relative overflow-hidden">
                   <img 
                     src={destination.image} 
                     alt={destination.name}
-                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
                   />
                   <div className="absolute top-4 right-4">
-                    <Button size="sm" variant="ghost" className="bg-white/80 hover:bg-white">
-                      <Heart className="h-4 w-4" />
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="glass-button hover-scale"
+                      onClick={() => toggleFavorite(destination.id)}
+                    >
+                      <Heart className={`h-4 w-4 ${favorites.includes(destination.id) ? 'fill-red-500 text-red-500' : ''}`} />
                     </Button>
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <p className="font-semibold">{destination.name}</p>
+                    <p className="font-semibold text-lg">{destination.name}</p>
                     <div className="flex items-center">
-                      <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                      <Star className="h-4 w-4 text-yellow-400 mr-1 fill-current" />
                       <span>{destination.rating}</span>
                     </div>
                   </div>
                 </div>
                 <CardContent className="p-6">
-                  <h3 className="font-semibold text-lg mb-2">{destination.name}</h3>
+                  <h3 className="font-serif font-bold text-xl mb-2">{destination.name}</h3>
+                  <p className="text-muted-foreground text-sm mb-4">{destination.description}</p>
                   <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-wandernest-teal">{destination.price}</span>
-                    <Button size="sm" className="wandernest-button">
+                    <span className="text-2xl font-bold gradient-text">
+                      {destination.price[currency as keyof typeof destination.price]}
+                    </span>
+                    <Button size="sm" className="glass-button">
                       View Details
                     </Button>
                   </div>
@@ -305,358 +570,298 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Best Stays */}
-      <section id="stays" className="py-20 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-wandernest-navy dark:text-white mb-6">
-              Best Stays & Hotels
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Handpicked accommodations that will make your stay unforgettable
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {bestStays.map((stay) => (
-              <Card key={stay.id} className="wandernest-card overflow-hidden group hover:shadow-xl transition-all duration-300">
-                <div className="relative overflow-hidden">
-                  <img 
-                    src={stay.image} 
-                    alt={stay.name}
-                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <div className="absolute top-4 right-4">
-                    <Button size="sm" variant="ghost" className="bg-white/80 hover:bg-white">
-                      <Heart className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-lg">{stay.name}</h3>
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                      <span className="text-sm">{stay.rating}</span>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4">{stay.location}</p>
-                  
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {stay.amenities.map((amenity, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {amenity}
-                      </Badge>
-                    ))}
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="text-2xl font-bold text-wandernest-teal">{stay.price}</span>
-                      <span className="text-gray-600 dark:text-gray-300">/night</span>
-                    </div>
-                    <Button size="sm" className="wandernest-button">
-                      Book Now
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Special Offers */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-wandernest-navy dark:text-white mb-6">
-              Special Offers & Seasonal Packages
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Limited-time deals and seasonal adventures you won't want to miss
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { 
-                title: 'Summer in Greece', 
-                description: 'Island hopping adventure with 30% off', 
-                price: '$599', 
-                originalPrice: '$899',
-                timeLeft: '5 days left',
-                image: '/api/placeholder/400/300'
-              },
-              { 
-                title: 'Winter in Japan', 
-                description: 'Cherry blossom season special package', 
-                price: '$799', 
-                originalPrice: '$1099',
-                timeLeft: '2 weeks left',
-                image: '/api/placeholder/400/300'
-              },
-              { 
-                title: 'Tropical Paradise', 
-                description: 'Maldives luxury resort experience', 
-                price: '$1299', 
-                originalPrice: '$1699',
-                timeLeft: '1 week left',
-                image: '/api/placeholder/400/300'
-              },
-            ].map((offer, index) => (
-              <Card key={index} className="wandernest-card overflow-hidden group hover:shadow-xl transition-all duration-300">
-                <div className="relative overflow-hidden">
-                  <img 
-                    src={offer.image} 
-                    alt={offer.title}
-                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-red-500 text-white">
-                      <Timer className="h-3 w-3 mr-1" />
-                      {offer.timeLeft}
-                    </Badge>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-xl mb-2">{offer.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4">{offer.description}</p>
-                  
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-2xl font-bold text-wandernest-teal">{offer.price}</span>
-                    <span className="text-lg text-gray-500 line-through">{offer.originalPrice}</span>
-                  </div>
-                  
-                  <Button className="wandernest-button w-full">
-                    Book This Deal
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Testimonials */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-900">
+      <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-wandernest-navy dark:text-white mb-6">
+          <div className="text-center mb-20 fade-in-on-scroll">
+            <h2 className="text-5xl md:text-6xl font-serif font-bold gradient-text mb-8">
               Traveler Stories
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Real experiences from our adventurous travelers
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Hear from adventurers who discovered their perfect surprise destinations
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto">
-            <Card className="wandernest-card p-8 text-center">
-              <div className="mb-6">
+          <div className="relative max-w-4xl mx-auto">
+            <Card className="glass-card p-12 text-center fade-in-on-scroll">
+              <Quote className="h-12 w-12 text-primary mx-auto mb-8 opacity-20" />
+              <div className="mb-8">
                 <img 
                   src={testimonials[currentTestimonial].image} 
                   alt={testimonials[currentTestimonial].name}
-                  className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
+                  className="w-20 h-20 rounded-full mx-auto mb-6 border-4 border-primary/20"
                 />
+                <blockquote className="text-xl md:text-2xl font-serif italic mb-6 leading-relaxed">
+                  "{testimonials[currentTestimonial].text}"
+                </blockquote>
                 <div className="flex justify-center mb-4">
                   {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
                     <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
                   ))}
                 </div>
-              </div>
-              
-              <blockquote className="text-xl md:text-2xl italic text-gray-700 dark:text-gray-300 mb-6">
-                "{testimonials[currentTestimonial].text}"
-              </blockquote>
-              
-              <div>
-                <p className="font-semibold text-lg">{testimonials[currentTestimonial].name}</p>
-                <p className="text-gray-600 dark:text-gray-400">Traveled to {testimonials[currentTestimonial].destination}</p>
+                <cite className="text-lg font-semibold">{testimonials[currentTestimonial].name}</cite>
+                <p className="text-muted-foreground">{testimonials[currentTestimonial].location}</p>
               </div>
             </Card>
 
-            {/* Testimonial Indicators */}
             <div className="flex justify-center mt-8 space-x-2">
               {testimonials.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentTestimonial(index)}
                   className={`w-3 h-3 rounded-full transition-colors ${
-                    index === currentTestimonial ? 'bg-wandernest-teal' : 'bg-gray-300'
+                    index === currentTestimonial ? 'bg-primary' : 'bg-muted'
                   }`}
                 />
               ))}
             </div>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 glass-button"
+              onClick={() => setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length)}
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 glass-button"
+              onClick={() => setCurrentTestimonial((prev) => (prev + 1) % testimonials.length)}
+            >
+              <ChevronRight className="h-6 w-6" />
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Booking Form */}
-      <section className="py-20">
+      {/* Interactive Booking Section */}
+      <section className="py-24 bg-gradient-to-b from-muted/20 to-background">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-wandernest-navy dark:text-white mb-6">
-              Book Your Mystery Adventure
+          <div className="text-center mb-20 fade-in-on-scroll">
+            <h2 className="text-5xl md:text-6xl font-serif font-bold gradient-text mb-8">
+              Ready for Your Mystery Adventure?
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300">
-              Fill out the form below and let us create your perfect surprise trip
+            <p className="text-xl text-muted-foreground">
+              Tell us your preferences and let the magic begin
             </p>
           </div>
 
-          <Card className="wandernest-card p-8">
+          <Card className="glass-card p-8 fade-in-on-scroll">
             <form className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Destination Preference</label>
-                  <Input placeholder="Any continent or specific country" />
+                  <label className="block text-sm font-medium mb-2">Budget Range</label>
+                  <select className="w-full glass-card border-white/20 rounded-lg px-4 py-3">
+                    <option>$500 - $1,000</option>
+                    <option>$1,000 - $2,500</option>
+                    <option>$2,500 - $5,000</option>
+                    <option>$5,000+</option>
+                  </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Budget Range</label>
-                  <Input placeholder="$500 - $2000" />
+                  <label className="block text-sm font-medium mb-2">Travel Style</label>
+                  <select className="w-full glass-card border-white/20 rounded-lg px-4 py-3">
+                    <option>Adventure</option>
+                    <option>Luxury</option>
+                    <option>Cultural</option>
+                    <option>Relaxation</option>
+                  </select>
                 </div>
               </div>
               
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Departure Date</label>
-                  <Input type="date" />
+                  <Input type="date" className="glass-card border-white/20" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Number of Travelers</label>
-                  <Input placeholder="2 adults" />
+                  <select className="w-full glass-card border-white/20 rounded-lg px-4 py-3">
+                    <option>1 Traveler</option>
+                    <option>2 Travelers</option>
+                    <option>3-4 Travelers</option>
+                    <option>5+ Travelers</option>
+                  </select>
                 </div>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium mb-2">Travel Style</label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {['Adventure', 'Luxury', 'Cultural', 'Relaxation'].map((style) => (
-                    <Button key={style} variant="outline" type="button" className="h-12">
-                      {style}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-2">Special Requests</label>
+                <label className="block text-sm font-medium mb-2">Special Preferences</label>
                 <textarea 
-                  className="w-full p-3 border rounded-lg dark:bg-gray-800 dark:border-gray-600"
-                  rows={4}
-                  placeholder="Any special requirements or preferences..."
+                  className="w-full glass-card border-white/20 rounded-lg px-4 py-3 h-24" 
+                  placeholder="Tell us about your interests, any activities you love or want to avoid..."
                 />
               </div>
-              
-              <Button size="lg" className="wandernest-button w-full text-xl py-6">
-                <Sparkles className="mr-3 h-6 w-6" />
-                Book My Mystery Trip 🎁
+
+              <Button 
+                type="submit" 
+                className="w-full glass-button ripple-button text-xl py-6"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/preferences');
+                }}
+              >
+                <Gift className="mr-3 h-6 w-6" />
+                Create My Mystery Trip 🎁
               </Button>
             </form>
           </Card>
         </div>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="py-20 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-serif font-bold text-wandernest-navy dark:text-white mb-6">
-                About MystiGo
-              </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
-                We believe that the best adventures come from the unexpected. MystiGo was founded on the idea that travel should be magical, surprising, and perfectly tailored to your dreams.
+      {/* About MystiGo */}
+      <section id="about" className="py-24 relative overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center parallax-slow opacity-30"
+          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1920&q=80)' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-background/70" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl fade-in-on-scroll">
+            <h2 className="text-5xl md:text-6xl font-serif font-bold gradient-text mb-8">
+              About MystiGo
+            </h2>
+            <div className="text-xl leading-relaxed space-y-6 text-muted-foreground">
+              <p>
+                At MystiGo, we believe that the best adventures come from the unexpected. Founded by passionate travelers who understand that sometimes the most memorable journeys are the ones you never planned.
               </p>
-              <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-                Our team of travel experts curates unique experiences around the world, ensuring that every mystery trip we create is unforgettable. From hidden gems to luxury escapes, we make travel dreams come true.
+              <p>
+                Our mission is simple: <strong className="text-foreground">Travel made magical through surprise adventures.</strong> We combine cutting-edge technology with human expertise to match you with destinations that exceed your wildest dreams.
               </p>
-              <Button size="lg" className="wandernest-button">
-                Learn More About Us
-              </Button>
+              <p>
+                From bustling cities to remote islands, ancient temples to modern marvels – every MystiGo trip is carefully crafted to create those "pinch me" moments that make travel truly transformative.
+              </p>
             </div>
-            <div className="relative">
-              <img 
-                src="/api/placeholder/600/400" 
-                alt="About MystiGo"
-                className="rounded-lg shadow-xl"
-              />
+            
+            <div className="mt-12 grid md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="text-4xl font-bold gradient-text mb-2">10K+</div>
+                <p className="text-muted-foreground">Happy Travelers</p>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold gradient-text mb-2">100+</div>
+                <p className="text-muted-foreground">Countries Covered</p>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold gradient-text mb-2">4.9</div>
+                <p className="text-muted-foreground">Average Rating</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Newsletter Modal */}
+      {showNewsletterModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 animate-fade-in" onClick={() => setShowNewsletterModal(false)} />
+          <Card className="glass-card p-8 max-w-md w-full relative animate-scale-in">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-4 right-4"
+              onClick={() => setShowNewsletterModal(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <Globe className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-serif font-bold mb-2">Stay in the Loop!</h3>
+              <p className="text-muted-foreground">Get exclusive mystery destination reveals and special offers</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              setShowNewsletterModal(false);
+              // Handle newsletter signup
+            }}>
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                className="mb-4 glass-card border-white/20"
+                required
+              />
+              <Button type="submit" className="w-full glass-button ripple-button">
+                Subscribe to Mystery Updates
+              </Button>
+            </form>
+          </Card>
+        </div>
+      )}
+
       {/* Footer */}
-      <footer className="bg-wandernest-navy dark:bg-gray-900 text-white py-16">
+      <footer className="bg-card border-t border-border py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="text-2xl font-serif font-bold mb-4">MystiGo</h3>
-              <p className="text-gray-300 mb-4">
-                Discover the world, one surprise at a time.
+              <h3 className="text-2xl font-serif font-bold gradient-text mb-4">MystiGo</h3>
+              <p className="text-muted-foreground mb-4">
+                Your gateway to surprise adventures around the world.
               </p>
               <div className="flex space-x-4">
-                {/* Social Icons */}
-                <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
-                  <Globe className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
-                  <Camera className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
-                  <Heart className="h-5 w-5" />
-                </Button>
+                {['facebook', 'twitter', 'instagram', 'youtube'].map((social) => (
+                  <Button key={social} variant="ghost" size="sm" className="glass-button hover-scale">
+                    <Globe className="h-4 w-4" />
+                  </Button>
+                ))}
               </div>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li><a href="#home" className="text-gray-300 hover:text-white transition-colors">Home</a></li>
-                <li><a href="#destinations" className="text-gray-300 hover:text-white transition-colors">Destinations</a></li>
-                <li><a href="#stays" className="text-gray-300 hover:text-white transition-colors">Best Stays</a></li>
-                <li><a href="#about" className="text-gray-300 hover:text-white transition-colors">About</a></li>
-              </ul>
+              <h4 className="font-semibold mb-4">Destinations</h4>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p><a href="#" className="hover:text-foreground transition-colors">Europe</a></p>
+                <p><a href="#" className="hover:text-foreground transition-colors">Asia</a></p>
+                <p><a href="#" className="hover:text-foreground transition-colors">Africa</a></p>
+                <p><a href="#" className="hover:text-foreground transition-colors">Americas</a></p>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Company</h4>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p><a href="#" className="hover:text-foreground transition-colors">About Us</a></p>
+                <p><a href="#" className="hover:text-foreground transition-colors">How It Works</a></p>
+                <p><a href="#" className="hover:text-foreground transition-colors">Safety</a></p>
+                <p><a href="#" className="hover:text-foreground transition-colors">Careers</a></p>
+              </div>
             </div>
             
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Privacy Policy</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Newsletter</h4>
-              <p className="text-gray-300 mb-4">Get surprise travel deals delivered to your inbox</p>
-              <div className="flex">
-                <Input 
-                  placeholder="Your email" 
-                  className="rounded-r-none bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                />
-                <Button className="rounded-l-none bg-wandernest-teal hover:bg-wandernest-teal/80">
-                  Subscribe
-                </Button>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p><a href="#" className="hover:text-foreground transition-colors">Help Center</a></p>
+                <p><a href="#" className="hover:text-foreground transition-colors">Contact Us</a></p>
+                <p><a href="#" className="hover:text-foreground transition-colors">Terms</a></p>
+                <p><a href="#" className="hover:text-foreground transition-colors">Privacy</a></p>
               </div>
             </div>
           </div>
           
-          <div className="mt-12 pt-8 border-t border-gray-700 text-center">
-            <p className="text-gray-300">
-              © 2024 MystiGo. All rights reserved. Travel made magical through surprise adventures.
-            </p>
+          <Separator className="mb-8" />
+          
+          <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
+            <p>&copy; 2024 MystiGo. All rights reserved.</p>
+            <p>Made with ❤️ for adventure seekers worldwide</p>
           </div>
         </div>
       </footer>
 
       {/* Floating Chat Widget */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button size="lg" className="rounded-full w-16 h-16 bg-wandernest-teal hover:bg-wandernest-teal/80 shadow-lg">
-          <Users className="h-6 w-6" />
-        </Button>
-      </div>
+      <Button 
+        className="fixed bottom-6 right-6 z-40 w-16 h-16 rounded-full glass-button shadow-elegant floating"
+        onClick={() => alert('Chat feature coming soon!')}
+      >
+        <Camera className="h-6 w-6" />
+      </Button>
     </div>
   );
 };
