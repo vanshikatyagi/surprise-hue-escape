@@ -9,7 +9,7 @@ import {
   Heart, Menu, X, Sun, Moon, ChevronDown, Timer, Users, Camera,
   Mountain, Waves, Building, Trees, Coffee, Car, Wifi
 } from 'lucide-react';
-import heroImage from '@/assets/mystigo-hero-mountain.jpg';
+import heroImage from '@/assets/hero-travel.jpg';
 
 const Index = () => {
   const navigate = useNavigate();
