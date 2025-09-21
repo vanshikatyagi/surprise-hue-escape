@@ -5,11 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   MapPin, Star, Calendar, DollarSign, Globe, Plane, Search,
   Heart, Menu, X, Sun, Moon, ChevronDown, Timer, Users, Camera,
   Mountain, Waves, Building, Trees, Coffee, Car, Wifi, Play,
-  ArrowRight, Eye, Gift, Compass, Shield, Award, Quote, ChevronLeft, ChevronRight
+  ArrowRight, Eye, Gift, Compass, Shield, Award, Quote, ChevronLeft, 
+  ChevronRight, Sparkles, Clock
 } from 'lucide-react';
 import heroImage from '@/assets/hero-travel.jpg';
 
@@ -339,57 +341,115 @@ const Index = () => {
         )}
       </nav>
 
-      {/* Hero Section */}
+      {/* Hero Section - Premium srprs.me + WanderNest inspired */}
       <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center parallax-slow"
-          style={{ backgroundImage: `url(${heroImage})` }}
+          style={{ 
+            backgroundImage: `url(${heroImage})`,
+            filter: 'brightness(0.8) contrast(1.1)'
+          }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/60" />
+        
+        {/* WanderNest-style gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-transparent to-accent/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+        
+        {/* Floating particles effect */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-2 h-2 bg-primary/40 rounded-full floating animate-bounce-in" style={{ animationDelay: '0s' }} />
+          <div className="absolute top-40 right-20 w-3 h-3 bg-accent/30 rounded-full floating-delayed animate-bounce-in" style={{ animationDelay: '1s' }} />
+          <div className="absolute bottom-40 left-1/4 w-2 h-2 bg-secondary/40 rounded-full floating animate-bounce-in" style={{ animationDelay: '2s' }} />
+          <div className="absolute bottom-60 right-1/3 w-1 h-1 bg-primary-glow/50 rounded-full floating-delayed animate-bounce-in" style={{ animationDelay: '0.5s' }} />
+        </div>
         
         <div className="relative z-10 text-center text-white max-w-6xl mx-auto px-4">
           <div className="animate-fade-in-up">
-            <h1 className="text-6xl md:text-8xl font-serif font-bold mb-8 leading-tight floating">
-              MystiGo ✈️
+            {/* WanderNest-style bold typography */}
+            <h1 className="text-7xl md:text-9xl font-bold mb-4 leading-none tracking-tight">
+              <span className="block text-white drop-shadow-lg">Your city break to</span>
+              <span className="block text-6xl md:text-8xl gradient-text bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent font-black">
+                destination unknown
+              </span>
             </h1>
-            <h2 className="text-3xl md:text-5xl font-serif mb-8 opacity-90 floating-delayed">
-              Your Next Adventure is a Mystery
-            </h2>
-            <p className="text-xl md:text-2xl mb-12 opacity-80 max-w-4xl mx-auto">
-              Pick your budget, pack your bags, and let us surprise you with your dream trip
+            
+            <p className="text-xl md:text-2xl mb-12 opacity-90 max-w-4xl mx-auto font-light leading-relaxed">
+              Make space for the unexpected in your schedule and discover your destination just before take-off.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            {/* srprs.me-style booking widget */}
+            <div className="glass-card p-6 md:p-8 mb-12 max-w-5xl mx-auto border border-white/20">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="relative">
+                  <Plane className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary z-10" />
+                  <Select>
+                    <SelectTrigger className="pl-12 h-14 bg-white/10 border-white/20 text-white backdrop-blur-sm hover:bg-white/20 transition-all">
+                      <SelectValue placeholder="HOW? MYSTERY TRIP" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weekend">Weekend Escape</SelectItem>
+                      <SelectItem value="adventure">Adventure Seeker</SelectItem>
+                      <SelectItem value="luxury">Luxury Mystery</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="relative">
+                  <Users className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary z-10" />
+                  <Select>
+                    <SelectTrigger className="pl-12 h-14 bg-white/10 border-white/20 text-white backdrop-blur-sm hover:bg-white/20 transition-all">
+                      <SelectValue placeholder="WITH WHOM? 2 PEOPLE" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="solo">Solo Traveler</SelectItem>
+                      <SelectItem value="couple">2 People</SelectItem>
+                      <SelectItem value="family">Family (3-4)</SelectItem>
+                      <SelectItem value="group">Group (5+)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="relative">
+                  <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary z-10" />
+                  <Select>
+                    <SelectTrigger className="pl-12 h-14 bg-white/10 border-white/20 text-white backdrop-blur-sm hover:bg-white/20 transition-all">
+                      <SelectValue placeholder="WHEN? SEPTEMBER 2025" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="jan">January 2025</SelectItem>
+                      <SelectItem value="feb">February 2025</SelectItem>
+                      <SelectItem value="mar">March 2025</SelectItem>
+                      <SelectItem value="apr">April 2025</SelectItem>
+                      <SelectItem value="may">May 2025</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
               <Button 
-                size="lg"
-                className="glass-button ripple-button text-xl px-12 py-6 bounce-hover"
+                size="lg" 
+                className="w-full md:w-auto px-16 py-4 text-lg font-bold bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary transition-all duration-300 shadow-2xl hover:shadow-primary/30 hover:scale-105"
                 onClick={() => navigate('/preferences')}
               >
-                <Gift className="mr-3 h-6 w-6" />
-                Book My Mystery Trip 🎁
-              </Button>
-              <Button 
-                size="lg"
-                variant="outline"
-                className="glass-button text-xl px-12 py-6 border-white/30 text-white hover:bg-white/10"
-              >
-                <Play className="mr-3 h-6 w-6" />
-                Watch How It Works
+                <Sparkles className="mr-3 h-6 w-6" />
+                Customise trip
+                <ArrowRight className="ml-3 h-6 w-6" />
               </Button>
             </div>
-
-            <div className="mt-16 flex justify-center items-center space-x-8 text-sm opacity-80">
-              <div className="flex items-center">
-                <Shield className="h-5 w-5 mr-2" />
-                100% Secure
+            
+            {/* srprs.me-style stats */}
+            <div className="flex justify-center items-center space-x-8 md:space-x-16 text-center mb-8">
+              <div className="text-white">
+                <div className="text-4xl md:text-5xl font-bold mb-1">269,705</div>
+                <div className="text-sm opacity-80">fans</div>
               </div>
-              <div className="flex items-center">
-                <Globe className="h-5 w-5 mr-2" />
-                100+ Countries
+              <div className="text-white">
+                <div className="text-4xl md:text-5xl font-bold mb-1">162,239</div>
+                <div className="text-sm opacity-80">travellers</div>
               </div>
-              <div className="flex items-center">
-                <Award className="h-5 w-5 mr-2" />
-                Premium Service
+              <div className="text-white">
+                <div className="text-4xl md:text-5xl font-bold mb-1">8.9</div>
+                <div className="text-sm opacity-80">in reviews</div>
               </div>
             </div>
           </div>
@@ -401,32 +461,89 @@ const Index = () => {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-24 bg-gradient-to-b from-background to-muted/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20 fade-in-on-scroll">
-            <h2 className="text-5xl md:text-6xl font-serif font-bold gradient-text mb-8">
-              How MystiGo Works
+      {/* How It Works - Enhanced srprs.me style */}
+      <section className="py-32 relative overflow-hidden bg-gradient-to-br from-background via-muted/20 to-background">
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='0.1'%3E%3Cpath d='M30 30l15-15v30z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }} />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-24 fade-in-on-scroll">
+            <h2 className="text-6xl md:text-7xl font-bold mb-8 leading-tight">
+              We'll take you wherever you're{' '}
+              <span className="gradient-text bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+                meant to go
+              </span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Experience the thrill of surprise travel with our simple 3-step process
+            <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+              Stop control-freaking your trip. Just sit back, relax and let us arrange everything. 
+              Select a specific theme or put together your own city break. Only accommodations rated 8 
+              or higher will make the final and, of course, you'll fly with a safe airline.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-12">
-            {features.map((feature, index) => (
-              <Card key={index} className="glass-card text-center p-8 fade-in-on-scroll hover-scale">
-                <div className="mb-8">
-                  <div className="w-20 h-20 mx-auto bg-gradient-primary rounded-full flex items-center justify-center mb-6">
-                    <feature.icon className="h-10 w-10 text-white" />
+          {/* Enhanced 3-step process */}
+          <div className="grid md:grid-cols-3 gap-16 relative">
+            {/* Connection lines */}
+            <div className="hidden md:block absolute top-1/2 left-1/3 w-1/3 h-px bg-gradient-to-r from-primary/50 to-accent/50 transform -translate-y-1/2 z-0" />
+            <div className="hidden md:block absolute top-1/2 right-1/3 w-1/3 h-px bg-gradient-to-r from-accent/50 to-secondary/50 transform -translate-y-1/2 z-0" />
+            
+            {[
+              {
+                step: "01",
+                title: "MystiGo in 3 steps",
+                subtitle: "Let us know what you like",
+                description: "Do you want to exclude cities, or sleep in luxury? Tell us your preferences in only a few clicks. This way we can arrange a fantastic experience for you.",
+                icon: Gift,
+                gradient: "from-primary/20 to-primary-glow/10",
+                delay: "0s"
+              },
+              {
+                step: "02", 
+                title: "Download our app",
+                subtitle: "Your personal timeline",
+                description: "Directly after booking your trip, you can download our app via a magical link. In the app you'll find your personal timeline. With this timeline, we'll keep you updated on all the steps of your MystiGo journey!",
+                icon: Compass,
+                gradient: "from-accent/20 to-accent-glow/10",
+                delay: "0.3s"
+              },
+              {
+                step: "03",
+                title: "Time to reveal",
+                subtitle: "The countdown reaches zero",
+                description: "About 2 hours before departure, the countdown in your app will reach zero. It's time... You're going to reveal your destination! From now on, every discovery is bound to trigger a moment of marvel.",
+                icon: Eye,
+                gradient: "from-secondary/20 to-secondary-glow/10",
+                delay: "0.6s"
+              }
+            ].map((feature, index) => (
+              <div 
+                key={index} 
+                className="relative fade-in-on-scroll animate-fade-in-up z-10"
+                style={{ animationDelay: feature.delay }}
+              >
+                <Card className="glass-card text-center p-10 hover:shadow-2xl transition-all duration-500 group relative overflow-hidden border-0 h-full">
+                  {/* Hover gradient */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                  
+                  <div className="relative z-10">
+                    {/* Step indicator */}
+                    <div className="absolute -top-6 -right-6 w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      {feature.step}
+                    </div>
+                    
+                    <div className="mb-8">
+                      <div className={`w-24 h-24 mx-auto bg-gradient-to-br ${feature.gradient} rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 border border-white/10`}>
+                        <feature.icon className="h-12 w-12 text-primary" />
+                      </div>
+                      <h3 className="text-3xl font-bold mb-3">{feature.title}</h3>
+                      <div className="text-primary font-semibold text-lg mb-4">{feature.subtitle}</div>
+                      <p className="text-muted-foreground leading-relaxed text-base">{feature.description}</p>
+                    </div>
                   </div>
-                  <Badge variant="secondary" className="mb-4 px-4 py-2">
-                    Step {index + 1}
-                  </Badge>
-                  <h3 className="text-2xl font-serif font-bold mb-4">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
-                </div>
-              </Card>
+                </Card>
+              </div>
             ))}
           </div>
         </div>
