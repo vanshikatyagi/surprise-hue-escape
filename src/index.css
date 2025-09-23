@@ -6,29 +6,29 @@
 
 @layer base {
   :root {
-    /* Pastel Color Palette */
-    --primary: 19 44% 83%; /* Peach #F5C9B0 */
-    --primary-foreground: 19 20% 25%;
-    --primary-glow: 19 60% 88%;
+    /* WanderNest Color Palette */
+    --primary: 180 85% 60%; /* Bright Turquoise #1DD1AA */
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 180 90% 70%;
     
-    --secondary: 263 45% 85%; /* Lavender #C9B7F5 */
-    --secondary-foreground: 263 20% 25%;
-    --secondary-glow: 263 60% 90%;
+    --secondary: 0 0% 100%; /* White */
+    --secondary-foreground: 0 0% 0%;
+    --secondary-glow: 0 0% 95%;
     
-    --accent: 150 45% 83%; /* Mint #B0F5D1 */
-    --accent-foreground: 150 20% 25%;
-    --accent-glow: 150 60% 88%;
+    --accent: 48 100% 50%; /* Bright Yellow #FFD700 */
+    --accent-foreground: 0 0% 0%;
+    --accent-glow: 48 100% 60%;
     
-    --accent-yellow: 45 45% 85%; /* Soft Yellow #F5E6B0 */
-    --accent-yellow-foreground: 45 20% 25%;
+    --accent-yellow: 48 100% 50%; /* Bright Yellow #FFD700 */
+    --accent-yellow-foreground: 0 0% 0%;
     
-    --accent-coral: 343 45% 83%; /* Pastel Coral #F5B0C9 */
+    --accent-coral: 343 45% 83%; /* Keep coral */
     --accent-coral-foreground: 343 20% 25%;
 
     /* Background System */
-    --background: 0 0% 100%;
-    --background-muted: 320 20% 98%;
-    --foreground: 263 20% 25%;
+    --background: 180 85% 60%; /* Turquoise background */
+    --background-muted: 180 80% 65%;
+    --foreground: 0 0% 100%; /* White text */
 
     /* Glassmorphism */
     --glass: 0 0% 100% / 0.15;
@@ -47,9 +47,9 @@
     --ring: 19 44% 70%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(19 44% 83%), hsl(263 45% 85%), hsl(150 45% 83%));
-    --gradient-hero: linear-gradient(135deg, hsl(19 60% 88%), hsl(263 60% 90%), hsl(150 60% 88%));
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100% / 0.15), hsl(0 0% 100% / 0.05));
+    --gradient-primary: linear-gradient(135deg, hsl(180 85% 60%), hsl(180 90% 65%));
+    --gradient-hero: linear-gradient(135deg, hsl(180 85% 60%), hsl(180 80% 65%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100% / 0.95), hsl(0 0% 100% / 0.9));
     
     /* Shadows */
     --shadow-glass: 0 8px 32px hsl(263 45% 85% / 0.15);
@@ -129,8 +129,7 @@
 
   body {
     @apply bg-background text-foreground;
-    background: var(--gradient-hero);
-    background-attachment: fixed;
+    background: hsl(var(--background));
     min-height: 100vh;
   }
 }
