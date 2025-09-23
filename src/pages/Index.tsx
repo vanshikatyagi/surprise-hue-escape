@@ -153,11 +153,11 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Hero Section - Exact WanderNest Style */}
+      {/* Hero Section - Clean WanderNest Style */}
       <section id="home" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-primary">
         {/* Main Title */}
-        <div className="relative z-20 text-center px-4 max-w-6xl mx-auto mb-20">
-          <h1 className="text-[10rem] md:text-[12rem] lg:text-[15rem] xl:text-[18rem] font-black leading-[0.8] tracking-tight mb-4">
+        <div className="relative z-20 text-center px-4 max-w-6xl mx-auto">
+          <h1 className="text-[8rem] md:text-[12rem] lg:text-[15rem] xl:text-[18rem] font-black leading-[0.8] tracking-tight mb-4">
             <span className="text-white drop-shadow-2xl block">Mysti</span>
             <span className="text-accent drop-shadow-2xl block -mt-8">Go</span>
           </h1>
@@ -166,22 +166,18 @@ const Index = () => {
           </p>
         </div>
 
-        {/* Mountain Landscape at Bottom */}
+        {/* Clean Mountain Landscape at Bottom */}
         <div className="absolute bottom-0 left-0 right-0 h-96 z-10">
           <img 
             src={heroImage} 
             alt="Mountain landscape" 
-            className="w-full h-full object-cover object-bottom opacity-80"
+            className="w-full h-full object-cover object-bottom"
           />
         </div>
 
-        {/* Decorative Elements */}
-        <div className="absolute top-32 left-20 text-white/20">
-          <div className="w-6 h-6 border-2 border-current rotate-45"></div>
-        </div>
-        <div className="absolute top-40 right-20 text-white/20">
-          <div className="w-6 h-6 border-2 border-current rotate-45"></div>
-        </div>
+        {/* Simple star decorations like WanderNest */}
+        <div className="absolute top-32 left-20 text-white/30 text-4xl">✦</div>
+        <div className="absolute top-40 right-20 text-white/30 text-3xl">✦</div>
       </section>
 
       {/* Left Side - Adventure Section */}
