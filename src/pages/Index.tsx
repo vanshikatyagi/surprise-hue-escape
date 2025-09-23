@@ -173,8 +173,6 @@ const Index = () => {
             alt="Mountain landscape" 
             className="w-full h-full object-cover object-bottom opacity-80"
           />
-          {/* Cloud overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-white/40"></div>
         </div>
 
         {/* Decorative Elements */}
