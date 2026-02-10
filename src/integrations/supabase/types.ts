@@ -14,7 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          budget_range: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          num_travelers: string
+          preferences: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget_range: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          num_travelers: string
+          preferences?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget_range?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          num_travelers?: string
+          preferences?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      quiz_results: {
+        Row: {
+          budget: string
+          created_at: string
+          id: string
+          travel_companions: string
+          travel_style: string
+          trip_duration: string
+          user_id: string
+        }
+        Insert: {
+          budget: string
+          created_at?: string
+          id?: string
+          travel_companions: string
+          travel_style: string
+          trip_duration: string
+          user_id: string
+        }
+        Update: {
+          budget?: string
+          created_at?: string
+          id?: string
+          travel_companions?: string
+          travel_style?: string
+          trip_duration?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

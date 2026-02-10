@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Gift, Globe, Mail, Star } from "lucide-react";
 
 import Header from "@/components/Header";
@@ -22,8 +25,16 @@ import CTASection from "@/components/CTASection";
 
 const Index = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [isNewsletterOpen, setIsNewsletterOpen] = useState(false);
+  const [bookingName, setBookingName] = useState("");
+  const [bookingEmail, setBookingEmail] = useState("");
+  const [bookingBudget, setBookingBudget] = useState("");
+  const [bookingTravelers, setBookingTravelers] = useState("");
+  const [bookingPreferences, setBookingPreferences] = useState("");
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   const testimonials = [
     {
@@ -68,12 +79,29 @@ const Index = () => {
     setIsNewsletterOpen(false);
   };
 
-  const handleBookingSubmit = (e: React.FormEvent) => {
+  const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Booking Request Received!",
-      description: "We'll contact you within 24 hours to plan your mystery adventure.",
+    if (!user) {
+      toast({ title: "Sign in required", description: "Please sign in to book a mystery trip." });
+      navigate("/auth");
+      return;
+    }
+    setBookingLoading(true);
+    const { error } = await supabase.from("bookings").insert({
+      user_id: user.id,
+      full_name: bookingName,
+      email: bookingEmail,
+      budget_range: bookingBudget,
+      num_travelers: bookingTravelers,
+      preferences: bookingPreferences,
     });
+    setBookingLoading(false);
+    if (error) {
+      toast({ title: "Booking failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Booking Request Received!", description: "We'll contact you within 24 hours." });
+      setBookingName(""); setBookingEmail(""); setBookingBudget(""); setBookingTravelers(""); setBookingPreferences("");
+    }
   };
 
   return (
@@ -162,32 +190,32 @@ const Index = () => {
                   <div className="grid md:grid-cols-2 gap-5">
                     <div className="text-left">
                       <Label htmlFor="name" className="text-white text-xs">Full Name</Label>
-                      <Input id="name" placeholder="Enter your name" className="bg-white/10 border-white/20 text-white placeholder:text-white/50 text-sm" required />
+                      <Input id="name" placeholder="Enter your name" value={bookingName} onChange={(e) => setBookingName(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/50 text-sm" required />
                     </div>
                     <div className="text-left">
                       <Label htmlFor="email" className="text-white text-xs">Email</Label>
-                      <Input id="email" type="email" placeholder="Enter your email" className="bg-white/10 border-white/20 text-white placeholder:text-white/50 text-sm" required />
+                      <Input id="email" type="email" placeholder="Enter your email" value={bookingEmail} onChange={(e) => setBookingEmail(e.target.value)} className="bg-white/10 border-white/20 text-white placeholder:text-white/50 text-sm" required />
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-5">
                     <div className="text-left">
                       <Label htmlFor="budget" className="text-white text-xs">Budget Range</Label>
-                      <Select>
+                      <Select value={bookingBudget} onValueChange={setBookingBudget}>
                         <SelectTrigger className="bg-white/10 border-white/20 text-white text-sm">
                           <SelectValue placeholder="Select budget" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="budget">$500 - $1,000</SelectItem>
-                          <SelectItem value="mid">$1,000 - $2,500</SelectItem>
-                          <SelectItem value="luxury">$2,500 - $5,000</SelectItem>
-                          <SelectItem value="premium">$5,000+</SelectItem>
+                          <SelectItem value="$500 - $1,000">$500 - $1,000</SelectItem>
+                          <SelectItem value="$1,000 - $2,500">$1,000 - $2,500</SelectItem>
+                          <SelectItem value="$2,500 - $5,000">$2,500 - $5,000</SelectItem>
+                          <SelectItem value="$5,000+">$5,000+</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="text-left">
                       <Label htmlFor="travelers" className="text-white text-xs">Number of Travelers</Label>
-                      <Select>
+                      <Select value={bookingTravelers} onValueChange={setBookingTravelers}>
                         <SelectTrigger className="bg-white/10 border-white/20 text-white text-sm">
                           <SelectValue placeholder="Select travelers" />
                         </SelectTrigger>
@@ -206,13 +234,15 @@ const Index = () => {
                     <Textarea
                       id="preferences"
                       placeholder="Tell us about your interests, activity level, climate preferences, etc."
+                      value={bookingPreferences}
+                      onChange={(e) => setBookingPreferences(e.target.value)}
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[80px] text-sm"
                     />
                   </div>
 
-                  <Button type="submit" className="w-full bg-accent text-black hover:bg-accent/90 text-sm py-5 font-semibold">
+                  <Button type="submit" disabled={bookingLoading} className="w-full bg-accent text-black hover:bg-accent/90 text-sm py-5 font-semibold">
                     <Gift className="w-4 h-4 mr-2" />
-                    Book My Mystery Trip
+                    {bookingLoading ? "Submitting..." : "Book My Mystery Trip"}
                   </Button>
                 </form>
               </CardContent>
