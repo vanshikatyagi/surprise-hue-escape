@@ -1,260 +1,201 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { 
-  MapPin, 
-  Calendar, 
-  Star, 
-  Trophy, 
-  Plane, 
-  Heart, 
-  Plus,
-  Settings,
-  Bell,
-  User
+  MapPin, Calendar, Star, Trophy, Plane, Plus, Settings, Bell, LogOut, User
 } from 'lucide-react';
+
+interface QuizResult {
+  id: string;
+  travel_style: string;
+  trip_duration: string;
+  budget: string;
+  travel_companions: string;
+  created_at: string;
+}
+
+interface Booking {
+  id: string;
+  full_name: string;
+  email: string;
+  budget_range: string;
+  num_travelers: string;
+  preferences: string | null;
+  status: string;
+  created_at: string;
+}
+
+interface Profile {
+  full_name: string | null;
+  email: string | null;
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const savedTrips = [
-    {
-      id: 1,
-      destination: 'Kyoto, Japan',
-      status: 'Booked',
-      date: 'Dec 15-22, 2024',
-      image: '/api/placeholder/300/200',
-      progress: 100
-    },
-    {
-      id: 2,
-      destination: 'Santorini, Greece',
-      status: 'Saved',
-      date: 'Mar 10-16, 2025',
-      image: '/api/placeholder/300/200',
-      progress: 0
-    },
-    {
-      id: 3,
-      destination: 'Patagonia, Chile',
-      status: 'Planning',
-      date: 'Summer 2025',
-      image: '/api/placeholder/300/200',
-      progress: 45
-    }
-  ];
+  useEffect(() => {
+    if (!user) return;
+    const fetchData = async () => {
+      const [profileRes, quizRes, bookingsRes] = await Promise.all([
+        supabase.from("profiles").select("full_name, email").eq("user_id", user.id).maybeSingle(),
+        supabase.from("quiz_results").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("bookings").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+      ]);
+      if (profileRes.data) setProfile(profileRes.data);
+      if (quizRes.data) setQuizResults(quizRes.data);
+      if (bookingsRes.data) setBookings(bookingsRes.data);
+      setLoading(false);
+    };
+    fetchData();
+  }, [user]);
 
-  const achievements = [
-    { id: 1, name: 'First Adventure', icon: '🎯', unlocked: true, color: 'primary' },
-    { id: 2, name: 'Globe Trotter', icon: '🌍', unlocked: true, color: 'secondary' },
-    { id: 3, name: 'Culture Explorer', icon: '🏛️', unlocked: false, color: 'accent' },
-    { id: 4, name: 'Mountain Climber', icon: '⛰️', unlocked: false, color: 'accent-coral' },
-  ];
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
-  const upcomingBooking = savedTrips.find(trip => trip.status === 'Booked');
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-500">Loading your dashboard...</p>
+      </div>
+    );
+  }
+
+  const displayName = profile?.full_name || user?.email?.split("@")[0] || "Explorer";
 
   return (
-    <div className="min-h-screen p-4">
-      {/* Floating Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="floating absolute top-20 left-10 text-3xl">✈️</div>
-        <div className="floating-delayed absolute top-40 right-20 text-2xl">🌟</div>
-        <div className="floating absolute bottom-40 left-20 text-2xl">🎒</div>
-      </div>
-
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold gradient-text">Welcome back, Explorer! 👋</h1>
-            <p className="text-muted-foreground mt-2">Ready for your next adventure?</p>
-          </div>
-          <div className="flex space-x-2">
-            <Button variant="outline" size="sm" className="glass-button">
-              <Bell className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" className="glass-button">
-              <Settings className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" className="glass-button">
-              <User className="h-4 w-4" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-[#2d2d2d] text-white py-4 px-6">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <a href="/" className="text-xl font-extrabold tracking-widest uppercase">MYSTIGO</a>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-white/70">{user?.email}</span>
+            <Button onClick={handleSignOut} variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
+              <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
+      </header>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto p-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {displayName}! 👋</h1>
+        <p className="text-gray-500 mb-8">Here's your travel overview</p>
+
+        <div className="grid lg:grid-cols-3 gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Next Trip Countdown */}
-            {upcomingBooking && (
-              <Card className="glass-card p-6 animate-fade-in-up">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold">Next Adventure</h2>
-                  <Badge className="bg-accent text-accent-foreground">
-                    {upcomingBooking.status}
-                  </Badge>
-                </div>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2">{upcomingBooking.destination}</h3>
-                    <div className="flex items-center text-muted-foreground mb-4">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      {upcomingBooking.date}
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Trip Preparation</span>
-                        <span>{upcomingBooking.progress}%</span>
-                      </div>
-                      <Progress value={upcomingBooking.progress} className="h-2" />
-                    </div>
-                    <Button className="glass-button ripple-button mt-4">
-                      <Plane className="h-4 w-4 mr-2" />
-                      View Trip Details
-                    </Button>
-                  </div>
-                  <div className="h-40 bg-gradient-to-br from-primary to-secondary rounded-2xl"></div>
-                </div>
-              </Card>
-            )}
-
-            {/* Saved Trips */}
-            <div className="animate-fade-in-up">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">Your Trips</h2>
-                <Button 
-                  className="glass-button ripple-button"
-                  onClick={() => navigate('/preferences')}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Plan New Trip
+          <div className="lg:col-span-2 space-y-6">
+            {/* Bookings */}
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">Your Bookings</h2>
+                <Button onClick={() => navigate("/#contact")} size="sm" className="bg-[#2d2d2d] text-white hover:bg-[#3d3d3d]">
+                  <Plus className="w-4 h-4 mr-1" /> New Booking
                 </Button>
               </div>
-              <div className="grid md:grid-cols-2 gap-6">
-                {savedTrips.map((trip) => (
-                  <Card key={trip.id} className="glass-card overflow-hidden group cursor-pointer bounce-hover">
-                    <div className="h-32 bg-gradient-to-br from-primary via-secondary to-accent relative">
-                      <div className="absolute inset-0 bg-black/20" />
-                      <div className="absolute top-4 right-4">
-                        <Badge 
-                          variant={trip.status === 'Booked' ? 'default' : 'secondary'}
-                          className="backdrop-blur-sm"
-                        >
-                          {trip.status}
+              {bookings.length === 0 ? (
+                <Card className="p-8 text-center bg-white rounded-xl">
+                  <Plane className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 text-sm">No bookings yet. Start your first mystery trip!</p>
+                  <Button onClick={() => navigate("/#contact")} className="mt-4 bg-accent text-black hover:bg-accent/90 text-sm">
+                    Book Now
+                  </Button>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {bookings.map((booking) => (
+                    <Card key={booking.id} className="p-5 bg-white rounded-xl">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold text-gray-900">{booking.full_name}</h3>
+                          <p className="text-sm text-gray-500">Budget: {booking.budget_range} · {booking.num_travelers} traveler(s)</p>
+                          {booking.preferences && <p className="text-sm text-gray-400 mt-1 line-clamp-1">{booking.preferences}</p>}
+                        </div>
+                        <Badge className={booking.status === "pending" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}>
+                          {booking.status}
                         </Badge>
                       </div>
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold mb-2">{trip.destination}</h3>
-                      <div className="flex items-center text-sm text-muted-foreground mb-3">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        {trip.date}
-                      </div>
-                      {trip.progress > 0 && (
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-xs">
-                            <span>Progress</span>
-                            <span>{trip.progress}%</span>
-                          </div>
-                          <Progress value={trip.progress} className="h-1" />
-                        </div>
-                      )}
-                      <div className="flex justify-between mt-3">
-                        <Button size="sm" variant="outline" className="glass-button">
-                          <Heart className="h-3 w-3 mr-1" />
-                          Saved
-                        </Button>
-                        <Button size="sm" className="glass-button">
-                          View Details
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+                      <p className="text-xs text-gray-400 mt-2">{new Date(booking.created_at).toLocaleDateString()}</p>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Travel Stats */}
-            <Card className="glass-card p-6 animate-fade-in-up">
-              <h3 className="font-semibold mb-4 flex items-center">
-                <Trophy className="h-5 w-5 mr-2 text-accent-yellow" />
-                Travel Stats
+            {/* Quiz Results */}
+            <Card className="p-6 bg-white rounded-xl">
+              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+                <Star className="w-5 h-5 mr-2 text-yellow-500" />
+                Travel Preferences
               </h3>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Countries Visited</span>
-                  <span className="font-semibold">12</span>
+              {quizResults.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-gray-500 text-sm mb-3">Take the quiz to discover your style!</p>
+                  <Button onClick={() => navigate("/")} size="sm" className="bg-accent text-black hover:bg-accent/90 text-sm">
+                    Take Quiz
+                  </Button>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Trips</span>
-                  <span className="font-semibold">8</span>
+              ) : (
+                <div className="space-y-3">
+                  {quizResults.slice(0, 3).map((result) => (
+                    <div key={result.id} className="p-3 bg-gray-50 rounded-lg text-sm">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div><span className="text-gray-400">Style:</span> <span className="font-medium text-gray-700">{result.travel_style}</span></div>
+                        <div><span className="text-gray-400">Duration:</span> <span className="font-medium text-gray-700">{result.trip_duration}</span></div>
+                        <div><span className="text-gray-400">Budget:</span> <span className="font-medium text-gray-700">{result.budget}</span></div>
+                        <div><span className="text-gray-400">With:</span> <span className="font-medium text-gray-700">{result.travel_companions}</span></div>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2">{new Date(result.created_at).toLocaleDateString()}</p>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Miles Traveled</span>
-                  <span className="font-semibold">45,230</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Travel Level</span>
-                  <Badge className="bg-secondary text-secondary-foreground">Explorer</Badge>
-                </div>
-              </div>
+              )}
             </Card>
 
-            {/* Achievements */}
-            <Card className="glass-card p-6 animate-fade-in-up">
-              <h3 className="font-semibold mb-4 flex items-center">
-                <Star className="h-5 w-5 mr-2 text-accent-yellow" />
-                Achievements
+            {/* Quick Stats */}
+            <Card className="p-6 bg-white rounded-xl">
+              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+                <Trophy className="w-5 h-5 mr-2 text-yellow-500" />
+                Quick Stats
               </h3>
-              <div className="grid grid-cols-2 gap-3">
-                {achievements.map((achievement) => (
-                  <div
-                    key={achievement.id}
-                    className={`p-3 rounded-lg text-center transition-all duration-300 ${
-                      achievement.unlocked 
-                        ? 'glass-card bounce-hover' 
-                        : 'bg-muted/50 opacity-50'
-                    }`}
-                  >
-                    <div className="text-2xl mb-1">{achievement.icon}</div>
-                    <div className="text-xs font-medium">{achievement.name}</div>
-                  </div>
-                ))}
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Total Bookings</span>
+                  <span className="font-semibold text-gray-900">{bookings.length}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Quizzes Taken</span>
+                  <span className="font-semibold text-gray-900">{quizResults.length}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Member Since</span>
+                  <span className="font-semibold text-gray-900">{user?.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}</span>
+                </div>
               </div>
             </Card>
 
             {/* Quick Actions */}
-            <Card className="glass-card p-6 animate-fade-in-up">
-              <h3 className="font-semibold mb-4">Quick Actions</h3>
-              <div className="space-y-3">
-                <Button 
-                  variant="outline" 
-                  className="w-full glass-button justify-start"
-                  onClick={() => navigate('/preferences')}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Plan New Trip
+            <Card className="p-6 bg-white rounded-xl">
+              <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="space-y-2">
+                <Button variant="outline" className="w-full justify-start text-sm" onClick={() => navigate("/")}>
+                  <MapPin className="w-4 h-4 mr-2" /> Explore Destinations
                 </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full glass-button justify-start"
-                  onClick={() => navigate('/reveal')}
-                >
-                  <Star className="h-4 w-4 mr-2" />
-                  View Saved Packages
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full glass-button justify-start"
-                >
-                  <MapPin className="h-4 w-4 mr-2" />
-                  Explore Destinations
+                <Button variant="outline" className="w-full justify-start text-sm" onClick={() => navigate("/#contact")}>
+                  <Plane className="w-4 h-4 mr-2" /> Book New Trip
                 </Button>
               </div>
             </Card>
