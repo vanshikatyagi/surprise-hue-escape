@@ -52,6 +52,10 @@ const packages = [
 ];
 
 const PackagesSection = () => {
+  const scrollToBooking = () => {
+    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <section id="packages" className="bg-white py-20">
       <div className="container mx-auto px-4">
@@ -65,7 +69,6 @@ const PackagesSection = () => {
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-8">
           {packages.map((pkg) => (
             <Card key={pkg.id} className="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
-              {/* Image */}
               <div className="relative h-44">
                 <img src={pkg.image} alt={pkg.title} className="w-full h-full object-cover" />
                 <Badge className="absolute top-3 right-3 bg-red-500 text-white border-0 text-[10px] rounded-sm px-2 py-0.5">
@@ -74,7 +77,6 @@ const PackagesSection = () => {
               </div>
 
               <CardContent className="p-5">
-                {/* Title + Rating */}
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="font-bold text-black text-sm">{pkg.title}</h3>
                   <div className="flex items-center gap-1 ml-auto">
@@ -86,7 +88,6 @@ const PackagesSection = () => {
 
                 <p className="text-xs text-gray-500 mb-3 leading-relaxed">{pkg.description}</p>
 
-                {/* Duration & People */}
                 <div className="flex gap-3 mb-3">
                   <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 rounded-full px-3 py-1">
                     <Clock className="w-3 h-3" />
@@ -98,7 +99,6 @@ const PackagesSection = () => {
                   </div>
                 </div>
 
-                {/* Features */}
                 <ul className="space-y-1.5 mb-4">
                   {pkg.features.map((feature, i) => (
                     <li key={i} className="flex items-center gap-2 text-xs text-gray-600">
@@ -108,13 +108,12 @@ const PackagesSection = () => {
                   ))}
                 </ul>
 
-                {/* Price + CTA */}
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="text-xl font-bold text-black">{pkg.price}</span>
                     <span className="text-xs text-gray-400">{pkg.priceNote}</span>
                   </div>
-                  <Button className="bg-primary text-white hover:bg-primary/90 rounded-lg px-4 py-2 text-xs font-semibold">
+                  <Button onClick={scrollToBooking} className="bg-primary text-white hover:bg-primary/90 rounded-lg px-4 py-2 text-xs font-semibold">
                     Book Mystery <Plane className="w-3 h-3 ml-1" />
                   </Button>
                 </div>
@@ -124,7 +123,7 @@ const PackagesSection = () => {
         </div>
 
         <div className="text-center">
-          <Button variant="outline" className="border-gray-300 text-black hover:bg-gray-50 rounded-full px-8 text-sm">
+          <Button onClick={scrollToBooking} variant="outline" className="border-gray-300 text-black hover:bg-gray-50 rounded-full px-8 text-sm">
             View All Packages →
           </Button>
         </div>

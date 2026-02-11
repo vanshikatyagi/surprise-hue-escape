@@ -38,7 +38,7 @@ const TravelsBeyondSection = () => {
               THE ORDINARY
             </h2>
 
-            <Button className="bg-transparent border border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 px-6 py-2 rounded-sm text-sm">
+            <Button onClick={() => document.getElementById("destinations")?.scrollIntoView({ behavior: "smooth" })} className="bg-transparent border border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 px-6 py-2 rounded-sm text-sm">
               Explore now <span className="ml-2">→</span>
             </Button>
           </div>

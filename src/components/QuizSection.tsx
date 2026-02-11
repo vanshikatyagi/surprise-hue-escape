@@ -72,22 +72,27 @@ const QuizSection = () => {
       setCurrentQuestion((prev) => prev + 1);
       setSelected(null);
     } else {
-      // Last question - save results
       if (user) {
         setSaving(true);
-        const { error } = await supabase.from("quiz_results").insert({
-          user_id: user.id,
-          travel_style: newAnswers.travel_style,
-          trip_duration: newAnswers.trip_duration,
-          budget: newAnswers.budget,
-          travel_companions: newAnswers.travel_companions,
-        });
-        setSaving(false);
-        if (error) {
-          toast({ title: "Error saving quiz", description: error.message, variant: "destructive" });
-        } else {
-          toast({ title: "Quiz completed!", description: "Your preferences have been saved." });
-          setCompleted(true);
+        try {
+          const { error } = await supabase.from("quiz_results").insert({
+            user_id: user.id,
+            travel_style: newAnswers.travel_style,
+            trip_duration: newAnswers.trip_duration,
+            budget: newAnswers.budget,
+            travel_companions: newAnswers.travel_companions,
+          });
+          if (error) {
+            toast({ title: "Error saving quiz", description: error.message, variant: "destructive" });
+          } else {
+            toast({ title: "Quiz completed!", description: "Your preferences have been saved." });
+            setCompleted(true);
+          }
+        } catch (error) {
+          console.error("Quiz save error:", error);
+          toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
+        } finally {
+          setSaving(false);
         }
       } else {
         toast({ title: "Sign in to save", description: "Create an account to save your travel preferences." });

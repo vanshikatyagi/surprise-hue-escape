@@ -2,6 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Compass, Mountain, Plane } from "lucide-react";
 
 const CTASection = () => {
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <section className="bg-[#2d2d2d] py-12">
       <div className="container mx-auto px-4">
@@ -18,10 +22,10 @@ const CTASection = () => {
             Let us surprise you with an incredible destination from our global collection!
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button className="bg-accent text-black hover:bg-accent/90 rounded-full px-8 py-3 font-semibold text-sm">
+            <Button onClick={() => scrollTo("contact")} className="bg-accent text-black hover:bg-accent/90 rounded-full px-8 py-3 font-semibold text-sm">
               Start Your Journey
             </Button>
-            <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-full px-8 py-3 text-sm">
+            <Button onClick={() => scrollTo("packages")} variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-full px-8 py-3 text-sm">
               Learn More
             </Button>
           </div>

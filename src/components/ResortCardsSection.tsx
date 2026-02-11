@@ -11,6 +11,10 @@ const resorts = [
 ];
 
 const ResortCardsSection = () => {
+  const scrollToBooking = () => {
+    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <section className="bg-white py-20">
       <div className="container mx-auto px-4">
@@ -29,14 +33,17 @@ const ResortCardsSection = () => {
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {resorts.map((resort, index) => (
-            <Card key={index} className="overflow-hidden group cursor-pointer border-0 shadow-md rounded-xl">
+            <Card key={index} onClick={scrollToBooking} className="overflow-hidden group cursor-pointer border-0 shadow-md rounded-xl">
               <div className="relative h-48 md:h-56">
                 <img
                   src={resort.image}
                   alt={resort.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <button className="absolute top-3 right-3 p-1.5 bg-white/20 rounded-full backdrop-blur-sm">
+                <button
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute top-3 right-3 p-1.5 bg-white/20 rounded-full backdrop-blur-sm hover:bg-white/40 transition-colors"
+                >
                   <Heart className="w-3.5 h-3.5 text-white" />
                 </button>
                 <div className="absolute bottom-3 left-3">
@@ -49,7 +56,7 @@ const ResortCardsSection = () => {
         </div>
 
         <div className="text-center">
-          <Button className="bg-accent text-black hover:bg-accent/90 rounded-full px-8 text-sm font-semibold">
+          <Button onClick={scrollToBooking} className="bg-accent text-black hover:bg-accent/90 rounded-full px-8 text-sm font-semibold">
             Show all
           </Button>
         </div>
