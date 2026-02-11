@@ -87,20 +87,26 @@ const Index = () => {
       return;
     }
     setBookingLoading(true);
-    const { error } = await supabase.from("bookings").insert({
-      user_id: user.id,
-      full_name: bookingName,
-      email: bookingEmail,
-      budget_range: bookingBudget,
-      num_travelers: bookingTravelers,
-      preferences: bookingPreferences,
-    });
-    setBookingLoading(false);
-    if (error) {
-      toast({ title: "Booking failed", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Booking Request Received!", description: "We'll contact you within 24 hours." });
-      setBookingName(""); setBookingEmail(""); setBookingBudget(""); setBookingTravelers(""); setBookingPreferences("");
+    try {
+      const { error } = await supabase.from("bookings").insert({
+        user_id: user.id,
+        full_name: bookingName,
+        email: bookingEmail,
+        budget_range: bookingBudget,
+        num_travelers: bookingTravelers,
+        preferences: bookingPreferences,
+      });
+      if (error) {
+        toast({ title: "Booking failed", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Booking Request Received!", description: "We'll contact you within 24 hours." });
+        setBookingName(""); setBookingEmail(""); setBookingBudget(""); setBookingTravelers(""); setBookingPreferences("");
+      }
+    } catch (error) {
+      console.error("Booking error:", error);
+      toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setBookingLoading(false);
     }
   };
 

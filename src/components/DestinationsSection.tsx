@@ -1,7 +1,12 @@
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Plane } from "lucide-react";
 
 const DestinationsSection = () => {
+  const scrollToBooking = () => {
+    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <section id="destinations" className="bg-white py-20">
       <div className="container mx-auto px-4">
@@ -14,21 +19,20 @@ const DestinationsSection = () => {
 
         <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {/* Map Card */}
-          <Card className="bg-gray-50 border-0 rounded-2xl p-8 flex flex-col justify-center items-center min-h-[280px]">
+          <Card onClick={scrollToBooking} className="bg-gray-50 border-0 rounded-2xl p-8 flex flex-col justify-center items-center min-h-[280px] cursor-pointer hover:shadow-lg transition-shadow">
             <div className="relative w-full flex justify-center mb-6">
-              {/* Decorative colored blobs to represent map regions */}
               <div className="relative w-48 h-32">
-                <div className="absolute left-0 bottom-0 w-12 h-12 bg-red-400 rounded-full opacity-80" />
-                <div className="absolute left-16 top-2 w-10 h-14 bg-accent rounded-[40%] opacity-90" />
-                <div className="absolute left-24 top-0 w-16 h-20 bg-accent rounded-[40%] opacity-80" />
-                <div className="absolute right-2 top-4 w-12 h-16 bg-green-500 rounded-[40%] opacity-70" />
-                <div className="absolute right-0 bottom-0 w-8 h-8 bg-green-400 rounded-full opacity-60" />
-                <div className="absolute left-8 top-8 w-6 h-6 bg-orange-400 rounded-full opacity-70" />
+                <div className="absolute left-0 bottom-0 w-12 h-12 bg-red-400 rounded-full opacity-80 hover:opacity-100 transition-opacity" />
+                <div className="absolute left-16 top-2 w-10 h-14 bg-accent rounded-[40%] opacity-90 hover:opacity-100 transition-opacity" />
+                <div className="absolute left-24 top-0 w-16 h-20 bg-accent rounded-[40%] opacity-80 hover:opacity-100 transition-opacity" />
+                <div className="absolute right-2 top-4 w-12 h-16 bg-green-500 rounded-[40%] opacity-70 hover:opacity-100 transition-opacity" />
+                <div className="absolute right-0 bottom-0 w-8 h-8 bg-green-400 rounded-full opacity-60 hover:opacity-100 transition-opacity" />
+                <div className="absolute left-8 top-8 w-6 h-6 bg-orange-400 rounded-full opacity-70 hover:opacity-100 transition-opacity" />
               </div>
             </div>
             <div className="text-left w-full">
               <h3 className="text-sm font-bold text-black">Mystery Destinations</h3>
-              <p className="text-xs text-gray-400">Click regions to explore</p>
+              <p className="text-xs text-gray-400">Click to start your mystery trip</p>
             </div>
           </Card>
 
@@ -55,6 +59,9 @@ const DestinationsSection = () => {
                 <span className="text-xs font-bold text-black">10,000+</span>
               </div>
             </div>
+            <Button onClick={scrollToBooking} className="mt-6 bg-primary text-white hover:bg-primary/90 rounded-lg text-xs font-semibold">
+              Start Your Mystery Trip
+            </Button>
           </Card>
         </div>
       </div>

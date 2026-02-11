@@ -38,7 +38,11 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-3">
-            <button className="w-10 h-10 rounded-full bg-[#3d3d3d] flex items-center justify-center text-white hover:bg-[#4d4d4d] transition-colors">
+            <button
+              onClick={() => document.documentElement.classList.toggle("dark")}
+              className="w-10 h-10 rounded-full bg-[#3d3d3d] flex items-center justify-center text-white hover:bg-[#4d4d4d] transition-colors"
+              title="Toggle dark mode"
+            >
               <Moon className="w-4 h-4" />
             </button>
             {user ? (
