@@ -5,7 +5,7 @@ import heroImage from "@/assets/hero-travel.jpg";
 
 const TravelsBeyondSection = () => {
   return (
-    <section className="flex flex-col lg:flex-row min-h-screen">
+    <section id="about" className="flex flex-col lg:flex-row min-h-screen">
       {/* Left Side - Travels Beyond */}
       <div className="w-full lg:w-1/2 bg-black relative overflow-hidden">
         <img
