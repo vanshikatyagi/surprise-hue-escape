@@ -36,6 +36,10 @@ const Index = () => {
   const [bookingPreferences, setBookingPreferences] = useState("");
   const [bookingLoading, setBookingLoading] = useState(false);
 
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const testimonials = [
     {
       id: 1,
@@ -128,7 +132,7 @@ const Index = () => {
       <CTASection />
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-white">
+      <section id="testimonials" className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-black mb-4">What Our Travelers Say</h2>
@@ -267,10 +271,10 @@ const Index = () => {
                 Creating unforgettable mystery travel experiences since 2020.
               </p>
               <div className="flex space-x-3">
-                <button className="text-gray-400 hover:text-white transition-colors">
+                <button onClick={() => scrollToSection("contact")} className="text-gray-400 hover:text-white transition-colors">
                   <Globe className="w-4 h-4" />
                 </button>
-                <button className="text-gray-400 hover:text-white transition-colors">
+                <button onClick={() => scrollToSection("contact")} className="text-gray-400 hover:text-white transition-colors">
                   <Mail className="w-4 h-4" />
                 </button>
               </div>
@@ -279,20 +283,20 @@ const Index = () => {
             <div>
               <h4 className="font-semibold text-sm mb-4">Company</h4>
               <ul className="space-y-2 text-gray-400 text-xs">
-                <li><a href="#about" className="hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#careers" className="hover:text-white transition-colors">Careers</a></li>
-                <li><a href="#press" className="hover:text-white transition-colors">Press</a></li>
-                <li><a href="#blog" className="hover:text-white transition-colors">Blog</a></li>
+                <li><button onClick={() => scrollToSection("about")} className="hover:text-white transition-colors">About Us</button></li>
+                <li><button onClick={() => scrollToSection("features")} className="hover:text-white transition-colors">Features</button></li>
+                <li><button onClick={() => scrollToSection("packages")} className="hover:text-white transition-colors">Packages</button></li>
+                <li><button onClick={() => scrollToSection("testimonials")} className="hover:text-white transition-colors">Testimonials</button></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-semibold text-sm mb-4">Support</h4>
               <ul className="space-y-2 text-gray-400 text-xs">
-                <li><a href="#help" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#contact" className="hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="#safety" className="hover:text-white transition-colors">Safety</a></li>
-                <li><a href="#cancellation" className="hover:text-white transition-colors">Cancellation</a></li>
+                <li><button onClick={() => scrollToSection("features")} className="hover:text-white transition-colors">Help Center</button></li>
+                <li><button onClick={() => scrollToSection("contact")} className="hover:text-white transition-colors">Contact Us</button></li>
+                <li><button onClick={() => scrollToSection("destinations")} className="hover:text-white transition-colors">Destinations</button></li>
+                <li><button onClick={() => scrollToSection("packages")} className="hover:text-white transition-colors">Pricing</button></li>
               </ul>
             </div>
 
@@ -319,9 +323,9 @@ const Index = () => {
           <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-xs">© 2024 MystiGo. All rights reserved.</p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="#privacy" className="text-gray-400 hover:text-white text-xs transition-colors">Privacy Policy</a>
-              <a href="#terms" className="text-gray-400 hover:text-white text-xs transition-colors">Terms of Service</a>
-              <a href="#cookies" className="text-gray-400 hover:text-white text-xs transition-colors">Cookie Policy</a>
+              <button onClick={() => scrollToSection("about")} className="text-gray-400 hover:text-white text-xs transition-colors">Privacy Policy</button>
+              <button onClick={() => scrollToSection("about")} className="text-gray-400 hover:text-white text-xs transition-colors">Terms of Service</button>
+              <button onClick={() => scrollToSection("contact")} className="text-gray-400 hover:text-white text-xs transition-colors">Contact</button>
             </div>
           </div>
         </div>
