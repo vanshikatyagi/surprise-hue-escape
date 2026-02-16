@@ -1,7 +1,16 @@
 import { Plane } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-travel.jpg";
 
 const HeroSection = () => {
+  const scrollToBooking = () => {
+    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const scrollToFeatures = () => {
+    document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <section id="home" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
       {/* Full Background Mountain Image */}
@@ -28,8 +37,13 @@ const HeroSection = () => {
         <p className="text-xl md:text-2xl text-white/90 font-light mt-4 tracking-wide">
           Travel agency
         </p>
-        <div className="mt-6">
-          <Plane className="w-6 h-6 text-white/60 mx-auto rotate-45" />
+        <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+          <Button onClick={scrollToBooking} className="bg-accent text-black hover:bg-accent/90 rounded-full px-8 py-3 font-semibold text-sm">
+            Book Your Mystery Trip
+          </Button>
+          <Button onClick={scrollToFeatures} variant="outline" className="border-white/40 text-white hover:bg-white/10 rounded-full px-8 py-3 text-sm">
+            Learn More ↓
+          </Button>
         </div>
       </div>
 

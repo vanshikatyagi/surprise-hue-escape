@@ -1,13 +1,33 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Moon, LogOut, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+
+const navLinks = [
+  { label: "FEATURES", target: "features" },
+  { label: "DESTINATIONS", target: "destinations" },
+  { label: "ABOUT", target: "about" },
+  { label: "CONTACT", target: "contact" },
+];
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const scrollToSection = (id: string) => {
+    setMobileOpen(false);
+    if (location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      }, 300);
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   const handleAuthAction = () => {
     if (user) {
@@ -31,10 +51,15 @@ const Header = () => {
           </a>
 
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-white/80 hover:text-white text-sm font-medium tracking-wide transition-colors">FEATURES</a>
-            <a href="#destinations" className="text-white/80 hover:text-white text-sm font-medium tracking-wide transition-colors">DESTINATIONS</a>
-            <a href="#about" className="text-white/80 hover:text-white text-sm font-medium tracking-wide transition-colors">ABOUT</a>
-            <a href="#contact" className="text-white/80 hover:text-white text-sm font-medium tracking-wide transition-colors">CONTACT</a>
+            {navLinks.map((link) => (
+              <button
+                key={link.target}
+                onClick={() => scrollToSection(link.target)}
+                className="text-white/80 hover:text-white text-sm font-medium tracking-wide transition-colors"
+              >
+                {link.label}
+              </button>
+            ))}
           </nav>
 
           <div className="flex items-center gap-3">
@@ -67,10 +92,15 @@ const Header = () => {
 
         {mobileOpen && (
           <nav className="md:hidden mt-4 pb-4 space-y-3">
-            <a href="#features" className="block text-white/80 hover:text-white text-sm font-medium">FEATURES</a>
-            <a href="#destinations" className="block text-white/80 hover:text-white text-sm font-medium">DESTINATIONS</a>
-            <a href="#about" className="block text-white/80 hover:text-white text-sm font-medium">ABOUT</a>
-            <a href="#contact" className="block text-white/80 hover:text-white text-sm font-medium">CONTACT</a>
+            {navLinks.map((link) => (
+              <button
+                key={link.target}
+                onClick={() => scrollToSection(link.target)}
+                className="block text-white/80 hover:text-white text-sm font-medium w-full text-left"
+              >
+                {link.label}
+              </button>
+            ))}
             {user ? (
               <>
                 <Button onClick={() => navigate("/dashboard")} className="w-full bg-accent text-black font-bold hover:bg-accent/90 rounded-md text-sm">
