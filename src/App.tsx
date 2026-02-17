@@ -10,6 +10,9 @@ import Auth from "./pages/Auth";
 import PreferencesForm from "./pages/PreferencesForm";
 import PackageReveal from "./pages/PackageReveal";
 import Dashboard from "./pages/Dashboard";
+import FlightBooking from "./pages/FlightBooking";
+import HotelBooking from "./pages/HotelBooking";
+import ItineraryView from "./pages/ItineraryView";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +30,9 @@ const App = () => (
             <Route path="/preferences" element={<PreferencesForm />} />
             <Route path="/reveal" element={<PackageReveal />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/flights" element={<FlightBooking />} />
+            <Route path="/hotels" element={<HotelBooking />} />
+            <Route path="/itinerary" element={<ProtectedRoute><ItineraryView /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  MapPin, Calendar, Star, Trophy, Plane, Plus, Settings, Bell, LogOut, User
+  MapPin, Calendar, Star, Trophy, Plane, Plus, LogOut, Hotel, Map
 } from 'lucide-react';
 
 interface QuizResult {
@@ -29,6 +29,36 @@ interface Booking {
   created_at: string;
 }
 
+interface Flight {
+  id: string;
+  airline: string;
+  flight_number: string;
+  departure_city: string;
+  arrival_city: string;
+  departure_date: string;
+  price: number;
+  class: string;
+  status: string;
+}
+
+interface HotelBooking {
+  id: string;
+  hotel_name: string;
+  city: string;
+  check_in: string;
+  check_out: string;
+  room_type: string;
+  total_price: number;
+  status: string;
+}
+
+interface Itinerary {
+  id: string;
+  destination: string;
+  duration: string;
+  created_at: string;
+}
+
 interface Profile {
   full_name: string | null;
   email: string | null;
@@ -40,19 +70,28 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [flights, setFlights] = useState<Flight[]>([]);
+  const [hotels, setHotels] = useState<HotelBooking[]>([]);
+  const [itineraries, setItineraries] = useState<Itinerary[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [profileRes, quizRes, bookingsRes] = await Promise.all([
+      const [profileRes, quizRes, bookingsRes, flightsRes, hotelsRes, itinRes] = await Promise.all([
         supabase.from("profiles").select("full_name, email").eq("user_id", user.id).maybeSingle(),
         supabase.from("quiz_results").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("bookings").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("flights").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("hotels").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("itineraries").select("id, destination, duration, created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
       ]);
       if (profileRes.data) setProfile(profileRes.data);
       if (quizRes.data) setQuizResults(quizRes.data);
       if (bookingsRes.data) setBookings(bookingsRes.data);
+      if (flightsRes.data) setFlights(flightsRes.data as Flight[]);
+      if (hotelsRes.data) setHotels(hotelsRes.data as HotelBooking[]);
+      if (itinRes.data) setItineraries(itinRes.data as Itinerary[]);
       setLoading(false);
     };
     fetchData();
@@ -75,7 +114,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-[#2d2d2d] text-white py-4 px-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <a href="/" className="text-xl font-extrabold tracking-widest uppercase">MYSTIGO</a>
@@ -93,12 +131,11 @@ const Dashboard = () => {
         <p className="text-gray-500 mb-8">Here's your travel overview</p>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Bookings */}
+            {/* Mystery Bookings */}
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-900">Your Bookings</h2>
+                <h2 className="text-xl font-bold text-gray-900">Mystery Bookings</h2>
                 <Button onClick={() => navigate("/#contact")} size="sm" className="bg-[#2d2d2d] text-white hover:bg-[#3d3d3d]">
                   <Plus className="w-4 h-4 mr-1" /> New Booking
                 </Button>
@@ -106,26 +143,94 @@ const Dashboard = () => {
               {bookings.length === 0 ? (
                 <Card className="p-8 text-center bg-white rounded-xl">
                   <Plane className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500 text-sm">No bookings yet. Start your first mystery trip!</p>
-                  <Button onClick={() => navigate("/#contact")} className="mt-4 bg-accent text-black hover:bg-accent/90 text-sm">
-                    Book Now
-                  </Button>
+                  <p className="text-gray-500 text-sm">No mystery bookings yet.</p>
+                  <Button onClick={() => navigate("/#contact")} className="mt-4 bg-accent text-black hover:bg-accent/90 text-sm">Book Now</Button>
                 </Card>
               ) : (
                 <div className="space-y-3">
-                  {bookings.map((booking) => (
-                    <Card key={booking.id} className="p-5 bg-white rounded-xl">
+                  {bookings.map((b) => (
+                    <Card key={b.id} className="p-5 bg-white rounded-xl">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="font-semibold text-gray-900">{booking.full_name}</h3>
-                          <p className="text-sm text-gray-500">Budget: {booking.budget_range} · {booking.num_travelers} traveler(s)</p>
-                          {booking.preferences && <p className="text-sm text-gray-400 mt-1 line-clamp-1">{booking.preferences}</p>}
+                          <h3 className="font-semibold text-gray-900">{b.full_name}</h3>
+                          <p className="text-sm text-gray-500">Budget: {b.budget_range} · {b.num_travelers} traveler(s)</p>
+                          {b.preferences && <p className="text-sm text-gray-400 mt-1 line-clamp-1">{b.preferences}</p>}
                         </div>
-                        <Badge className={booking.status === "pending" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}>
-                          {booking.status}
-                        </Badge>
+                        <Badge className={b.status === "pending" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}>{b.status}</Badge>
                       </div>
-                      <p className="text-xs text-gray-400 mt-2">{new Date(booking.created_at).toLocaleDateString()}</p>
+                      <p className="text-xs text-gray-400 mt-2">{new Date(b.created_at).toLocaleDateString()}</p>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Flights */}
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">✈️ Flight Bookings</h2>
+                <Button onClick={() => navigate("/flights")} size="sm" variant="outline"><Plus className="w-4 h-4 mr-1" /> Book Flight</Button>
+              </div>
+              {flights.length === 0 ? (
+                <Card className="p-6 text-center bg-white rounded-xl">
+                  <p className="text-gray-500 text-sm">No flights booked yet.</p>
+                  <Button onClick={() => navigate("/flights")} className="mt-3 bg-accent text-black hover:bg-accent/90 text-sm">Browse Flights</Button>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {flights.map((f) => (
+                    <Card key={f.id} className="p-4 bg-white rounded-xl">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                            <Plane className="w-4 h-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-sm text-gray-900">{f.departure_city.split("(")[0]} → {f.arrival_city.split("(")[0]}</p>
+                            <p className="text-xs text-gray-400">{f.airline} · {f.flight_number} · {new Date(f.departure_date).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-gray-900">${f.price}</p>
+                          <Badge variant="outline" className="text-[10px] capitalize">{f.class}</Badge>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Hotels */}
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">🏨 Hotel Bookings</h2>
+                <Button onClick={() => navigate("/hotels")} size="sm" variant="outline"><Plus className="w-4 h-4 mr-1" /> Book Hotel</Button>
+              </div>
+              {hotels.length === 0 ? (
+                <Card className="p-6 text-center bg-white rounded-xl">
+                  <p className="text-gray-500 text-sm">No hotels booked yet.</p>
+                  <Button onClick={() => navigate("/hotels")} className="mt-3 bg-accent text-black hover:bg-accent/90 text-sm">Browse Hotels</Button>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {hotels.map((h) => (
+                    <Card key={h.id} className="p-4 bg-white rounded-xl">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
+                            <Hotel className="w-4 h-4 text-accent" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-sm text-gray-900">{h.hotel_name}</p>
+                            <p className="text-xs text-gray-400">{h.city} · {h.check_in} to {h.check_out}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-gray-900">${h.total_price}</p>
+                          <Badge variant="outline" className="text-[10px] capitalize">{h.room_type}</Badge>
+                        </div>
+                      </div>
                     </Card>
                   ))}
                 </div>
@@ -135,6 +240,29 @@ const Dashboard = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Itineraries */}
+            <Card className="p-6 bg-white rounded-xl">
+              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+                <Map className="w-5 h-5 mr-2 text-primary" />
+                Your Itineraries
+              </h3>
+              {itineraries.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-gray-500 text-sm mb-3">Complete the quiz to get an AI itinerary!</p>
+                  <Button onClick={() => navigate("/")} size="sm" className="bg-primary text-white hover:bg-primary/90 text-sm">Take Quiz</Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {itineraries.slice(0, 5).map((it) => (
+                    <button key={it.id} onClick={() => navigate(`/itinerary?id=${it.id}`)} className="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <p className="font-semibold text-sm text-gray-900">{it.destination}</p>
+                      <p className="text-xs text-gray-400">{it.duration} · {new Date(it.created_at).toLocaleDateString()}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </Card>
+
             {/* Quiz Results */}
             <Card className="p-6 bg-white rounded-xl">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
@@ -144,13 +272,11 @@ const Dashboard = () => {
               {quizResults.length === 0 ? (
                 <div className="text-center py-4">
                   <p className="text-gray-500 text-sm mb-3">Take the quiz to discover your style!</p>
-                  <Button onClick={() => navigate("/")} size="sm" className="bg-accent text-black hover:bg-accent/90 text-sm">
-                    Take Quiz
-                  </Button>
+                  <Button onClick={() => navigate("/")} size="sm" className="bg-accent text-black hover:bg-accent/90 text-sm">Take Quiz</Button>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {quizResults.slice(0, 3).map((result) => (
+                  {quizResults.slice(0, 2).map((result) => (
                     <div key={result.id} className="p-3 bg-gray-50 rounded-lg text-sm">
                       <div className="grid grid-cols-2 gap-2">
                         <div><span className="text-gray-400">Style:</span> <span className="font-medium text-gray-700">{result.travel_style}</span></div>
@@ -173,12 +299,20 @@ const Dashboard = () => {
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Total Bookings</span>
+                  <span className="text-gray-500">Mystery Bookings</span>
                   <span className="font-semibold text-gray-900">{bookings.length}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Quizzes Taken</span>
-                  <span className="font-semibold text-gray-900">{quizResults.length}</span>
+                  <span className="text-gray-500">Flights Booked</span>
+                  <span className="font-semibold text-gray-900">{flights.length}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Hotels Booked</span>
+                  <span className="font-semibold text-gray-900">{hotels.length}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Itineraries</span>
+                  <span className="font-semibold text-gray-900">{itineraries.length}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Member Since</span>
@@ -191,11 +325,17 @@ const Dashboard = () => {
             <Card className="p-6 bg-white rounded-xl">
               <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
               <div className="space-y-2">
+                <Button variant="outline" className="w-full justify-start text-sm" onClick={() => navigate("/flights")}>
+                  <Plane className="w-4 h-4 mr-2" /> Browse Flights
+                </Button>
+                <Button variant="outline" className="w-full justify-start text-sm" onClick={() => navigate("/hotels")}>
+                  <Hotel className="w-4 h-4 mr-2" /> Browse Hotels
+                </Button>
+                <Button variant="outline" className="w-full justify-start text-sm" onClick={() => navigate("/itinerary")}>
+                  <Map className="w-4 h-4 mr-2" /> Generate Itinerary
+                </Button>
                 <Button variant="outline" className="w-full justify-start text-sm" onClick={() => navigate("/")}>
                   <MapPin className="w-4 h-4 mr-2" /> Explore Destinations
-                </Button>
-                <Button variant="outline" className="w-full justify-start text-sm" onClick={() => navigate("/#contact")}>
-                  <Plane className="w-4 h-4 mr-2" /> Book New Trip
                 </Button>
               </div>
             </Card>
