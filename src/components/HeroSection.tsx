@@ -1,6 +1,6 @@
 import { Plane } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/hero-travel.jpg";
+import heroImage from "@/assets/hero-mountain.png";
 
 const HeroSection = () => {
   const scrollToBooking = () => {
