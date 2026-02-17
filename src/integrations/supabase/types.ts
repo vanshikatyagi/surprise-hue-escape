@@ -53,6 +53,134 @@ export type Database = {
         }
         Relationships: []
       }
+      flights: {
+        Row: {
+          airline: string
+          arrival_city: string
+          arrival_date: string
+          class: string
+          created_at: string
+          departure_city: string
+          departure_date: string
+          flight_number: string
+          id: string
+          price: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          airline: string
+          arrival_city: string
+          arrival_date: string
+          class?: string
+          created_at?: string
+          departure_city: string
+          departure_date: string
+          flight_number: string
+          id?: string
+          price: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          airline?: string
+          arrival_city?: string
+          arrival_date?: string
+          class?: string
+          created_at?: string
+          departure_city?: string
+          departure_date?: string
+          flight_number?: string
+          id?: string
+          price?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      hotels: {
+        Row: {
+          check_in: string
+          check_out: string
+          city: string
+          created_at: string
+          hotel_name: string
+          id: string
+          image_url: string | null
+          price_per_night: number
+          room_type: string
+          status: string
+          total_price: number
+          user_id: string
+        }
+        Insert: {
+          check_in: string
+          check_out: string
+          city: string
+          created_at?: string
+          hotel_name: string
+          id?: string
+          image_url?: string | null
+          price_per_night: number
+          room_type?: string
+          status?: string
+          total_price: number
+          user_id: string
+        }
+        Update: {
+          check_in?: string
+          check_out?: string
+          city?: string
+          created_at?: string
+          hotel_name?: string
+          id?: string
+          image_url?: string | null
+          price_per_night?: number
+          room_type?: string
+          status?: string
+          total_price?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      itineraries: {
+        Row: {
+          created_at: string
+          destination: string
+          duration: string
+          id: string
+          plan: Json
+          quiz_result_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          destination: string
+          duration: string
+          id?: string
+          plan?: Json
+          quiz_result_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          destination?: string
+          duration?: string
+          id?: string
+          plan?: Json
+          quiz_result_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itineraries_quiz_result_id_fkey"
+            columns: ["quiz_result_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

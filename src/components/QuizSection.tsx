@@ -85,8 +85,9 @@ const QuizSection = () => {
           if (error) {
             toast({ title: "Error saving quiz", description: error.message, variant: "destructive" });
           } else {
-            toast({ title: "Quiz completed!", description: "Your preferences have been saved." });
+            toast({ title: "Quiz completed!", description: "Generating your personalized itinerary..." });
             setCompleted(true);
+            navigate("/itinerary");
           }
         } catch (error) {
           console.error("Quiz save error:", error);
