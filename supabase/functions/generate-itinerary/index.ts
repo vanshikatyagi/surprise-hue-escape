@@ -68,6 +68,7 @@ Return ONLY valid JSON with this exact structure:
           {
             role: "user",
             content: `Plan a mystery trip with these exact preferences:
+- Departing from: ${departure_city || "nearest major hub"}
 - Travel style: ${travel_style}
 - Trip duration: ${trip_duration}
 - Budget per person: ${budget}
@@ -75,7 +76,7 @@ Return ONLY valid JSON with this exact structure:
 - Preferred activities: ${activity_preference || "mixed"}
 - Preferred accommodation: ${accommodation_type || "hotel"}
 
-Generate a COMPLETE day-by-day itinerary. Include specific restaurant names, attraction names, and neighborhoods. Make it feel real and actionable. The destination should be a genuine surprise that perfectly matches their profile.`
+Generate a COMPLETE day-by-day itinerary. Include specific restaurant names, attraction names, and neighborhoods. Make it feel real and actionable. The destination should be a genuine surprise that perfectly matches their profile. The flight_suggestion.from_hub should reference the nearest airport to "${departure_city || "New York"}".`
           }
         ],
       }),
