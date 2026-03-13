@@ -13,6 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import FlightBooking from "./pages/FlightBooking";
 import HotelBooking from "./pages/HotelBooking";
 import ItineraryView from "./pages/ItineraryView";
+import TripReveal from "./pages/TripReveal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,7 +29,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/preferences" element={<PreferencesForm />} />
-            <Route path="/reveal" element={<PackageReveal />} />
+            <Route path="/reveal" element={<ProtectedRoute><TripReveal /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/flights" element={<FlightBooking />} />
             <Route path="/hotels" element={<HotelBooking />} />
