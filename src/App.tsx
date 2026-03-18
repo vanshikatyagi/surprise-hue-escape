@@ -14,6 +14,7 @@ import FlightBooking from "./pages/FlightBooking";
 import HotelBooking from "./pages/HotelBooking";
 import ItineraryView from "./pages/ItineraryView";
 import TripReveal from "./pages/TripReveal";
+import SharedItinerary from "./pages/SharedItinerary";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
