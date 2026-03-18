@@ -10,7 +10,7 @@ import {
   MapPin, Calendar, DollarSign, Lightbulb, Loader2, Plane,
   Camera, UtensilsCrossed, Mountain, Palmtree, Landmark,
   Hotel, Package, ChevronRight, Star, Backpack, Navigation,
-  Clock, CheckCircle2, ArrowRight,
+  Clock, CheckCircle2, ArrowRight, Share2, Copy, Check,
 } from "lucide-react";
 import Header from "@/components/Header";
 
