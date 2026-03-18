@@ -11,62 +11,6 @@ serve(async (req) => {
   try {
     const { destination, budget, accommodation_type } = await req.json();
 
-    // Try Amadeus API first
-    const apiKey = Deno.env.get("AMADEUS_API_KEY");
-    const apiSecret = Deno.env.get("AMADEUS_API_SECRET");
-
-    if (apiKey && apiSecret) {
-      const tokenRes = await fetch("https://api.amadeus.com/v1/security/oauth2/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `grant_type=client_credentials&client_id=${apiKey}&client_secret=${apiSecret}`,
-      });
-
-      if (tokenRes.ok) {
-        const tokenData = await tokenRes.json();
-        const token = tokenData.access_token;
-        const city = destination?.split(",")[0]?.trim() || destination;
-
-        // Search for city code first
-        const cityRes = await fetch(
-          `https://api.amadeus.com/v1/reference-data/locations?subType=CITY&keyword=${encodeURIComponent(city)}&page[limit]=1`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        if (cityRes.ok) {
-          const cityData = await cityRes.json();
-          const cityCode = cityData.data?.[0]?.iataCode;
-
-          if (cityCode) {
-            const checkIn = new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0];
-            const checkOut = new Date(Date.now() + 21 * 86400000).toISOString().split("T")[0];
-
-            const hotelRes = await fetch(
-              `https://api.amadeus.com/v1/reference-data/locations/hotels/by-city?cityCode=${cityCode}&radius=30&radiusUnit=KM&hotelSource=ALL`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-
-            if (hotelRes.ok) {
-              const hotelData = await hotelRes.json();
-              const hotels = (hotelData.data || []).slice(0, 5).map((h: any) => ({
-                name: h.name || "Hotel",
-                city: destination,
-                price: Math.floor(Math.random() * 300 + 100),
-                rating: (Math.random() * 1.5 + 3.5).toFixed(1),
-                room_type: accommodation_type || "standard",
-                image_url: `https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600`,
-              }));
-
-              return new Response(JSON.stringify({ hotels, source: "amadeus" }), {
-                headers: { ...corsHeaders, "Content-Type": "application/json" },
-              });
-            }
-          }
-        }
-      }
-    }
-
-    // Fallback: Use AI to generate realistic hotel data
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -78,7 +22,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `Generate 4 realistic hotel options as JSON array. Each hotel: { "name": "Real Hotel Name", "city": "City, Country", "price": number (per night USD), "rating": number (3.5-5.0), "room_type": "standard|deluxe|suite|villa", "image_url": "https://images.unsplash.com/photo-XXXXX?w=600" }. Use real Unsplash photo IDs for hotels. Make prices realistic. Return ONLY a JSON array, no markdown.`
+            content: `Generate 4 realistic hotel options as JSON array. Each hotel: { "name": "Real Hotel Name", "city": "City, Country", "price": number (per night USD), "rating": number (3.5-5.0), "room_type": "standard|deluxe|suite|villa", "image_url": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600" }. Use real Unsplash photo IDs for hotels. Make prices realistic. Return ONLY a JSON array, no markdown.`
           },
           {
             role: "user",
