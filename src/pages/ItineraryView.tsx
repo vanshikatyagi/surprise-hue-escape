@@ -10,7 +10,7 @@ import {
   MapPin, Calendar, DollarSign, Lightbulb, Loader2, Plane,
   Camera, UtensilsCrossed, Mountain, Palmtree, Landmark,
   Hotel, Package, ChevronRight, Star, Backpack, Navigation,
-  Clock, CheckCircle2, ArrowRight,
+  Clock, CheckCircle2, ArrowRight, Share2, Copy, Check,
 } from "lucide-react";
 import Header from "@/components/Header";
 
@@ -84,6 +84,9 @@ const ItineraryView = () => {
   const [savedItineraryId, setSavedItineraryId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [activeDay, setActiveDay] = useState(1);
+  const [sharing, setSharing] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!user) { navigate("/auth"); return; }
@@ -180,6 +183,52 @@ const ItineraryView = () => {
     navigate(`/hotels?destination=${encodeURIComponent(city)}`);
   };
 
+  const handleShare = async () => {
+    if (!savedItineraryId) return;
+    setSharing(true);
+    try {
+      // Check if already has a token
+      const { data: existing } = await supabase
+        .from("itineraries")
+        .select("shared_token")
+        .eq("id", savedItineraryId)
+        .maybeSingle();
+
+      let token = (existing as any)?.shared_token;
+      if (!token) {
+        token = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+        await supabase
+          .from("itineraries")
+          .update({ shared_token: token } as any)
+          .eq("id", savedItineraryId);
+      }
+
+      const url = `${window.location.origin}/shared/${token}`;
+      setShareUrl(url);
+
+      if (navigator.share) {
+        await navigator.share({ title: `Trip to ${itinerary?.destination}`, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        toast({ title: "Link copied!", description: "Share this link with your friends." });
+      }
+    } catch (e) {
+      console.error("Share error:", e);
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const copyShareUrl = async () => {
+    if (!shareUrl) return;
+    await navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast({ title: "Copied!" });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -265,6 +314,30 @@ const ItineraryView = () => {
               <span>Best: {itinerary.best_season}</span>
             </div>
           </div>
+
+          {/* Share Button */}
+          {savedItineraryId && (
+            <div className="mt-6 flex flex-col items-center gap-2">
+              <Button
+                onClick={handleShare}
+                disabled={sharing}
+                className="bg-white/10 hover:bg-white/20 text-white border-0 rounded-full text-xs font-semibold gap-2 px-6"
+                variant="outline"
+              >
+                {sharing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Share2 className="w-3.5 h-3.5" />}
+                Share This Trip
+              </Button>
+              {shareUrl && (
+                <button
+                  onClick={copyShareUrl}
+                  className="flex items-center gap-2 text-white/50 hover:text-white text-xs transition-colors"
+                >
+                  {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  {copied ? "Copied!" : shareUrl}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
