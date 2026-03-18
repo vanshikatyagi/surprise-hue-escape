@@ -183,6 +183,52 @@ const ItineraryView = () => {
     navigate(`/hotels?destination=${encodeURIComponent(city)}`);
   };
 
+  const handleShare = async () => {
+    if (!savedItineraryId) return;
+    setSharing(true);
+    try {
+      // Check if already has a token
+      const { data: existing } = await supabase
+        .from("itineraries")
+        .select("shared_token")
+        .eq("id", savedItineraryId)
+        .maybeSingle();
+
+      let token = (existing as any)?.shared_token;
+      if (!token) {
+        token = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+        await supabase
+          .from("itineraries")
+          .update({ shared_token: token } as any)
+          .eq("id", savedItineraryId);
+      }
+
+      const url = `${window.location.origin}/shared/${token}`;
+      setShareUrl(url);
+
+      if (navigator.share) {
+        await navigator.share({ title: `Trip to ${itinerary?.destination}`, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        toast({ title: "Link copied!", description: "Share this link with your friends." });
+      }
+    } catch (e) {
+      console.error("Share error:", e);
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const copyShareUrl = async () => {
+    if (!shareUrl) return;
+    await navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast({ title: "Copied!" });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
