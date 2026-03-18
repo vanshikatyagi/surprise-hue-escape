@@ -84,6 +84,9 @@ const ItineraryView = () => {
   const [savedItineraryId, setSavedItineraryId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [activeDay, setActiveDay] = useState(1);
+  const [sharing, setSharing] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!user) { navigate("/auth"); return; }
