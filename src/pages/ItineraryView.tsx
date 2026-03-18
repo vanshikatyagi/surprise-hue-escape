@@ -314,6 +314,30 @@ const ItineraryView = () => {
               <span>Best: {itinerary.best_season}</span>
             </div>
           </div>
+
+          {/* Share Button */}
+          {savedItineraryId && (
+            <div className="mt-6 flex flex-col items-center gap-2">
+              <Button
+                onClick={handleShare}
+                disabled={sharing}
+                className="bg-white/10 hover:bg-white/20 text-white border-0 rounded-full text-xs font-semibold gap-2 px-6"
+                variant="outline"
+              >
+                {sharing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Share2 className="w-3.5 h-3.5" />}
+                Share This Trip
+              </Button>
+              {shareUrl && (
+                <button
+                  onClick={copyShareUrl}
+                  className="flex items-center gap-2 text-white/50 hover:text-white text-xs transition-colors"
+                >
+                  {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  {copied ? "Copied!" : shareUrl}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

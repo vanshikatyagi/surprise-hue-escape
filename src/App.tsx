@@ -35,6 +35,7 @@ const App = () => (
             <Route path="/flights" element={<FlightBooking />} />
             <Route path="/hotels" element={<HotelBooking />} />
             <Route path="/itinerary" element={<ProtectedRoute><ItineraryView /></ProtectedRoute>} />
+            <Route path="/shared/:token" element={<SharedItinerary />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
