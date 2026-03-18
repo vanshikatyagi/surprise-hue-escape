@@ -151,6 +151,7 @@ export type Database = {
           id: string
           plan: Json
           quiz_result_id: string | null
+          shared_token: string | null
           user_id: string
         }
         Insert: {
@@ -160,6 +161,7 @@ export type Database = {
           id?: string
           plan?: Json
           quiz_result_id?: string | null
+          shared_token?: string | null
           user_id: string
         }
         Update: {
@@ -169,6 +171,7 @@ export type Database = {
           id?: string
           plan?: Json
           quiz_result_id?: string | null
+          shared_token?: string | null
           user_id?: string
         }
         Relationships: [
