@@ -79,6 +79,11 @@ const TripReveal = () => {
     generateItinerary();
   }, []);
 
+  const currencySymbol = (() => {
+    const map: Record<string, string> = { "INR (₹)": "₹", "USD ($)": "$", "EUR (€)": "€", "GBP (£)": "£" };
+    return map[quizData?.currency] || "$";
+  })();
+
   const generateItinerary = async () => {
     try {
       const { data, error: fnError } = await supabase.functions.invoke("generate-itinerary", {
@@ -90,6 +95,10 @@ const TripReveal = () => {
           activity_preference: quizData.activity_preference || "mixed",
           accommodation_type: quizData.accommodation_type || "hotel",
           departure_city: quizData.departure_city || "",
+          travel_scope: quizData.travel_scope || "Surprise Me",
+          currency: quizData.currency || "USD ($)",
+          climate_preference: quizData.climate_preference || "any",
+          travel_pace: quizData.travel_pace || "Balanced",
         },
       });
       if (fnError) throw fnError;
@@ -127,6 +136,7 @@ const TripReveal = () => {
           destination: itinerary.destination,
           destination_airport: itinerary.destination_airport,
           budget: quizData.budget,
+          currency: quizData.currency || "USD ($)",
         },
       });
       if (error) throw error;
@@ -166,6 +176,7 @@ const TripReveal = () => {
           destination: itinerary.destination,
           budget: quizData.budget,
           accommodation_type: quizData.accommodation_type,
+          currency: quizData.currency || "USD ($)",
         },
       });
       if (error) throw error;
@@ -493,7 +504,7 @@ const TripReveal = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-black">${flight.price}</p>
+                        <p className="text-2xl font-black">{currencySymbol}{flight.price}</p>
                         <Badge variant="outline" className="text-[10px] capitalize">{flight.class}</Badge>
                       </div>
                     </div>
@@ -583,7 +594,7 @@ const TripReveal = () => {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-xl font-black">${hotel.price}<span className="text-xs font-normal text-gray-400">/night</span></p>
+                            <p className="text-xl font-black">{currencySymbol}{hotel.price}<span className="text-xs font-normal text-gray-400">/night</span></p>
                             <div className="flex items-center gap-1 justify-end mt-1">
                               <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                               <span className="text-xs font-bold">{hotel.rating}</span>
@@ -662,7 +673,7 @@ const TripReveal = () => {
                 <Badge className="bg-green-100 text-green-700 border-0 text-[10px]">Confirmed</Badge>
               </div>
               <p className="font-bold text-gray-900">{flights[selectedFlight].from} → {flights[selectedFlight].to}</p>
-              <p className="text-xs text-gray-500">{flights[selectedFlight].airline} · {flights[selectedFlight].flight_number} · ${flights[selectedFlight].price}</p>
+              <p className="text-xs text-gray-500">{flights[selectedFlight].airline} · {flights[selectedFlight].flight_number} · {currencySymbol}{flights[selectedFlight].price}</p>
             </Card>
           )}
 
@@ -675,7 +686,7 @@ const TripReveal = () => {
                 <Badge className="bg-green-100 text-green-700 border-0 text-[10px]">Confirmed</Badge>
               </div>
               <p className="font-bold text-gray-900">{hotels[selectedHotel].name}</p>
-              <p className="text-xs text-gray-500">${hotels[selectedHotel].price}/night · {hotels[selectedHotel].room_type}</p>
+              <p className="text-xs text-gray-500">{currencySymbol}{hotels[selectedHotel].price}/night · {hotels[selectedHotel].room_type}</p>
             </Card>
           )}
 
@@ -686,7 +697,7 @@ const TripReveal = () => {
               <h3 className="font-bold text-sm">Estimated Total</h3>
             </div>
             <p className="text-3xl font-black text-gray-900">
-              ${(
+              {currencySymbol}{(
                 (selectedFlight !== null && flights[selectedFlight] ? flights[selectedFlight].price : 0) +
                 (selectedHotel !== null && hotels[selectedHotel] ? hotels[selectedHotel].price * 7 : 0)
               ).toLocaleString()}

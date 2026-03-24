@@ -9,10 +9,15 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { destination, budget, accommodation_type } = await req.json();
+    const { destination, budget, accommodation_type, currency } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const currencyMap: Record<string, string> = {
+      "INR (₹)": "₹", "USD ($)": "$", "EUR (€)": "€", "GBP (£)": "£",
+    };
+    const symbol = currencyMap[currency] || "$";
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -22,11 +27,11 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `Generate 4 realistic hotel options as JSON array. Each hotel: { "name": "Real Hotel Name", "city": "City, Country", "price": number (per night USD), "rating": number (3.5-5.0), "room_type": "standard|deluxe|suite|villa", "image_url": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600" }. Use real Unsplash photo IDs for hotels. Make prices realistic. Return ONLY a JSON array, no markdown.`
+            content: `Generate 4 realistic hotel options as JSON array. Each hotel: { "name": "Real Hotel Name", "city": "City, Country", "price": number (per night in ${symbol}), "rating": number (3.5-5.0), "room_type": "standard|deluxe|suite|villa", "image_url": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600" }. ALL PRICES IN ${symbol}. Use real Unsplash photo IDs for hotels. Return ONLY a JSON array, no markdown.`
           },
           {
             role: "user",
-            content: `Hotels in ${destination}. Budget: ${budget}. Preferred type: ${accommodation_type || "any"}. Include a mix of price ranges.`
+            content: `Hotels in ${destination}. Budget: ${budget}. Currency: ${symbol}. Preferred type: ${accommodation_type || "any"}. Include a mix of price ranges, all in ${symbol}.`
           }
         ],
       }),
@@ -39,7 +44,7 @@ serve(async (req) => {
     if (jsonMatch) content = jsonMatch[1];
     const hotels = JSON.parse(content.trim());
 
-    return new Response(JSON.stringify({ hotels, source: "ai-generated" }), {
+    return new Response(JSON.stringify({ hotels, source: "ai-generated", currency_symbol: symbol }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
