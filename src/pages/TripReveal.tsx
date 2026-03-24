@@ -695,6 +695,14 @@ const TripReveal = () => {
             </Card>
           )}
 
+          {/* Budget Breakdown */}
+          <BudgetBreakdown
+            flightCost={selectedFlight !== null && flights[selectedFlight] ? flights[selectedFlight].price : 0}
+            hotelCost={selectedHotel !== null && hotels[selectedHotel] ? hotels[selectedHotel].price * 7 : 0}
+            currencySymbol={currencySymbol}
+            estimatedBudget={itinerary.estimated_budget}
+          />
+
           {/* Total Cost */}
           <Card className="bg-accent/10 border-accent/20 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-3">
