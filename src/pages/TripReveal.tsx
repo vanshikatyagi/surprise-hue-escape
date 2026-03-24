@@ -697,7 +697,7 @@ const TripReveal = () => {
               <h3 className="font-bold text-sm">Estimated Total</h3>
             </div>
             <p className="text-3xl font-black text-gray-900">
-              ${(
+              {currencySymbol}{(
                 (selectedFlight !== null && flights[selectedFlight] ? flights[selectedFlight].price : 0) +
                 (selectedHotel !== null && hotels[selectedHotel] ? hotels[selectedHotel].price * 7 : 0)
               ).toLocaleString()}
