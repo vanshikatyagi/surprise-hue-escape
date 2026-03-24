@@ -24,7 +24,7 @@ interface QuizStep {
   question: string;
   subtitle: string;
   key: string;
-  type: "options" | "location";
+  type: "options" | "location" | "currency";
   options?: { label: string; description: string; icon: React.ElementType }[];
   condition?: (answers: Record<string, string>) => boolean;
 }
