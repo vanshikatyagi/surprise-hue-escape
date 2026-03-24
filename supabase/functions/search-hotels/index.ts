@@ -16,6 +16,8 @@ serve(async (req) => {
 
     const currencyMap: Record<string, string> = {
       "INR (₹)": "₹", "USD ($)": "$", "EUR (€)": "€", "GBP (£)": "£",
+      "AED (د.إ)": "د.إ", "THB (฿)": "฿", "JPY (¥)": "¥", "AUD (A$)": "A$",
+      "SGD (S$)": "S$", "MYR (RM)": "RM", "CAD (C$)": "C$", "KRW (₩)": "₩",
     };
     const symbol = currencyMap[currency] || "$";
 

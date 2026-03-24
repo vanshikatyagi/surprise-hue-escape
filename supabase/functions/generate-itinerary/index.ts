@@ -15,10 +15,12 @@ serve(async (req) => {
 
     // Parse currency symbol
     const currencyMap: Record<string, { symbol: string; code: string }> = {
-      "INR (₹)": { symbol: "₹", code: "INR" },
-      "USD ($)": { symbol: "$", code: "USD" },
-      "EUR (€)": { symbol: "€", code: "EUR" },
-      "GBP (£)": { symbol: "£", code: "GBP" },
+      "INR (₹)": { symbol: "₹", code: "INR" }, "USD ($)": { symbol: "$", code: "USD" },
+      "EUR (€)": { symbol: "€", code: "EUR" }, "GBP (£)": { symbol: "£", code: "GBP" },
+      "AED (د.إ)": { symbol: "د.إ", code: "AED" }, "THB (฿)": { symbol: "฿", code: "THB" },
+      "JPY (¥)": { symbol: "¥", code: "JPY" }, "AUD (A$)": { symbol: "A$", code: "AUD" },
+      "SGD (S$)": { symbol: "S$", code: "SGD" }, "MYR (RM)": { symbol: "RM", code: "MYR" },
+      "CAD (C$)": { symbol: "C$", code: "CAD" }, "KRW (₩)": { symbol: "₩", code: "KRW" },
     };
     const curr = currencyMap[currency] || { symbol: "$", code: "USD" };
 

@@ -13,6 +13,7 @@ import {
   Palmtree, Landmark, Navigation, CheckCircle2, Backpack,
 } from "lucide-react";
 import Header from "@/components/Header";
+import BudgetBreakdown from "@/components/BudgetBreakdown";
 
 const activityIcons: Record<string, React.ElementType> = {
   sightseeing: Camera, food: UtensilsCrossed, adventure: Mountain,
@@ -80,7 +81,11 @@ const TripReveal = () => {
   }, []);
 
   const currencySymbol = (() => {
-    const map: Record<string, string> = { "INR (₹)": "₹", "USD ($)": "$", "EUR (€)": "€", "GBP (£)": "£" };
+    const map: Record<string, string> = {
+      "INR (₹)": "₹", "USD ($)": "$", "EUR (€)": "€", "GBP (£)": "£",
+      "AED (د.إ)": "د.إ", "THB (฿)": "฿", "JPY (¥)": "¥", "AUD (A$)": "A$",
+      "SGD (S$)": "S$", "MYR (RM)": "RM", "CAD (C$)": "C$", "KRW (₩)": "₩",
+    };
     return map[quizData?.currency] || "$";
   })();
 
@@ -689,6 +694,14 @@ const TripReveal = () => {
               <p className="text-xs text-gray-500">{currencySymbol}{hotels[selectedHotel].price}/night · {hotels[selectedHotel].room_type}</p>
             </Card>
           )}
+
+          {/* Budget Breakdown */}
+          <BudgetBreakdown
+            flightCost={selectedFlight !== null && flights[selectedFlight] ? flights[selectedFlight].price : 0}
+            hotelCost={selectedHotel !== null && hotels[selectedHotel] ? hotels[selectedHotel].price * 7 : 0}
+            currencySymbol={currencySymbol}
+            estimatedBudget={itinerary.estimated_budget}
+          />
 
           {/* Total Cost */}
           <Card className="bg-accent/10 border-accent/20 rounded-xl p-6">

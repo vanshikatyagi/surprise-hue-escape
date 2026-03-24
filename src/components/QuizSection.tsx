@@ -24,7 +24,7 @@ interface QuizStep {
   question: string;
   subtitle: string;
   key: string;
-  type: "options" | "location";
+  type: "options" | "location" | "currency";
   options?: { label: string; description: string; icon: React.ElementType }[];
   condition?: (answers: Record<string, string>) => boolean;
 }
@@ -52,13 +52,7 @@ const allSteps: QuizStep[] = [
     question: "What currency do you prefer?",
     subtitle: "We'll show all prices in your preferred currency",
     key: "currency",
-    type: "options",
-    options: [
-      { label: "INR (₹)", description: "Indian Rupee", icon: IndianRupee },
-      { label: "USD ($)", description: "US Dollar", icon: DollarSign },
-      { label: "EUR (€)", description: "Euro", icon: Euro },
-      { label: "GBP (£)", description: "British Pound", icon: PoundSterling },
-    ],
+    type: "currency",
   },
   {
     question: "What's your budget per person?",
@@ -212,9 +206,25 @@ const QuizSection = () => {
     }
   }, []);
 
+  const currencies = [
+    { code: "INR", symbol: "₹", label: "INR (₹)", name: "Indian Rupee" },
+    { code: "USD", symbol: "$", label: "USD ($)", name: "US Dollar" },
+    { code: "EUR", symbol: "€", label: "EUR (€)", name: "Euro" },
+    { code: "GBP", symbol: "£", label: "GBP (£)", name: "British Pound" },
+    { code: "AED", symbol: "د.إ", label: "AED (د.إ)", name: "UAE Dirham" },
+    { code: "THB", symbol: "฿", label: "THB (฿)", name: "Thai Baht" },
+    { code: "JPY", symbol: "¥", label: "JPY (¥)", name: "Japanese Yen" },
+    { code: "AUD", symbol: "A$", label: "AUD (A$)", name: "Australian Dollar" },
+    { code: "SGD", symbol: "S$", label: "SGD (S$)", name: "Singapore Dollar" },
+    { code: "MYR", symbol: "RM", label: "MYR (RM)", name: "Malaysian Ringgit" },
+    { code: "CAD", symbol: "C$", label: "CAD (C$)", name: "Canadian Dollar" },
+    { code: "KRW", symbol: "₩", label: "KRW (₩)", name: "South Korean Won" },
+  ];
+
   const canProceed = () => {
     if (!currentStepData) return false;
     if (currentStepData.type === "location") return locationInput.trim().length > 1;
+    if (currentStepData.type === "currency") return selected !== null;
     return selected !== null;
   };
 
@@ -326,6 +336,39 @@ const QuizSection = () => {
                   Location detected automatically
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Currency Step */}
+          {currentStepData.type === "currency" && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+              {currencies.map((curr) => {
+                const isSelected = selected === curr.label;
+                return (
+                  <button
+                    key={curr.code}
+                    onClick={() => setSelected(curr.label)}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 ${
+                      isSelected
+                        ? "border-[#2d2d2d] bg-[#2d2d2d]/5 shadow-sm"
+                        : "border-gray-200 hover:border-gray-300 bg-gray-50 hover:bg-gray-100"
+                    }`}
+                  >
+                    <span className={`text-2xl font-black ${isSelected ? "text-[#2d2d2d]" : "text-gray-600"}`}>
+                      {curr.symbol}
+                    </span>
+                    <span className={`text-xs font-semibold ${isSelected ? "text-[#2d2d2d]" : "text-gray-500"}`}>
+                      {curr.code}
+                    </span>
+                    <span className="text-[10px] text-gray-400">{curr.name}</span>
+                    {isSelected && (
+                      <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center">
+                        <Check className="w-3 h-3 text-black" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
 
