@@ -9,10 +9,15 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { origin, destination, budget } = await req.json();
+    const { origin, destination, budget, currency } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const currencyMap: Record<string, string> = {
+      "INR (₹)": "₹", "USD ($)": "$", "EUR (€)": "€", "GBP (£)": "£",
+    };
+    const symbol = currencyMap[currency] || "$";
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -22,11 +27,11 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `Generate 4 realistic flight options as JSON array. Each flight: { "airline": "Real Airline Name", "flight_number": "XX-123", "from": "City (CODE)", "to": "City (CODE)", "depart": "HH:MM", "arrive": "HH:MM", "duration": "Xh Ym", "price": number, "class": "economy|business|first", "stops": "Direct|1 stop" }. Make prices realistic for the budget range. Return ONLY a JSON array, no markdown.`
+            content: `Generate 4 realistic flight options as JSON array. Each flight: { "airline": "Real Airline Name", "flight_number": "XX-123", "from": "City (CODE)", "to": "City (CODE)", "depart": "HH:MM", "arrive": "HH:MM", "duration": "Xh Ym", "price": number, "class": "economy|business|first", "stops": "Direct|1 stop" }. ALL PRICES MUST BE IN ${symbol} (realistic for this currency). Return ONLY a JSON array, no markdown.`
           },
           {
             role: "user",
-            content: `Flights from ${origin || "New York"} to ${destination}. Budget: ${budget}. Include economy and business options.`
+            content: `Flights from ${origin || "New York"} to ${destination}. Budget: ${budget}. Currency: ${symbol}. Include economy and business options with realistic prices in ${symbol}.`
           }
         ],
       }),
@@ -39,7 +44,7 @@ serve(async (req) => {
     if (jsonMatch) content = jsonMatch[1];
     const flights = JSON.parse(content.trim());
 
-    return new Response(JSON.stringify({ flights, source: "ai-generated" }), {
+    return new Response(JSON.stringify({ flights, source: "ai-generated", currency_symbol: symbol }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

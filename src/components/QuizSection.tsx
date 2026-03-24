@@ -11,6 +11,10 @@ import {
   Utensils, Ship, Bike, Palette,
   Home, Hotel, TreePine, Waves,
   MapPin, Loader2, Navigation, Sparkles,
+  Globe, Sun, Snowflake, CloudRain, Thermometer,
+  Zap, Coffee, Gauge, Timer,
+  IndianRupee, DollarSign, Euro, PoundSterling,
+  Plane, Flag,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,15 +37,39 @@ const allSteps: QuizStep[] = [
     type: "location",
   },
   {
+    question: "Explore your own country or go abroad?",
+    subtitle: "This decides the scope of your mystery destination",
+    key: "travel_scope",
+    type: "options",
+    options: [
+      { label: "Domestic", description: "Hidden gems in my own country", icon: Flag },
+      { label: "International", description: "Take me to a new country!", icon: Globe },
+      { label: "Surprise Me", description: "Anywhere in the world works", icon: Sparkles },
+      { label: "Nearby Countries", description: "Close but different culture", icon: Plane },
+    ],
+  },
+  {
+    question: "What currency do you prefer?",
+    subtitle: "We'll show all prices in your preferred currency",
+    key: "currency",
+    type: "options",
+    options: [
+      { label: "INR (₹)", description: "Indian Rupee", icon: IndianRupee },
+      { label: "USD ($)", description: "US Dollar", icon: DollarSign },
+      { label: "EUR (€)", description: "Euro", icon: Euro },
+      { label: "GBP (£)", description: "British Pound", icon: PoundSterling },
+    ],
+  },
+  {
     question: "What's your budget per person?",
     subtitle: "This helps us find the perfect match",
     key: "budget",
     type: "options",
     options: [
-      { label: "Budget Explorer", description: "$500 – $1,000", icon: Wallet },
-      { label: "Comfortable", description: "$1,000 – $2,500", icon: CreditCard },
-      { label: "Premium", description: "$2,500 – $5,000", icon: Gem },
-      { label: "Luxury", description: "$5,000+, no limits", icon: Crown },
+      { label: "Budget Explorer", description: "Keep it affordable & fun", icon: Wallet },
+      { label: "Comfortable", description: "Good value, nice experiences", icon: CreditCard },
+      { label: "Premium", description: "Treat yourself, you deserve it", icon: Gem },
+      { label: "Luxury", description: "No limits, top-tier everything", icon: Crown },
     ],
   },
   {
@@ -54,6 +82,30 @@ const allSteps: QuizStep[] = [
       { label: "Beach & Relaxation", description: "Sunsets, spa, zero agenda", icon: Umbrella },
       { label: "Culture & History", description: "Museums, ancient ruins, local life", icon: Building2 },
       { label: "Food & Photography", description: "Culinary scenes & scenic shots", icon: Camera },
+    ],
+  },
+  {
+    question: "What climate do you love?",
+    subtitle: "We'll match your weather preferences perfectly",
+    key: "climate_preference",
+    type: "options",
+    options: [
+      { label: "Tropical & Warm", description: "Sunshine, beaches, warm breeze", icon: Sun },
+      { label: "Cold & Snowy", description: "Mountains, cozy vibes, snow", icon: Snowflake },
+      { label: "Mild & Pleasant", description: "Not too hot, not too cold", icon: Thermometer },
+      { label: "Rainy & Lush", description: "Green forests, monsoon magic", icon: CloudRain },
+    ],
+  },
+  {
+    question: "How do you like your travel pace?",
+    subtitle: "Packed days or chill vibes?",
+    key: "travel_pace",
+    type: "options",
+    options: [
+      { label: "Action-Packed", description: "See everything, sleep later!", icon: Zap },
+      { label: "Balanced", description: "Mix of activity and downtime", icon: Gauge },
+      { label: "Slow & Relaxed", description: "No rushing, soak it all in", icon: Coffee },
+      { label: "Flexible", description: "Some planned, some spontaneous", icon: Timer },
     ],
   },
   {
@@ -120,7 +172,6 @@ const QuizSection = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Build active steps based on current answers
   const activeSteps = allSteps.filter(
     (step) => !step.condition || step.condition(answers)
   );
@@ -129,7 +180,6 @@ const QuizSection = () => {
   const currentStepData = activeSteps[currentStep];
   const progress = ((currentStep + 1) / totalSteps) * 100;
 
-  // Auto-detect location on mount
   useEffect(() => {
     if (currentStep === 0 && !locationDetected) {
       detectLocation();
@@ -156,7 +206,7 @@ const QuizSection = () => {
         setLocationDetected(true);
       }
     } catch {
-      // User denied or timeout — they can type manually
+      // User denied or timeout
     } finally {
       setDetectingLocation(false);
     }
@@ -178,7 +228,6 @@ const QuizSection = () => {
       setCurrentStep((prev) => prev + 1);
       setSelected(null);
     } else {
-      // Quiz complete — save & navigate to reveal
       if (user) {
         setSaving(true);
         try {
@@ -193,12 +242,7 @@ const QuizSection = () => {
             toast({ title: "Error saving quiz", description: error.message, variant: "destructive" });
             return;
           }
-          // Navigate to reveal with full quiz data
-          navigate("/reveal", {
-            state: {
-              quizData: newAnswers,
-            },
-          });
+          navigate("/reveal", { state: { quizData: newAnswers } });
         } catch {
           toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
         } finally {
