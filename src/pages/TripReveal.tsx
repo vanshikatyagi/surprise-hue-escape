@@ -13,6 +13,7 @@ import {
   Palmtree, Landmark, Navigation, CheckCircle2, Backpack,
 } from "lucide-react";
 import Header from "@/components/Header";
+import BudgetBreakdown from "@/components/BudgetBreakdown";
 
 const activityIcons: Record<string, React.ElementType> = {
   sightseeing: Camera, food: UtensilsCrossed, adventure: Mountain,
