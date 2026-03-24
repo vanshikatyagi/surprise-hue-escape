@@ -504,7 +504,7 @@ const TripReveal = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-black">${flight.price}</p>
+                        <p className="text-2xl font-black">{currencySymbol}{flight.price}</p>
                         <Badge variant="outline" className="text-[10px] capitalize">{flight.class}</Badge>
                       </div>
                     </div>
