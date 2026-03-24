@@ -594,7 +594,7 @@ const TripReveal = () => {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-xl font-black">${hotel.price}<span className="text-xs font-normal text-gray-400">/night</span></p>
+                            <p className="text-xl font-black">{currencySymbol}{hotel.price}<span className="text-xs font-normal text-gray-400">/night</span></p>
                             <div className="flex items-center gap-1 justify-end mt-1">
                               <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                               <span className="text-xs font-bold">{hotel.rating}</span>
