@@ -52,13 +52,7 @@ const allSteps: QuizStep[] = [
     question: "What currency do you prefer?",
     subtitle: "We'll show all prices in your preferred currency",
     key: "currency",
-    type: "options",
-    options: [
-      { label: "INR (₹)", description: "Indian Rupee", icon: IndianRupee },
-      { label: "USD ($)", description: "US Dollar", icon: DollarSign },
-      { label: "EUR (€)", description: "Euro", icon: Euro },
-      { label: "GBP (£)", description: "British Pound", icon: PoundSterling },
-    ],
+    type: "currency",
   },
   {
     question: "What's your budget per person?",
