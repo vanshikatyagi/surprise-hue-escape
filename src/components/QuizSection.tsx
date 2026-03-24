@@ -339,6 +339,39 @@ const QuizSection = () => {
             </div>
           )}
 
+          {/* Currency Step */}
+          {currentStepData.type === "currency" && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+              {currencies.map((curr) => {
+                const isSelected = selected === curr.label;
+                return (
+                  <button
+                    key={curr.code}
+                    onClick={() => setSelected(curr.label)}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 ${
+                      isSelected
+                        ? "border-[#2d2d2d] bg-[#2d2d2d]/5 shadow-sm"
+                        : "border-gray-200 hover:border-gray-300 bg-gray-50 hover:bg-gray-100"
+                    }`}
+                  >
+                    <span className={`text-2xl font-black ${isSelected ? "text-[#2d2d2d]" : "text-gray-600"}`}>
+                      {curr.symbol}
+                    </span>
+                    <span className={`text-xs font-semibold ${isSelected ? "text-[#2d2d2d]" : "text-gray-500"}`}>
+                      {curr.code}
+                    </span>
+                    <span className="text-[10px] text-gray-400">{curr.name}</span>
+                    {isSelected && (
+                      <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center">
+                        <Check className="w-3 h-3 text-black" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {/* Options Step */}
           {currentStepData.type === "options" && currentStepData.options && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
