@@ -79,6 +79,11 @@ const TripReveal = () => {
     generateItinerary();
   }, []);
 
+  const currencySymbol = (() => {
+    const map: Record<string, string> = { "INR (₹)": "₹", "USD ($)": "$", "EUR (€)": "€", "GBP (£)": "£" };
+    return map[quizData?.currency] || "$";
+  })();
+
   const generateItinerary = async () => {
     try {
       const { data, error: fnError } = await supabase.functions.invoke("generate-itinerary", {
@@ -90,6 +95,10 @@ const TripReveal = () => {
           activity_preference: quizData.activity_preference || "mixed",
           accommodation_type: quizData.accommodation_type || "hotel",
           departure_city: quizData.departure_city || "",
+          travel_scope: quizData.travel_scope || "Surprise Me",
+          currency: quizData.currency || "USD ($)",
+          climate_preference: quizData.climate_preference || "any",
+          travel_pace: quizData.travel_pace || "Balanced",
         },
       });
       if (fnError) throw fnError;
