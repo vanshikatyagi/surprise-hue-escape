@@ -136,6 +136,7 @@ const TripReveal = () => {
           destination: itinerary.destination,
           destination_airport: itinerary.destination_airport,
           budget: quizData.budget,
+          currency: quizData.currency || "USD ($)",
         },
       });
       if (error) throw error;
