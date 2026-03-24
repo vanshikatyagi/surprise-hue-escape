@@ -206,9 +206,25 @@ const QuizSection = () => {
     }
   }, []);
 
+  const currencies = [
+    { code: "INR", symbol: "₹", label: "INR (₹)", name: "Indian Rupee" },
+    { code: "USD", symbol: "$", label: "USD ($)", name: "US Dollar" },
+    { code: "EUR", symbol: "€", label: "EUR (€)", name: "Euro" },
+    { code: "GBP", symbol: "£", label: "GBP (£)", name: "British Pound" },
+    { code: "AED", symbol: "د.إ", label: "AED (د.إ)", name: "UAE Dirham" },
+    { code: "THB", symbol: "฿", label: "THB (฿)", name: "Thai Baht" },
+    { code: "JPY", symbol: "¥", label: "JPY (¥)", name: "Japanese Yen" },
+    { code: "AUD", symbol: "A$", label: "AUD (A$)", name: "Australian Dollar" },
+    { code: "SGD", symbol: "S$", label: "SGD (S$)", name: "Singapore Dollar" },
+    { code: "MYR", symbol: "RM", label: "MYR (RM)", name: "Malaysian Ringgit" },
+    { code: "CAD", symbol: "C$", label: "CAD (C$)", name: "Canadian Dollar" },
+    { code: "KRW", symbol: "₩", label: "KRW (₩)", name: "South Korean Won" },
+  ];
+
   const canProceed = () => {
     if (!currentStepData) return false;
     if (currentStepData.type === "location") return locationInput.trim().length > 1;
+    if (currentStepData.type === "currency") return selected !== null;
     return selected !== null;
   };
 
