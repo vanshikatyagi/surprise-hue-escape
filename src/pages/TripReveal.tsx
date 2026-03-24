@@ -686,7 +686,7 @@ const TripReveal = () => {
                 <Badge className="bg-green-100 text-green-700 border-0 text-[10px]">Confirmed</Badge>
               </div>
               <p className="font-bold text-gray-900">{hotels[selectedHotel].name}</p>
-              <p className="text-xs text-gray-500">${hotels[selectedHotel].price}/night · {hotels[selectedHotel].room_type}</p>
+              <p className="text-xs text-gray-500">{currencySymbol}{hotels[selectedHotel].price}/night · {hotels[selectedHotel].room_type}</p>
             </Card>
           )}
 
