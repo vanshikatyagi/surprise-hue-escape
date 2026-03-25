@@ -5,127 +5,198 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function parseCurrency(currency: string) {
+  // Extract code and symbol from format like "INR (₹)" or just "USD"
+  const match = currency?.match(/^(\w+)\s*\((.+)\)$/);
+  if (match) return { code: match[1], symbol: match[2] };
+  // Fallback: just a code
+  return { code: currency || "USD", symbol: "$" };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { travel_style, trip_duration, budget, travel_companions, activity_preference, accommodation_type, departure_city, travel_scope, currency, climate_preference, travel_pace } = await req.json();
+    const body = await req.json();
+    const { mode } = body; // "suggest" or "itinerary" (default)
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Parse currency symbol
-    const currencyMap: Record<string, { symbol: string; code: string }> = {
-      "INR (₹)": { symbol: "₹", code: "INR" }, "USD ($)": { symbol: "$", code: "USD" },
-      "EUR (€)": { symbol: "€", code: "EUR" }, "GBP (£)": { symbol: "£", code: "GBP" },
-      "AED (د.إ)": { symbol: "د.إ", code: "AED" }, "THB (฿)": { symbol: "฿", code: "THB" },
-      "JPY (¥)": { symbol: "¥", code: "JPY" }, "AUD (A$)": { symbol: "A$", code: "AUD" },
-      "SGD (S$)": { symbol: "S$", code: "SGD" }, "MYR (RM)": { symbol: "RM", code: "MYR" },
-      "CAD (C$)": { symbol: "C$", code: "CAD" }, "KRW (₩)": { symbol: "₩", code: "KRW" },
-    };
-    const curr = currencyMap[currency] || { symbol: "$", code: "USD" };
+    const curr = parseCurrency(body.currency);
 
-    const scopeInstruction = travel_scope === "Domestic"
-      ? `The destination MUST be within the same country as "${departure_city}". Pick a hidden gem or underrated spot.`
-      : travel_scope === "International"
-      ? `The destination MUST be in a different country from "${departure_city}". Pick somewhere exciting and different.`
-      : travel_scope === "Nearby Countries"
-      ? `The destination should be in a neighboring country close to "${departure_city}".`
+    const scopeInstruction = body.travel_scope === "Domestic"
+      ? `The destination MUST be within the same country as "${body.departure_city}". Pick hidden gems.`
+      : body.travel_scope === "International"
+      ? `The destination MUST be in a different country from "${body.departure_city}". Pick somewhere exciting.`
+      : body.travel_scope === "Nearby Countries"
+      ? `The destination should be in a neighboring country close to "${body.departure_city}".`
       : `Pick the best destination anywhere in the world.`;
+
+    // ── MODE: SUGGEST — return 3 destination options ──
+    if (mode === "suggest") {
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            {
+              role: "system",
+              content: `You are an expert travel planner for MystiGo. Based on preferences, suggest exactly 3 real destination options. Two should be named with details, one should be a complete mystery with only cryptic hints.
+
+${scopeInstruction}
+Climate preference: ${body.climate_preference || "any"}.
+
+Return ONLY valid JSON:
+{
+  "destinations": [
+    {
+      "id": 1,
+      "name": "City, Country",
+      "tagline": "Short exciting tagline",
+      "hints": ["hint 1", "hint 2", "hint 3"],
+      "match_score": 95,
+      "highlights": ["highlight 1", "highlight 2", "highlight 3"],
+      "estimated_budget": "${curr.symbol}X,XXX",
+      "best_for": "Who this is best for",
+      "mystery": false
+    },
+    {
+      "id": 2,
+      "name": "City, Country",
+      "tagline": "Short exciting tagline",
+      "hints": ["hint 1", "hint 2", "hint 3"],
+      "match_score": 90,
+      "highlights": ["highlight 1", "highlight 2", "highlight 3"],
+      "estimated_budget": "${curr.symbol}X,XXX",
+      "best_for": "Who this is best for",
+      "mystery": false
+    },
+    {
+      "id": 3,
+      "name": "HIDDEN",
+      "tagline": "Trust us. This one's special.",
+      "hints": ["A cryptic climate hint", "A cryptic culture hint", "A cryptic food hint"],
+      "match_score": 98,
+      "highlights": ["???", "???", "???"],
+      "estimated_budget": "${curr.symbol}X,XXX",
+      "best_for": "The ultimate thrill-seeker",
+      "mystery": true
+    }
+  ]
+}
+
+Make destinations genuinely different from each other. The mystery option should have the HIGHEST match_score to tempt the user. The hints for the mystery option should be poetic and cryptic — never reveal the actual location name.`
+            },
+            {
+              role: "user",
+              content: `Suggest 3 destinations:
+- Departing from: ${body.departure_city || "nearest hub"}
+- Travel scope: ${body.travel_scope || "Surprise Me"}
+- Travel style: ${Array.isArray(body.travel_style) ? body.travel_style.join(", ") : body.travel_style}
+- Budget: ${Array.isArray(body.budget) ? body.budget[0] : body.budget}
+- Duration: ${Array.isArray(body.trip_duration) ? body.trip_duration[0] : body.trip_duration}
+- Companions: ${Array.isArray(body.travel_companions) ? body.travel_companions[0] : body.travel_companions}
+- Climate: ${Array.isArray(body.climate_preference) ? body.climate_preference.join(", ") : (body.climate_preference || "any")}
+- Activities: ${Array.isArray(body.activity_preference) ? body.activity_preference.join(", ") : (body.activity_preference || "mixed")}
+- Currency: ${curr.code} (${curr.symbol})
+
+ALL budget estimates must be in ${curr.code}.`
+            }
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limited, please try again." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        if (response.status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        throw new Error("AI gateway error");
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content || "";
+      let jsonStr = content;
+      const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (jsonMatch) jsonStr = jsonMatch[1];
+      const result = JSON.parse(jsonStr.trim());
+
+      return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // ── MODE: ITINERARY — generate full plan for chosen destination ──
+    const chosenDestination = body.chosen_destination; // could be a name or "mystery"
+
+    const destinationInstruction = chosenDestination && chosenDestination !== "mystery"
+      ? `The destination is: ${chosenDestination}. Create the itinerary for THIS specific destination.`
+      : `Pick the BEST surprise destination. The user chose mystery — make it unforgettable! ${scopeInstruction}`;
+
+    const travelStyle = Array.isArray(body.travel_style) ? body.travel_style.join(", ") : body.travel_style;
+    const tripDuration = Array.isArray(body.trip_duration) ? body.trip_duration[0] : body.trip_duration;
+    const budget = Array.isArray(body.budget) ? body.budget[0] : body.budget;
+    const companions = Array.isArray(body.travel_companions) ? body.travel_companions[0] : body.travel_companions;
+    const climate = Array.isArray(body.climate_preference) ? body.climate_preference.join(", ") : (body.climate_preference || "any");
+    const pace = Array.isArray(body.travel_pace) ? body.travel_pace[0] : (body.travel_pace || "Balanced");
+    const activities = Array.isArray(body.activity_preference) ? body.activity_preference.join(", ") : (body.activity_preference || "mixed");
+    const accommodation = Array.isArray(body.accommodation_type) ? body.accommodation_type.join(", ") : (body.accommodation_type || "hotel");
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
           {
             role: "system",
-            content: `You are an expert travel planner for MystiGo, a mystery travel agency. Generate a complete, actionable trip plan. Pick a real, exciting, surprising destination that perfectly fits the preferences.
+            content: `You are an expert travel planner for MystiGo. Generate a complete trip plan.
 
-IMPORTANT: All prices and budget estimates MUST be in ${curr.code} (${curr.symbol}). Convert all costs to this currency.
+IMPORTANT: All prices MUST be in ${curr.code} (${curr.symbol}).
 
-${scopeInstruction}
+${destinationInstruction}
 
-Climate preference: ${climate_preference || "any"}. Match the destination's climate to this preference.
-Travel pace: ${travel_pace || "Balanced"}. If "Action-Packed", include 5-6 activities per day. If "Slow & Relaxed", include 2-3 max. If "Balanced", include 3-4.
+Climate preference: ${climate}. Match the destination's climate.
+Travel pace: ${pace}. If "Action-Packed", 5-6 activities/day. If "Slow & Relaxed", 2-3. If "Balanced", 3-4.
 
-Return ONLY valid JSON with this exact structure:
+Return ONLY valid JSON:
 {
   "destination": "City, Country",
   "destination_airport": "XXX",
   "duration": "X days",
   "currency": "${curr.code}",
   "currency_symbol": "${curr.symbol}",
-  "summary": "One enticing paragraph about why this destination is perfect for them",
-  "days": [
-    {
-      "day": 1,
-      "title": "Catchy day title",
-      "activities": [
-        {
-          "time": "9:00 AM",
-          "activity": "Activity name",
-          "description": "Specific description with venue/location name",
-          "type": "sightseeing|food|adventure|relaxation|culture|transport",
-          "cost_estimate": "${curr.symbol}XX"
-        }
-      ]
-    }
-  ],
+  "summary": "One enticing paragraph",
+  "days": [{ "day": 1, "title": "Catchy title", "activities": [{ "time": "9:00 AM", "activity": "Name", "description": "Details", "type": "sightseeing|food|adventure|relaxation|culture|transport", "cost_estimate": "${curr.symbol}XX" }] }],
   "estimated_budget": "${curr.symbol}X,XXX",
   "best_season": "Month – Month",
-  "flight_suggestion": {
-    "from_hub": "Nearest major hub airport",
-    "to": "Destination airport code",
-    "estimated_price_range": "${curr.symbol}XXX – ${curr.symbol}XXX",
-    "flight_duration": "X hours"
-  },
-  "hotel_suggestion": {
-    "name": "Suggested hotel or area to stay",
-    "area": "Neighborhood or zone",
-    "style": "boutique|resort|villa|eco-lodge|apartment",
-    "estimated_price_range": "${curr.symbol}XXX – ${curr.symbol}XXX per night"
-  },
-  "tips": ["Practical tip 1", "Practical tip 2", "Practical tip 3", "Practical tip 4"],
-  "packing_essentials": ["Item 1", "Item 2", "Item 3"],
-  "local_phrases": ["Hello = local word", "Thank you = local word", "How much? = local word"]
+  "flight_suggestion": { "from_hub": "Airport", "to": "Code", "estimated_price_range": "${curr.symbol}XXX – ${curr.symbol}XXX", "flight_duration": "X hours" },
+  "hotel_suggestion": { "name": "Hotel", "area": "Zone", "style": "boutique|resort|villa|eco-lodge|apartment", "estimated_price_range": "${curr.symbol}XXX – ${curr.symbol}XXX per night" },
+  "tips": ["tip1", "tip2", "tip3", "tip4"],
+  "packing_essentials": ["item1", "item2", "item3"],
+  "local_phrases": ["Hello = word", "Thank you = word"]
 }`
           },
           {
             role: "user",
-            content: `Plan a mystery trip with these exact preferences:
-- Departing from: ${departure_city || "nearest major hub"}
-- Travel scope: ${travel_scope || "Surprise Me"}
+            content: `Plan a trip:
+- Departing from: ${body.departure_city || "nearest hub"}
+- Travel style: ${travelStyle}
+- Duration: ${tripDuration}
+- Budget: ${budget}
+- Companions: ${companions}
+- Activities: ${activities}
+- Accommodation: ${accommodation}
+- Climate: ${climate}
+- Pace: ${pace}
 - Currency: ${curr.code} (${curr.symbol})
-- Travel style: ${travel_style}
-- Trip duration: ${trip_duration}
-- Budget per person: ${budget}
-- Traveling with: ${travel_companions}
-- Preferred activities: ${activity_preference || "mixed"}
-- Preferred accommodation: ${accommodation_type || "hotel"}
-- Climate preference: ${climate_preference || "any"}
-- Travel pace: ${travel_pace || "Balanced"}
 
-Generate a COMPLETE day-by-day itinerary. Include specific restaurant names, attraction names, and neighborhoods. Make it feel real and actionable. ALL PRICES IN ${curr.code} (${curr.symbol}).`
+ALL PRICES IN ${curr.code} (${curr.symbol}).`
           }
         ],
       }),
     });
 
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited, please try again in a moment." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limited, please try again." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (response.status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       const t = await response.text();
       console.error("AI error:", response.status, t);
       throw new Error("AI gateway error");
@@ -138,9 +209,7 @@ Generate a COMPLETE day-by-day itinerary. Include specific restaurant names, att
     if (jsonMatch) jsonStr = jsonMatch[1];
     const itinerary = JSON.parse(jsonStr.trim());
 
-    return new Response(JSON.stringify(itinerary), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(JSON.stringify(itinerary), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("generate-itinerary error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
