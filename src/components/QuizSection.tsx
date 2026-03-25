@@ -13,8 +13,7 @@ import {
   MapPin, Loader2, Navigation, Sparkles,
   Globe, Sun, Snowflake, CloudRain, Thermometer,
   Zap, Coffee, Gauge, Timer,
-  IndianRupee, DollarSign, Euro, PoundSterling,
-  Plane, Flag,
+  Plane, Flag, Search,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,8 +24,9 @@ interface QuizStep {
   subtitle: string;
   key: string;
   type: "options" | "location" | "currency";
+  multiSelect?: boolean;
   options?: { label: string; description: string; icon: React.ElementType }[];
-  condition?: (answers: Record<string, string>) => boolean;
+  condition?: (answers: Record<string, string | string[]>) => boolean;
 }
 
 const allSteps: QuizStep[] = [
@@ -68,9 +68,10 @@ const allSteps: QuizStep[] = [
   },
   {
     question: "What's your ideal travel vibe?",
-    subtitle: "This shapes the entire character of your mystery trip",
+    subtitle: "Pick all that excite you — we'll blend them!",
     key: "travel_style",
     type: "options",
+    multiSelect: true,
     options: [
       { label: "Adventure & Outdoors", description: "Hiking, safaris, extreme sports", icon: Mountain },
       { label: "Beach & Relaxation", description: "Sunsets, spa, zero agenda", icon: Umbrella },
@@ -80,9 +81,10 @@ const allSteps: QuizStep[] = [
   },
   {
     question: "What climate do you love?",
-    subtitle: "We'll match your weather preferences perfectly",
+    subtitle: "Select all that appeal to you",
     key: "climate_preference",
     type: "options",
+    multiSelect: true,
     options: [
       { label: "Tropical & Warm", description: "Sunshine, beaches, warm breeze", icon: Sun },
       { label: "Cold & Snowy", description: "Mountains, cozy vibes, snow", icon: Snowflake },
@@ -128,10 +130,10 @@ const allSteps: QuizStep[] = [
   },
   {
     question: "What activities excite you most?",
-    subtitle: "We'll pack your days with things you love",
+    subtitle: "Pick all your favorites!",
     key: "activity_preference",
     type: "options",
-    condition: (a) => a.travel_style === "Adventure & Outdoors" || a.travel_style === "Culture & History",
+    multiSelect: true,
     options: [
       { label: "Gourmet & Nightlife", description: "Restaurants, bars, local markets", icon: Utensils },
       { label: "Water & Ocean", description: "Diving, sailing, island hopping", icon: Ship },
@@ -141,10 +143,14 @@ const allSteps: QuizStep[] = [
   },
   {
     question: "Where do you prefer to sleep?",
-    subtitle: "Your accommodation shapes the entire mood",
+    subtitle: "Pick all styles you'd enjoy",
     key: "accommodation_type",
     type: "options",
-    condition: (a) => a.budget === "Premium" || a.budget === "Luxury",
+    multiSelect: true,
+    condition: (a) => {
+      const b = Array.isArray(a.budget) ? a.budget[0] : a.budget;
+      return b === "Premium" || b === "Luxury";
+    },
     options: [
       { label: "Boutique Hotel", description: "Stylish, intimate, local character", icon: Hotel },
       { label: "Eco Lodge / Glamping", description: "Nature immersion done right", icon: TreePine },
@@ -154,14 +160,80 @@ const allSteps: QuizStep[] = [
   },
 ];
 
+// Comprehensive world currencies
+const allCurrencies = [
+  { code: "INR", symbol: "₹", name: "Indian Rupee" },
+  { code: "USD", symbol: "$", name: "US Dollar" },
+  { code: "EUR", symbol: "€", name: "Euro" },
+  { code: "GBP", symbol: "£", name: "British Pound" },
+  { code: "AED", symbol: "د.إ", name: "UAE Dirham" },
+  { code: "THB", symbol: "฿", name: "Thai Baht" },
+  { code: "JPY", symbol: "¥", name: "Japanese Yen" },
+  { code: "AUD", symbol: "A$", name: "Australian Dollar" },
+  { code: "SGD", symbol: "S$", name: "Singapore Dollar" },
+  { code: "MYR", symbol: "RM", name: "Malaysian Ringgit" },
+  { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
+  { code: "KRW", symbol: "₩", name: "South Korean Won" },
+  { code: "CNY", symbol: "¥", name: "Chinese Yuan" },
+  { code: "CHF", symbol: "Fr", name: "Swiss Franc" },
+  { code: "SEK", symbol: "kr", name: "Swedish Krona" },
+  { code: "NOK", symbol: "kr", name: "Norwegian Krone" },
+  { code: "DKK", symbol: "kr", name: "Danish Krone" },
+  { code: "NZD", symbol: "NZ$", name: "New Zealand Dollar" },
+  { code: "ZAR", symbol: "R", name: "South African Rand" },
+  { code: "BRL", symbol: "R$", name: "Brazilian Real" },
+  { code: "MXN", symbol: "MX$", name: "Mexican Peso" },
+  { code: "TRY", symbol: "₺", name: "Turkish Lira" },
+  { code: "RUB", symbol: "₽", name: "Russian Ruble" },
+  { code: "PLN", symbol: "zł", name: "Polish Zloty" },
+  { code: "CZK", symbol: "Kč", name: "Czech Koruna" },
+  { code: "HUF", symbol: "Ft", name: "Hungarian Forint" },
+  { code: "PHP", symbol: "₱", name: "Philippine Peso" },
+  { code: "IDR", symbol: "Rp", name: "Indonesian Rupiah" },
+  { code: "VND", symbol: "₫", name: "Vietnamese Dong" },
+  { code: "TWD", symbol: "NT$", name: "Taiwan Dollar" },
+  { code: "HKD", symbol: "HK$", name: "Hong Kong Dollar" },
+  { code: "SAR", symbol: "﷼", name: "Saudi Riyal" },
+  { code: "QAR", symbol: "﷼", name: "Qatari Riyal" },
+  { code: "KWD", symbol: "د.ك", name: "Kuwaiti Dinar" },
+  { code: "BHD", symbol: "BD", name: "Bahraini Dinar" },
+  { code: "OMR", symbol: "ر.ع", name: "Omani Rial" },
+  { code: "EGP", symbol: "E£", name: "Egyptian Pound" },
+  { code: "NGN", symbol: "₦", name: "Nigerian Naira" },
+  { code: "KES", symbol: "KSh", name: "Kenyan Shilling" },
+  { code: "GHS", symbol: "GH₵", name: "Ghanaian Cedi" },
+  { code: "PKR", symbol: "₨", name: "Pakistani Rupee" },
+  { code: "LKR", symbol: "Rs", name: "Sri Lankan Rupee" },
+  { code: "BDT", symbol: "৳", name: "Bangladeshi Taka" },
+  { code: "NPR", symbol: "रू", name: "Nepalese Rupee" },
+  { code: "MMK", symbol: "K", name: "Myanmar Kyat" },
+  { code: "CLP", symbol: "CL$", name: "Chilean Peso" },
+  { code: "COP", symbol: "COL$", name: "Colombian Peso" },
+  { code: "ARS", symbol: "AR$", name: "Argentine Peso" },
+  { code: "PEN", symbol: "S/", name: "Peruvian Sol" },
+  { code: "UAH", symbol: "₴", name: "Ukrainian Hryvnia" },
+  { code: "RON", symbol: "lei", name: "Romanian Leu" },
+  { code: "BGN", symbol: "лв", name: "Bulgarian Lev" },
+  { code: "HRK", symbol: "kn", name: "Croatian Kuna" },
+  { code: "ISK", symbol: "kr", name: "Icelandic Krona" },
+  { code: "JOD", symbol: "JD", name: "Jordanian Dinar" },
+  { code: "MAD", symbol: "MAD", name: "Moroccan Dirham" },
+  { code: "TND", symbol: "DT", name: "Tunisian Dinar" },
+  { code: "GEL", symbol: "₾", name: "Georgian Lari" },
+  { code: "AMD", symbol: "֏", name: "Armenian Dram" },
+  { code: "UZS", symbol: "сўм", name: "Uzbek Sum" },
+  { code: "KZT", symbol: "₸", name: "Kazakh Tenge" },
+];
+
 const QuizSection = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [selected, setSelected] = useState<string[]>([]);
+  const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [saving, setSaving] = useState(false);
   const [detectingLocation, setDetectingLocation] = useState(false);
   const [locationInput, setLocationInput] = useState("");
   const [locationDetected, setLocationDetected] = useState(false);
+  const [currencySearch, setCurrencySearch] = useState("");
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -206,47 +278,59 @@ const QuizSection = () => {
     }
   }, []);
 
-  const currencies = [
-    { code: "INR", symbol: "₹", label: "INR (₹)", name: "Indian Rupee" },
-    { code: "USD", symbol: "$", label: "USD ($)", name: "US Dollar" },
-    { code: "EUR", symbol: "€", label: "EUR (€)", name: "Euro" },
-    { code: "GBP", symbol: "£", label: "GBP (£)", name: "British Pound" },
-    { code: "AED", symbol: "د.إ", label: "AED (د.إ)", name: "UAE Dirham" },
-    { code: "THB", symbol: "฿", label: "THB (฿)", name: "Thai Baht" },
-    { code: "JPY", symbol: "¥", label: "JPY (¥)", name: "Japanese Yen" },
-    { code: "AUD", symbol: "A$", label: "AUD (A$)", name: "Australian Dollar" },
-    { code: "SGD", symbol: "S$", label: "SGD (S$)", name: "Singapore Dollar" },
-    { code: "MYR", symbol: "RM", label: "MYR (RM)", name: "Malaysian Ringgit" },
-    { code: "CAD", symbol: "C$", label: "CAD (C$)", name: "Canadian Dollar" },
-    { code: "KRW", symbol: "₩", label: "KRW (₩)", name: "South Korean Won" },
-  ];
+  const filteredCurrencies = allCurrencies.filter(
+    (c) =>
+      c.code.toLowerCase().includes(currencySearch.toLowerCase()) ||
+      c.name.toLowerCase().includes(currencySearch.toLowerCase()) ||
+      c.symbol.includes(currencySearch)
+  );
+
+  const toggleOption = (label: string) => {
+    if (currentStepData?.multiSelect) {
+      setSelected((prev) =>
+        prev.includes(label) ? prev.filter((s) => s !== label) : [...prev, label]
+      );
+    } else {
+      setSelected([label]);
+    }
+  };
 
   const canProceed = () => {
     if (!currentStepData) return false;
     if (currentStepData.type === "location") return locationInput.trim().length > 1;
-    if (currentStepData.type === "currency") return selected !== null;
-    return selected !== null;
+    return selected.length > 0;
   };
 
   const handleNext = async () => {
     const step = currentStepData;
-    const value = step.type === "location" ? locationInput.trim() : selected!;
+    const value =
+      step.type === "location"
+        ? locationInput.trim()
+        : step.multiSelect
+        ? selected
+        : selected[0];
     const newAnswers = { ...answers, [step.key]: value };
     setAnswers(newAnswers);
 
     if (currentStep < totalSteps - 1) {
       setCurrentStep((prev) => prev + 1);
-      setSelected(null);
+      setSelected([]);
+      setCurrencySearch("");
     } else {
       if (user) {
         setSaving(true);
         try {
+          const ts = Array.isArray(newAnswers.travel_style) ? newAnswers.travel_style.join(", ") : (newAnswers.travel_style as string);
+          const td = Array.isArray(newAnswers.trip_duration) ? newAnswers.trip_duration[0] : (newAnswers.trip_duration as string);
+          const b = Array.isArray(newAnswers.budget) ? newAnswers.budget[0] : (newAnswers.budget as string);
+          const tc = Array.isArray(newAnswers.travel_companions) ? newAnswers.travel_companions[0] : (newAnswers.travel_companions as string);
+
           const { error } = await supabase.from("quiz_results").insert({
             user_id: user.id,
-            travel_style: newAnswers.travel_style,
-            trip_duration: newAnswers.trip_duration,
-            budget: newAnswers.budget,
-            travel_companions: newAnswers.travel_companions,
+            travel_style: ts,
+            trip_duration: td,
+            budget: b,
+            travel_companions: tc,
           });
           if (error) {
             toast({ title: "Error saving quiz", description: error.message, variant: "destructive" });
@@ -269,9 +353,16 @@ const QuizSection = () => {
     if (currentStep > 0) {
       const prevStep = activeSteps[currentStep - 1];
       setCurrentStep((prev) => prev - 1);
-      if (prevStep.type === "options") {
-        setSelected(answers[prevStep.key] || null);
+      const prevAnswer = answers[prevStep.key];
+      if (prevStep.type === "location") {
+        // location is already in locationInput
+        setSelected([]);
+      } else if (prevAnswer) {
+        setSelected(Array.isArray(prevAnswer) ? prevAnswer : [prevAnswer]);
+      } else {
+        setSelected([]);
       }
+      setCurrencySearch("");
     }
   };
 
@@ -303,6 +394,11 @@ const QuizSection = () => {
               {currentStepData.question}
             </h3>
             <p className="text-sm text-gray-400">{currentStepData.subtitle}</p>
+            {currentStepData.multiSelect && (
+              <span className="inline-block mt-2 text-xs bg-accent/10 text-accent font-semibold px-3 py-1 rounded-full">
+                ✨ Select multiple
+              </span>
+            )}
           </div>
 
           {/* Location Step */}
@@ -341,34 +437,50 @@ const QuizSection = () => {
 
           {/* Currency Step */}
           {currentStepData.type === "currency" && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-              {currencies.map((curr) => {
-                const isSelected = selected === curr.label;
-                return (
-                  <button
-                    key={curr.code}
-                    onClick={() => setSelected(curr.label)}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 ${
-                      isSelected
-                        ? "border-[#2d2d2d] bg-[#2d2d2d]/5 shadow-sm"
-                        : "border-gray-200 hover:border-gray-300 bg-gray-50 hover:bg-gray-100"
-                    }`}
-                  >
-                    <span className={`text-2xl font-black ${isSelected ? "text-[#2d2d2d]" : "text-gray-600"}`}>
-                      {curr.symbol}
-                    </span>
-                    <span className={`text-xs font-semibold ${isSelected ? "text-[#2d2d2d]" : "text-gray-500"}`}>
-                      {curr.code}
-                    </span>
-                    <span className="text-[10px] text-gray-400">{curr.name}</span>
-                    {isSelected && (
-                      <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center">
-                        <Check className="w-3 h-3 text-black" />
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
+            <div className="mb-8 space-y-4">
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  value={currencySearch}
+                  onChange={(e) => setCurrencySearch(e.target.value)}
+                  placeholder="Search currency (e.g. INR, Dollar, Euro)..."
+                  className="pl-10 text-sm h-11 rounded-xl border-2 border-gray-200 focus:border-[#2d2d2d]"
+                />
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-h-80 overflow-y-auto pr-1">
+                {filteredCurrencies.map((curr) => {
+                  const label = `${curr.code} (${curr.symbol})`;
+                  const isSelected = selected.includes(label);
+                  return (
+                    <button
+                      key={curr.code}
+                      onClick={() => setSelected([label])}
+                      className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all duration-200 ${
+                        isSelected
+                          ? "border-[#2d2d2d] bg-[#2d2d2d]/5 shadow-sm"
+                          : "border-gray-200 hover:border-gray-300 bg-gray-50 hover:bg-gray-100"
+                      }`}
+                    >
+                      <span className={`text-xl font-black ${isSelected ? "text-[#2d2d2d]" : "text-gray-600"}`}>
+                        {curr.symbol}
+                      </span>
+                      <span className={`text-[10px] font-semibold ${isSelected ? "text-[#2d2d2d]" : "text-gray-500"}`}>
+                        {curr.code}
+                      </span>
+                      <span className="text-[9px] text-gray-400 truncate w-full text-center">{curr.name}</span>
+                      {isSelected && (
+                        <div className="w-4 h-4 bg-accent rounded-full flex items-center justify-center">
+                          <Check className="w-2.5 h-2.5 text-black" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+                {filteredCurrencies.length === 0 && (
+                  <p className="col-span-4 text-center text-sm text-gray-400 py-6">No currency found</p>
+                )}
+              </div>
             </div>
           )}
 
@@ -377,11 +489,11 @@ const QuizSection = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
               {currentStepData.options.map((option) => {
                 const Icon = option.icon;
-                const isSelected = selected === option.label;
+                const isSelected = selected.includes(option.label);
                 return (
                   <button
                     key={option.label}
-                    onClick={() => setSelected(option.label)}
+                    onClick={() => toggleOption(option.label)}
                     className={`flex items-start gap-4 p-5 rounded-xl border-2 transition-all duration-200 text-left group ${
                       isSelected
                         ? "border-[#2d2d2d] bg-[#2d2d2d]/5 shadow-sm"
