@@ -290,7 +290,7 @@ const TripReveal = () => {
             </Badge>
             <h1 className="text-3xl md:text-4xl font-black">Pick Your Destination</h1>
             <p className="text-white/60 text-sm mt-2 max-w-lg mx-auto">
-              We found 2 perfect matches for you, plus one mystery destination. Which one calls to you?
+              We found a perfect match for you, plus one mystery destination. Which one calls to you?
             </p>
           </div>
         </div>
