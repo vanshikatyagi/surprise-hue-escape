@@ -295,7 +295,7 @@ const TripReveal = () => {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-10 max-w-4xl">
+        <div className="container mx-auto px-4 py-10 max-w-3xl">
           <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             {destinations.map((dest) => (
               <Card
