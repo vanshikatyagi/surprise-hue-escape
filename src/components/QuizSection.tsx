@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Mountain, Umbrella, Building2, Camera, ChevronRight, Check,
   Users, User, Heart, UserCheck,
@@ -13,7 +14,7 @@ import {
   MapPin, Loader2, Navigation, Sparkles,
   Globe, Sun, Snowflake, CloudRain, Thermometer,
   Zap, Coffee, Gauge, Timer,
-  Plane, Flag, Search,
+  Plane, Flag, Search, RotateCcw, MapPinOff,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,7 +24,7 @@ interface QuizStep {
   question: string;
   subtitle: string;
   key: string;
-  type: "options" | "location" | "currency";
+  type: "options" | "location" | "currency" | "textarea";
   multiSelect?: boolean;
   options?: { label: string; description: string; icon: React.ElementType }[];
   condition?: (answers: Record<string, string | string[]>) => boolean;
@@ -47,6 +48,32 @@ const allSteps: QuizStep[] = [
       { label: "Surprise Me", description: "Anywhere in the world works", icon: Sparkles },
       { label: "Nearby Countries", description: "Close but different culture", icon: Plane },
     ],
+  },
+  {
+    question: "Where have you already traveled?",
+    subtitle: "We'll make sure your destination is somewhere NEW and exciting!",
+    key: "visited_places",
+    type: "textarea",
+  },
+  {
+    question: "Want to revisit any favorite place?",
+    subtitle: "If yes, tell us — otherwise we'll find somewhere completely new",
+    key: "revisit_preference",
+    type: "options",
+    options: [
+      { label: "No, somewhere new!", description: "I want a completely fresh experience", icon: MapPinOff },
+      { label: "Yes, I'd revisit", description: "I'll mention the place in the next step", icon: RotateCcw },
+    ],
+  },
+  {
+    question: "Which place would you like to revisit?",
+    subtitle: "Tell us where you'd love to go back to",
+    key: "revisit_place",
+    type: "textarea",
+    condition: (a) => {
+      const v = Array.isArray(a.revisit_preference) ? a.revisit_preference[0] : a.revisit_preference;
+      return v === "Yes, I'd revisit";
+    },
   },
   {
     question: "What currency do you prefer?",
@@ -234,6 +261,7 @@ const QuizSection = () => {
   const [locationInput, setLocationInput] = useState("");
   const [locationDetected, setLocationDetected] = useState(false);
   const [currencySearch, setCurrencySearch] = useState("");
+  const [textareaInput, setTextareaInput] = useState("");
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -298,6 +326,7 @@ const QuizSection = () => {
   const canProceed = () => {
     if (!currentStepData) return false;
     if (currentStepData.type === "location") return locationInput.trim().length > 1;
+    if (currentStepData.type === "textarea") return true; // textarea is optional
     return selected.length > 0;
   };
 
@@ -306,6 +335,8 @@ const QuizSection = () => {
     const value =
       step.type === "location"
         ? locationInput.trim()
+        : step.type === "textarea"
+        ? textareaInput.trim()
         : step.multiSelect
         ? selected
         : selected[0];
@@ -316,6 +347,12 @@ const QuizSection = () => {
       setCurrentStep((prev) => prev + 1);
       setSelected([]);
       setCurrencySearch("");
+      setTextareaInput("");
+      // Restore textarea value if going forward to a step that already has an answer
+      const nextStep = activeSteps[currentStep + 1];
+      if (nextStep && nextStep.type === "textarea" && newAnswers[nextStep.key]) {
+        setTextareaInput(newAnswers[nextStep.key] as string);
+      }
     } else {
       if (user) {
         setSaving(true);
@@ -355,7 +392,9 @@ const QuizSection = () => {
       setCurrentStep((prev) => prev - 1);
       const prevAnswer = answers[prevStep.key];
       if (prevStep.type === "location") {
-        // location is already in locationInput
+        setSelected([]);
+      } else if (prevStep.type === "textarea") {
+        setTextareaInput((prevAnswer as string) || "");
         setSelected([]);
       } else if (prevAnswer) {
         setSelected(Array.isArray(prevAnswer) ? prevAnswer : [prevAnswer]);
@@ -435,10 +474,30 @@ const QuizSection = () => {
             </div>
           )}
 
+          {/* Textarea Step */}
+          {currentStepData.type === "textarea" && (
+            <div className="mb-8 space-y-3">
+              <Textarea
+                value={textareaInput}
+                onChange={(e) => setTextareaInput(e.target.value)}
+                placeholder={
+                  currentStepData.key === "visited_places"
+                    ? "e.g. Paris, Tokyo, Bali, New York, Dubai... (leave empty if this is your first trip!)"
+                    : "e.g. Bali — I loved the beaches and culture there"
+                }
+                className="text-sm min-h-[100px] rounded-xl border-2 border-gray-200 focus:border-[#2d2d2d] resize-none"
+              />
+              {currentStepData.key === "visited_places" && (
+                <p className="text-xs text-gray-400 text-center">
+                  💡 This helps us suggest places you haven't been to yet
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Currency Step */}
           {currentStepData.type === "currency" && (
             <div className="mb-8 space-y-4">
-              {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input

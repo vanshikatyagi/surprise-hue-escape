@@ -6,10 +6,8 @@ const corsHeaders = {
 };
 
 function parseCurrency(currency: string) {
-  // Extract code and symbol from format like "INR (₹)" or just "USD"
   const match = currency?.match(/^(\w+)\s*\((.+)\)$/);
   if (match) return { code: match[1], symbol: match[2] };
-  // Fallback: just a code
   return { code: currency || "USD", symbol: "$" };
 }
 
@@ -18,7 +16,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { mode } = body; // "suggest" or "itinerary" (default)
+    const { mode } = body;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -32,7 +30,20 @@ serve(async (req) => {
       ? `The destination should be in a neighboring country close to "${body.departure_city}".`
       : `Pick the best destination anywhere in the world.`;
 
-    // ── MODE: SUGGEST — return 3 destination options ──
+    // Build visited places exclusion
+    const visitedPlaces = body.visited_places || "";
+    const revisitPref = Array.isArray(body.revisit_preference) ? body.revisit_preference[0] : (body.revisit_preference || "");
+    const revisitPlace = body.revisit_place || "";
+
+    const exclusionInstruction = visitedPlaces
+      ? `The user has already visited: ${visitedPlaces}. Do NOT suggest any of these places.`
+      : "";
+
+    const revisitInstruction = revisitPref === "Yes, I'd revisit" && revisitPlace
+      ? `The user wants to revisit: ${revisitPlace}. You may use this as the NAMED destination if it fits their preferences well.`
+      : "";
+
+    // ── MODE: SUGGEST — return 2 destination options (1 named + 1 mystery) ──
     if (mode === "suggest") {
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -42,10 +53,18 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `You are an expert travel planner for MystiGo. Based on preferences, suggest exactly 3 real destination options. Two should be named with details, one should be a complete mystery with only cryptic hints.
+              content: `You are an expert travel planner for MystiGo. Based on preferences, suggest exactly 2 real destination options. One should be named with details, one should be a complete mystery with only cryptic hints.
 
 ${scopeInstruction}
+${exclusionInstruction}
+${revisitInstruction}
 Climate preference: ${body.climate_preference || "any"}.
+
+CRITICAL RULES:
+- The named destination and the mystery destination MUST be COMPLETELY DIFFERENT places (different countries if international, different regions if domestic).
+- The mystery destination must NEVER be the same as the named destination.
+- Neither destination should be a place the user has already visited.
+${revisitInstruction ? "- Exception: if the user wants to revisit a specific place, the named option can be that place." : ""}
 
 Return ONLY valid JSON:
 {
@@ -55,7 +74,7 @@ Return ONLY valid JSON:
       "name": "City, Country",
       "tagline": "Short exciting tagline",
       "hints": ["hint 1", "hint 2", "hint 3"],
-      "match_score": 95,
+      "match_score": 92,
       "highlights": ["highlight 1", "highlight 2", "highlight 3"],
       "estimated_budget": "${curr.symbol}X,XXX",
       "best_for": "Who this is best for",
@@ -63,17 +82,6 @@ Return ONLY valid JSON:
     },
     {
       "id": 2,
-      "name": "City, Country",
-      "tagline": "Short exciting tagline",
-      "hints": ["hint 1", "hint 2", "hint 3"],
-      "match_score": 90,
-      "highlights": ["highlight 1", "highlight 2", "highlight 3"],
-      "estimated_budget": "${curr.symbol}X,XXX",
-      "best_for": "Who this is best for",
-      "mystery": false
-    },
-    {
-      "id": 3,
       "name": "HIDDEN",
       "tagline": "Trust us. This one's special.",
       "hints": ["A cryptic climate hint", "A cryptic culture hint", "A cryptic food hint"],
@@ -86,11 +94,11 @@ Return ONLY valid JSON:
   ]
 }
 
-Make destinations genuinely different from each other. The mystery option should have the HIGHEST match_score to tempt the user. The hints for the mystery option should be poetic and cryptic — never reveal the actual location name.`
+The mystery option should have the HIGHEST match_score to tempt the user. The hints for the mystery option should be poetic and cryptic — never reveal the actual location name. The actual mystery destination must be a REAL, DIFFERENT place from option 1.`
             },
             {
               role: "user",
-              content: `Suggest 3 destinations:
+              content: `Suggest 2 destinations:
 - Departing from: ${body.departure_city || "nearest hub"}
 - Travel scope: ${body.travel_scope || "Surprise Me"}
 - Travel style: ${Array.isArray(body.travel_style) ? body.travel_style.join(", ") : body.travel_style}
@@ -100,6 +108,8 @@ Make destinations genuinely different from each other. The mystery option should
 - Climate: ${Array.isArray(body.climate_preference) ? body.climate_preference.join(", ") : (body.climate_preference || "any")}
 - Activities: ${Array.isArray(body.activity_preference) ? body.activity_preference.join(", ") : (body.activity_preference || "mixed")}
 - Currency: ${curr.code} (${curr.symbol})
+- Already visited: ${visitedPlaces || "none mentioned"}
+- Wants to revisit: ${revisitPlace || "no"}
 
 ALL budget estimates must be in ${curr.code}.`
             }
@@ -124,11 +134,11 @@ ALL budget estimates must be in ${curr.code}.`
     }
 
     // ── MODE: ITINERARY — generate full plan for chosen destination ──
-    const chosenDestination = body.chosen_destination; // could be a name or "mystery"
+    const chosenDestination = body.chosen_destination;
 
     const destinationInstruction = chosenDestination && chosenDestination !== "mystery"
       ? `The destination is: ${chosenDestination}. Create the itinerary for THIS specific destination.`
-      : `Pick the BEST surprise destination. The user chose mystery — make it unforgettable! ${scopeInstruction}`;
+      : `Pick the BEST surprise destination that is DIFFERENT from any named suggestion. The user chose mystery — make it unforgettable! ${scopeInstruction} ${exclusionInstruction}`;
 
     const travelStyle = Array.isArray(body.travel_style) ? body.travel_style.join(", ") : body.travel_style;
     const tripDuration = Array.isArray(body.trip_duration) ? body.trip_duration[0] : body.trip_duration;
@@ -187,6 +197,7 @@ Return ONLY valid JSON:
 - Climate: ${climate}
 - Pace: ${pace}
 - Currency: ${curr.code} (${curr.symbol})
+- Already visited: ${visitedPlaces || "none"}
 
 ALL PRICES IN ${curr.code} (${curr.symbol}).`
           }
