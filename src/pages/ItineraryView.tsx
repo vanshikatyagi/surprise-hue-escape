@@ -29,6 +29,11 @@ interface Activity {
   description: string;
   type: string;
   cost_estimate?: string;
+  hidden_gem?: boolean;
+  photo_spot?: boolean;
+  local_food_tip?: string;
+  insider_tip?: string;
+  community_pick?: boolean;
 }
 
 interface DayPlan {
