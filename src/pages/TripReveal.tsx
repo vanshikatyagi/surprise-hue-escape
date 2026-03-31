@@ -46,6 +46,7 @@ interface Itinerary {
   destination: string; destination_airport?: string; duration: string; summary: string;
   days: DayPlan[]; estimated_budget: string; best_season: string; tips: string[];
   packing_essentials?: string[]; flight_suggestion?: FlightSuggestion; hotel_suggestion?: HotelSuggestion;
+  budget_breakdown?: Record<string, string>;
 }
 
 interface RealFlight {
