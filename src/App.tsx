@@ -16,6 +16,7 @@ import ItineraryView from "./pages/ItineraryView";
 import TripReveal from "./pages/TripReveal";
 import SharedItinerary from "./pages/SharedItinerary";
 import NotFound from "./pages/NotFound";
+import LocalSecrets from "./pages/LocalSecrets";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/hotels" element={<HotelBooking />} />
             <Route path="/itinerary" element={<ProtectedRoute><ItineraryView /></ProtectedRoute>} />
             <Route path="/shared/:token" element={<SharedItinerary />} />
+            <Route path="/local-secrets" element={<LocalSecrets />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -6,63 +6,17 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  MapPin, Calendar, Star, Trophy, Plane, Plus, LogOut, Hotel, Map
+  MapPin, Calendar, Star, Trophy, Plane, Plus, LogOut, Hotel, Map, Sparkles
 } from 'lucide-react';
+import GenerateItineraryDialog from '@/components/GenerateItineraryDialog';
+import TravelChatbot from '@/components/TravelChatbot';
 
-interface QuizResult {
-  id: string;
-  travel_style: string;
-  trip_duration: string;
-  budget: string;
-  travel_companions: string;
-  created_at: string;
-}
-
-interface Booking {
-  id: string;
-  full_name: string;
-  email: string;
-  budget_range: string;
-  num_travelers: string;
-  preferences: string | null;
-  status: string;
-  created_at: string;
-}
-
-interface Flight {
-  id: string;
-  airline: string;
-  flight_number: string;
-  departure_city: string;
-  arrival_city: string;
-  departure_date: string;
-  price: number;
-  class: string;
-  status: string;
-}
-
-interface HotelBooking {
-  id: string;
-  hotel_name: string;
-  city: string;
-  check_in: string;
-  check_out: string;
-  room_type: string;
-  total_price: number;
-  status: string;
-}
-
-interface Itinerary {
-  id: string;
-  destination: string;
-  duration: string;
-  created_at: string;
-}
-
-interface Profile {
-  full_name: string | null;
-  email: string | null;
-}
+interface QuizResult { id: string; travel_style: string; trip_duration: string; budget: string; travel_companions: string; created_at: string; }
+interface Booking { id: string; full_name: string; email: string; budget_range: string; num_travelers: string; preferences: string | null; status: string; created_at: string; }
+interface Flight { id: string; airline: string; flight_number: string; departure_city: string; arrival_city: string; departure_date: string; price: number; class: string; status: string; }
+interface HotelBooking { id: string; hotel_name: string; city: string; check_in: string; check_out: string; room_type: string; total_price: number; status: string; }
+interface Itinerary { id: string; destination: string; duration: string; created_at: string; }
+interface Profile { full_name: string | null; email: string | null; }
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -74,6 +28,7 @@ const Dashboard = () => {
   const [hotels, setHotels] = useState<HotelBooking[]>([]);
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showGenDialog, setShowGenDialog] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -97,10 +52,7 @@ const Dashboard = () => {
     fetchData();
   }, [user]);
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/");
-  };
+  const handleSignOut = async () => { await signOut(); navigate("/"); };
 
   if (loading) {
     return (
@@ -132,19 +84,19 @@ const Dashboard = () => {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            {/* Mystery Bookings */}
+            {/* Concierge Bookings */}
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-900">Mystery Bookings</h2>
+                <h2 className="text-xl font-bold text-gray-900">Trip Requests</h2>
                 <Button onClick={() => navigate("/#contact")} size="sm" className="bg-[#2d2d2d] text-white hover:bg-[#3d3d3d]">
-                  <Plus className="w-4 h-4 mr-1" /> New Booking
+                  <Plus className="w-4 h-4 mr-1" /> New Request
                 </Button>
               </div>
               {bookings.length === 0 ? (
                 <Card className="p-8 text-center bg-white rounded-xl">
                   <Plane className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500 text-sm">No mystery bookings yet.</p>
-                  <Button onClick={() => navigate("/#contact")} className="mt-4 bg-accent text-black hover:bg-accent/90 text-sm">Book Now</Button>
+                  <p className="text-gray-500 text-sm">No trip requests yet.</p>
+                  <Button onClick={() => navigate("/#contact")} className="mt-4 bg-accent text-black hover:bg-accent/90 text-sm">Plan a Trip</Button>
                 </Card>
               ) : (
                 <div className="space-y-3">
@@ -182,9 +134,7 @@ const Dashboard = () => {
                     <Card key={f.id} className="p-4 bg-white rounded-xl">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                            <Plane className="w-4 h-4 text-primary" />
-                          </div>
+                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center"><Plane className="w-4 h-4 text-primary" /></div>
                           <div>
                             <p className="font-semibold text-sm text-gray-900">{f.departure_city.split("(")[0]} → {f.arrival_city.split("(")[0]}</p>
                             <p className="text-xs text-gray-400">{f.airline} · {f.flight_number} · {new Date(f.departure_date).toLocaleDateString()}</p>
@@ -218,9 +168,7 @@ const Dashboard = () => {
                     <Card key={h.id} className="p-4 bg-white rounded-xl">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
-                            <Hotel className="w-4 h-4 text-accent" />
-                          </div>
+                          <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center"><Hotel className="w-4 h-4 text-accent" /></div>
                           <div>
                             <p className="font-semibold text-sm text-gray-900">{h.hotel_name}</p>
                             <p className="text-xs text-gray-400">{h.city} · {h.check_in} to {h.check_out}</p>
@@ -243,13 +191,14 @@ const Dashboard = () => {
             {/* Itineraries */}
             <Card className="p-6 bg-white rounded-xl">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                <Map className="w-5 h-5 mr-2 text-primary" />
-                Your Itineraries
+                <Map className="w-5 h-5 mr-2 text-primary" /> Your Itineraries
               </h3>
               {itineraries.length === 0 ? (
                 <div className="text-center py-4">
-                  <p className="text-gray-500 text-sm mb-3">Complete the quiz to get an AI itinerary!</p>
-                  <Button onClick={() => navigate("/")} size="sm" className="bg-primary text-white hover:bg-primary/90 text-sm">Take Quiz</Button>
+                  <p className="text-gray-500 text-sm mb-3">Generate your first AI itinerary!</p>
+                  <Button onClick={() => setShowGenDialog(true)} size="sm" className="bg-primary text-white hover:bg-primary/90 text-sm gap-1">
+                    <Sparkles className="w-3 h-3" /> Generate
+                  </Button>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -266,13 +215,12 @@ const Dashboard = () => {
             {/* Quiz Results */}
             <Card className="p-6 bg-white rounded-xl">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                <Star className="w-5 h-5 mr-2 text-yellow-500" />
-                Travel Preferences
+                <Star className="w-5 h-5 mr-2 text-yellow-500" /> Travel Preferences
               </h3>
               {quizResults.length === 0 ? (
                 <div className="text-center py-4">
                   <p className="text-gray-500 text-sm mb-3">Take the quiz to discover your style!</p>
-                  <Button onClick={() => navigate("/")} size="sm" className="bg-accent text-black hover:bg-accent/90 text-sm">Take Quiz</Button>
+                  <Button onClick={() => navigate("/#quiz")} size="sm" className="bg-accent text-black hover:bg-accent/90 text-sm">Take Quiz</Button>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -294,30 +242,14 @@ const Dashboard = () => {
             {/* Quick Stats */}
             <Card className="p-6 bg-white rounded-xl">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                <Trophy className="w-5 h-5 mr-2 text-yellow-500" />
-                Quick Stats
+                <Trophy className="w-5 h-5 mr-2 text-yellow-500" /> Quick Stats
               </h3>
               <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Mystery Bookings</span>
-                  <span className="font-semibold text-gray-900">{bookings.length}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Flights Booked</span>
-                  <span className="font-semibold text-gray-900">{flights.length}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Hotels Booked</span>
-                  <span className="font-semibold text-gray-900">{hotels.length}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Itineraries</span>
-                  <span className="font-semibold text-gray-900">{itineraries.length}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Member Since</span>
-                  <span className="font-semibold text-gray-900">{user?.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}</span>
-                </div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">Trip Requests</span><span className="font-semibold text-gray-900">{bookings.length}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">Flights Booked</span><span className="font-semibold text-gray-900">{flights.length}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">Hotels Booked</span><span className="font-semibold text-gray-900">{hotels.length}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">Itineraries</span><span className="font-semibold text-gray-900">{itineraries.length}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">Member Since</span><span className="font-semibold text-gray-900">{user?.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}</span></div>
               </div>
             </Card>
 
@@ -331,17 +263,23 @@ const Dashboard = () => {
                 <Button variant="outline" className="w-full justify-start text-sm" onClick={() => navigate("/hotels")}>
                   <Hotel className="w-4 h-4 mr-2" /> Browse Hotels
                 </Button>
-                <Button variant="outline" className="w-full justify-start text-sm" onClick={() => navigate("/itinerary")}>
+                <Button variant="outline" className="w-full justify-start text-sm" onClick={() => setShowGenDialog(true)}>
                   <Map className="w-4 h-4 mr-2" /> Generate Itinerary
                 </Button>
-                <Button variant="outline" className="w-full justify-start text-sm" onClick={() => navigate("/")}>
-                  <MapPin className="w-4 h-4 mr-2" /> Explore Destinations
+                <Button variant="outline" className="w-full justify-start text-sm" onClick={() => navigate("/local-secrets")}>
+                  <MapPin className="w-4 h-4 mr-2" /> Local Secrets
+                </Button>
+                <Button variant="outline" className="w-full justify-start text-sm" onClick={() => navigate("/#quiz")}>
+                  <Sparkles className="w-4 h-4 mr-2" /> Take Quiz
                 </Button>
               </div>
             </Card>
           </div>
         </div>
       </div>
+
+      <GenerateItineraryDialog open={showGenDialog} onOpenChange={setShowGenDialog} />
+      <TravelChatbot />
     </div>
   );
 };
