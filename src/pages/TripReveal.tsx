@@ -120,6 +120,20 @@ const TripReveal = () => {
     }
   };
 
+  const fetchLocalSecrets = async (destination: string) => {
+    try {
+      const city = destination.split(",")[0].trim().toLowerCase();
+      const { data } = await supabase
+        .from("local_secrets" as any)
+        .select("location, title, description, category")
+        .ilike("location" as any, `%${city}%`)
+        .limit(10);
+      return (data || []) as any[];
+    } catch {
+      return [];
+    }
+  };
+
   const generateItinerary = async (chosenDest: string) => {
     setPhase("building");
     try {
