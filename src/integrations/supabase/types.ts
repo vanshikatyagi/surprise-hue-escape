@@ -17,6 +17,7 @@ export type Database = {
       bookings: {
         Row: {
           budget_range: string
+          contact_type: string
           created_at: string
           email: string
           full_name: string
@@ -29,6 +30,7 @@ export type Database = {
         }
         Insert: {
           budget_range: string
+          contact_type?: string
           created_at?: string
           email: string
           full_name: string
@@ -41,6 +43,7 @@ export type Database = {
         }
         Update: {
           budget_range?: string
+          contact_type?: string
           created_at?: string
           email?: string
           full_name?: string
@@ -184,6 +187,39 @@ export type Database = {
           },
         ]
       }
+      local_secrets: {
+        Row: {
+          category: Database["public"]["Enums"]["local_secret_category"]
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          location: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["local_secret_category"]
+          created_at?: string
+          description: string
+          id?: string
+          image_url?: string | null
+          location: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["local_secret_category"]
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          location?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -252,7 +288,11 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      local_secret_category:
+        | "hidden_place"
+        | "food_spot"
+        | "local_tip"
+        | "less_crowded"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -379,6 +419,13 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      local_secret_category: [
+        "hidden_place",
+        "food_spot",
+        "local_tip",
+        "less_crowded",
+      ],
+    },
   },
 } as const
