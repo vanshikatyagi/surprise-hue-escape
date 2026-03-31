@@ -38,7 +38,7 @@ interface DestinationOption {
   estimated_budget: string; best_for: string; mystery: boolean;
 }
 
-interface Activity { time: string; activity: string; description: string; type: string; cost_estimate?: string; }
+interface Activity { time: string; activity: string; description: string; type: string; cost_estimate?: string; hidden_gem?: boolean; photo_spot?: boolean; local_food_tip?: string; insider_tip?: string; community_pick?: boolean; }
 interface DayPlan { day: number; title: string; activities: Activity[]; }
 interface FlightSuggestion { from_hub: string; to: string; estimated_price_range: string; flight_duration: string; }
 interface HotelSuggestion { name: string; area: string; style: string; estimated_price_range: string; }
