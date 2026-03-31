@@ -451,7 +451,7 @@ const TripReveal = () => {
                   const Icon = activityIcons[act.type] || MapPin;
                   const colorClass = activityTypeColors[act.type] || "bg-gray-50 text-gray-600 border-gray-200";
                   return (
-                    <div key={j} className="flex gap-4 mb-5 last:mb-0">
+                    <div key={j} className="flex gap-4 mb-6 last:mb-0">
                       <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                         <Icon className="w-4 h-4 text-gray-600" />
                       </div>
@@ -460,9 +460,14 @@ const TripReveal = () => {
                           <span className="text-xs font-mono text-gray-400 flex items-center gap-1"><Clock className="w-3 h-3" />{act.time}</span>
                           <span className={`text-[10px] font-semibold border rounded-full px-2 py-0.5 capitalize ${colorClass}`}>{act.type}</span>
                           {act.cost_estimate && <span className="text-[10px] text-gray-400">{act.cost_estimate}</span>}
+                          {act.hidden_gem && <Badge className="bg-purple-100 text-purple-700 border-0 text-[9px] gap-0.5 px-1.5 py-0"><Sparkles className="w-2.5 h-2.5" />Hidden Gem</Badge>}
+                          {act.photo_spot && <Badge className="bg-blue-100 text-blue-700 border-0 text-[9px] gap-0.5 px-1.5 py-0"><Camera className="w-2.5 h-2.5" />📸 Photo Spot</Badge>}
+                          {act.community_pick && <Badge className="bg-green-100 text-green-700 border-0 text-[9px] gap-0.5 px-1.5 py-0">🤝 Community Pick</Badge>}
                         </div>
                         <p className="font-bold text-sm text-gray-900">{act.activity}</p>
                         <p className="text-xs text-gray-500 mt-0.5">{act.description}</p>
+                        {act.local_food_tip && <p className="text-xs text-orange-600 mt-1 flex items-center gap-1"><UtensilsCrossed className="w-3 h-3" />{act.local_food_tip}</p>}
+                        {act.insider_tip && <p className="text-xs text-purple-600 mt-1 italic">💡 {act.insider_tip}</p>}
                       </div>
                     </div>
                   );
