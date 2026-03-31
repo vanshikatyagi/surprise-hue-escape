@@ -30,7 +30,6 @@ serve(async (req) => {
       ? `The destination should be in a neighboring country close to "${body.departure_city}".`
       : `Pick the best destination anywhere in the world.`;
 
-    // Build visited places exclusion
     const visitedPlaces = body.visited_places || "";
     const revisitPref = Array.isArray(body.revisit_preference) ? body.revisit_preference[0] : (body.revisit_preference || "");
     const revisitPlace = body.revisit_place || "";
@@ -43,7 +42,13 @@ serve(async (req) => {
       ? `The user wants to revisit: ${revisitPlace}. You may use this as the NAMED destination if it fits their preferences well.`
       : "";
 
-    // ── MODE: SUGGEST — return 2 destination options (1 named + 1 mystery) ──
+    // Local secrets integration
+    const localSecrets = body.local_secrets || [];
+    const localSecretsInstruction = localSecrets.length > 0
+      ? `\n\nCOMMUNITY LOCAL SECRETS for this destination:\n${localSecrets.map((s: any) => `- [${s.category}] "${s.title}": ${s.description} (Location: ${s.location})`).join("\n")}\nWeave these community-submitted tips into the itinerary where relevant. Mark activities based on community tips with "community_pick": true.`
+      : "";
+
+    // ── MODE: SUGGEST ──
     if (mode === "suggest") {
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -133,7 +138,7 @@ ALL budget estimates must be in ${curr.code}.`
       return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // ── MODE: ITINERARY — generate full plan for chosen destination ──
+    // ── MODE: ITINERARY ──
     const chosenDestination = body.chosen_destination;
 
     const destinationInstruction = chosenDestination && chosenDestination !== "mystery"
@@ -157,14 +162,18 @@ ALL budget estimates must be in ${curr.code}.`
         messages: [
           {
             role: "system",
-            content: `You are an expert travel planner for MystiGo. Generate a complete trip plan.
+            content: `You are an expert travel planner for MystiGo. Generate a PREMIUM, highly detailed trip plan that feels personalized and unique.
 
 IMPORTANT: All prices MUST be in ${curr.code} (${curr.symbol}).
 
 ${destinationInstruction}
+${localSecretsInstruction}
 
 Climate preference: ${climate}. Match the destination's climate.
 Travel pace: ${pace}. If "Action-Packed", 5-6 activities/day. If "Slow & Relaxed", 2-3. If "Balanced", 3-4.
+
+CRITICAL: Each day MUST have 4 time blocks: Morning, Afternoon, Evening, Night.
+Each activity must feel UNIQUE and PREMIUM — include hidden gems, photo-worthy spots, local food recommendations, and insider tips.
 
 Return ONLY valid JSON:
 {
@@ -173,16 +182,89 @@ Return ONLY valid JSON:
   "duration": "X days",
   "currency": "${curr.code}",
   "currency_symbol": "${curr.symbol}",
-  "summary": "One enticing paragraph",
-  "days": [{ "day": 1, "title": "Catchy title", "activities": [{ "time": "9:00 AM", "activity": "Name", "description": "Details", "type": "sightseeing|food|adventure|relaxation|culture|transport", "cost_estimate": "${curr.symbol}XX" }] }],
+  "summary": "One enticing paragraph that makes the user excited",
+  "days": [
+    {
+      "day": 1,
+      "title": "Catchy creative title",
+      "activities": [
+        {
+          "time": "Morning",
+          "activity": "Activity Name",
+          "description": "Vivid, detailed description with insider tips",
+          "type": "sightseeing|food|adventure|relaxation|culture|transport",
+          "cost_estimate": "${curr.symbol}XX",
+          "hidden_gem": true,
+          "photo_spot": false,
+          "local_food_tip": "Try the local specialty here...",
+          "insider_tip": "Arrive early to avoid crowds...",
+          "community_pick": false
+        },
+        {
+          "time": "Afternoon",
+          "activity": "...",
+          "description": "...",
+          "type": "...",
+          "cost_estimate": "${curr.symbol}XX",
+          "hidden_gem": false,
+          "photo_spot": true,
+          "local_food_tip": "",
+          "insider_tip": "",
+          "community_pick": false
+        },
+        {
+          "time": "Evening",
+          "activity": "...",
+          "description": "...",
+          "type": "food",
+          "cost_estimate": "${curr.symbol}XX",
+          "hidden_gem": false,
+          "photo_spot": false,
+          "local_food_tip": "Must-try local dish...",
+          "insider_tip": "",
+          "community_pick": false
+        },
+        {
+          "time": "Night",
+          "activity": "...",
+          "description": "...",
+          "type": "relaxation",
+          "cost_estimate": "${curr.symbol}XX",
+          "hidden_gem": false,
+          "photo_spot": false,
+          "local_food_tip": "",
+          "insider_tip": "",
+          "community_pick": false
+        }
+      ]
+    }
+  ],
   "estimated_budget": "${curr.symbol}X,XXX",
   "best_season": "Month – Month",
   "flight_suggestion": { "from_hub": "Airport", "to": "Code", "estimated_price_range": "${curr.symbol}XXX – ${curr.symbol}XXX", "flight_duration": "X hours" },
   "hotel_suggestion": { "name": "Hotel", "area": "Zone", "style": "boutique|resort|villa|eco-lodge|apartment", "estimated_price_range": "${curr.symbol}XXX – ${curr.symbol}XXX per night" },
   "tips": ["tip1", "tip2", "tip3", "tip4"],
   "packing_essentials": ["item1", "item2", "item3"],
-  "local_phrases": ["Hello = word", "Thank you = word"]
-}`
+  "local_phrases": ["Hello = word", "Thank you = word"],
+  "budget_breakdown": {
+    "flights": "${curr.symbol}XXX",
+    "accommodation": "${curr.symbol}XXX",
+    "food": "${curr.symbol}XXX",
+    "activities": "${curr.symbol}XXX",
+    "transport": "${curr.symbol}XXX",
+    "miscellaneous": "${curr.symbol}XXX"
+  }
+}
+
+RULES:
+- hidden_gem: true for activities that are off-the-beaten-path, not touristy
+- photo_spot: true for Instagram-worthy, visually stunning locations
+- local_food_tip: non-empty string for food-related activities with specific dish/restaurant recommendations
+- insider_tip: non-empty string with pro tips locals would know
+- community_pick: true ONLY for activities sourced from community local secrets
+- Make each day feel DIFFERENT — vary activity types, energy levels, neighborhoods
+- Include at least 2 hidden gems and 2 photo spots per trip
+- Every evening should include a local food recommendation`
           },
           {
             role: "user",
