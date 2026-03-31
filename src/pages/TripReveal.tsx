@@ -38,7 +38,7 @@ interface DestinationOption {
   estimated_budget: string; best_for: string; mystery: boolean;
 }
 
-interface Activity { time: string; activity: string; description: string; type: string; cost_estimate?: string; }
+interface Activity { time: string; activity: string; description: string; type: string; cost_estimate?: string; hidden_gem?: boolean; photo_spot?: boolean; local_food_tip?: string; insider_tip?: string; community_pick?: boolean; }
 interface DayPlan { day: number; title: string; activities: Activity[]; }
 interface FlightSuggestion { from_hub: string; to: string; estimated_price_range: string; flight_duration: string; }
 interface HotelSuggestion { name: string; area: string; style: string; estimated_price_range: string; }
@@ -46,6 +46,7 @@ interface Itinerary {
   destination: string; destination_airport?: string; duration: string; summary: string;
   days: DayPlan[]; estimated_budget: string; best_season: string; tips: string[];
   packing_essentials?: string[]; flight_suggestion?: FlightSuggestion; hotel_suggestion?: HotelSuggestion;
+  budget_breakdown?: Record<string, string>;
 }
 
 interface RealFlight {
@@ -119,11 +120,28 @@ const TripReveal = () => {
     }
   };
 
+  const fetchLocalSecrets = async (destination: string) => {
+    try {
+      const city = destination.split(",")[0].trim().toLowerCase();
+      const { data } = await supabase
+        .from("local_secrets" as any)
+        .select("location, title, description, category")
+        .ilike("location" as any, `%${city}%`)
+        .limit(10);
+      return (data || []) as any[];
+    } catch {
+      return [];
+    }
+  };
+
   const generateItinerary = async (chosenDest: string) => {
     setPhase("building");
     try {
+      // Fetch local secrets for the destination
+      const secrets = chosenDest !== "mystery" ? await fetchLocalSecrets(chosenDest) : [];
+      
       const { data, error: fnError } = await supabase.functions.invoke("generate-itinerary", {
-        body: { ...quizData, mode: "itinerary", chosen_destination: chosenDest },
+        body: { ...quizData, mode: "itinerary", chosen_destination: chosenDest, local_secrets: secrets },
       });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
@@ -433,7 +451,7 @@ const TripReveal = () => {
                   const Icon = activityIcons[act.type] || MapPin;
                   const colorClass = activityTypeColors[act.type] || "bg-gray-50 text-gray-600 border-gray-200";
                   return (
-                    <div key={j} className="flex gap-4 mb-5 last:mb-0">
+                    <div key={j} className="flex gap-4 mb-6 last:mb-0">
                       <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                         <Icon className="w-4 h-4 text-gray-600" />
                       </div>
@@ -442,9 +460,14 @@ const TripReveal = () => {
                           <span className="text-xs font-mono text-gray-400 flex items-center gap-1"><Clock className="w-3 h-3" />{act.time}</span>
                           <span className={`text-[10px] font-semibold border rounded-full px-2 py-0.5 capitalize ${colorClass}`}>{act.type}</span>
                           {act.cost_estimate && <span className="text-[10px] text-gray-400">{act.cost_estimate}</span>}
+                          {act.hidden_gem && <Badge className="bg-purple-100 text-purple-700 border-0 text-[9px] gap-0.5 px-1.5 py-0"><Sparkles className="w-2.5 h-2.5" />Hidden Gem</Badge>}
+                          {act.photo_spot && <Badge className="bg-blue-100 text-blue-700 border-0 text-[9px] gap-0.5 px-1.5 py-0"><Camera className="w-2.5 h-2.5" />📸 Photo Spot</Badge>}
+                          {act.community_pick && <Badge className="bg-green-100 text-green-700 border-0 text-[9px] gap-0.5 px-1.5 py-0">🤝 Community Pick</Badge>}
                         </div>
                         <p className="font-bold text-sm text-gray-900">{act.activity}</p>
                         <p className="text-xs text-gray-500 mt-0.5">{act.description}</p>
+                        {act.local_food_tip && <p className="text-xs text-orange-600 mt-1 flex items-center gap-1"><UtensilsCrossed className="w-3 h-3" />{act.local_food_tip}</p>}
+                        {act.insider_tip && <p className="text-xs text-purple-600 mt-1 italic">💡 {act.insider_tip}</p>}
                       </div>
                     </div>
                   );

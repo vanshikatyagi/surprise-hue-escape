@@ -29,6 +29,11 @@ interface Activity {
   description: string;
   type: string;
   cost_estimate?: string;
+  hidden_gem?: boolean;
+  photo_spot?: boolean;
+  local_food_tip?: string;
+  insider_tip?: string;
+  community_pick?: boolean;
 }
 
 interface DayPlan {
@@ -423,9 +428,14 @@ const ItineraryView = () => {
                               {act.cost_estimate && (
                                 <span className="text-[10px] text-gray-400">{act.cost_estimate}</span>
                               )}
+                              {act.hidden_gem && <span className="text-[9px] bg-purple-100 text-purple-700 rounded-full px-1.5 py-0.5 font-semibold">✨ Hidden Gem</span>}
+                              {act.photo_spot && <span className="text-[9px] bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5 font-semibold">📸 Photo Spot</span>}
+                              {act.community_pick && <span className="text-[9px] bg-green-100 text-green-700 rounded-full px-1.5 py-0.5 font-semibold">🤝 Community</span>}
                             </div>
                             <p className="font-bold text-sm text-gray-900">{act.activity}</p>
                             <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{act.description}</p>
+                            {act.local_food_tip && <p className="text-xs text-orange-600 mt-1">🍴 {act.local_food_tip}</p>}
+                            {act.insider_tip && <p className="text-xs text-purple-600 mt-1 italic">💡 {act.insider_tip}</p>}
                           </div>
                         </div>
                       );

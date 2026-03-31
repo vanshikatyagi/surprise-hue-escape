@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Moon, LogOut, User } from "lucide-react";
+import { Menu, X, Moon, LogOut, User, MapPin } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { label: "FEATURES", target: "features" },
   { label: "DESTINATIONS", target: "destinations" },
+  { label: "LOCAL SECRETS", href: "/local-secrets" },
   { label: "ABOUT", target: "about" },
   { label: "CONTACT", target: "contact" },
 ];
@@ -26,6 +27,15 @@ const Header = () => {
       }, 300);
     } else {
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleNavClick = (link: typeof navLinks[0]) => {
+    setMobileOpen(false);
+    if ('href' in link && link.href) {
+      navigate(link.href);
+    } else if ('target' in link && link.target) {
+      scrollToSection(link.target);
     }
   };
 
@@ -53,8 +63,8 @@ const Header = () => {
           <nav className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
               <button
-                key={link.target}
-                onClick={() => scrollToSection(link.target)}
+                key={link.label}
+                onClick={() => handleNavClick(link)}
                 className="text-white/80 hover:text-white text-sm font-medium tracking-wide transition-colors"
               >
                 {link.label}
@@ -94,8 +104,8 @@ const Header = () => {
           <nav className="md:hidden mt-4 pb-4 space-y-3">
             {navLinks.map((link) => (
               <button
-                key={link.target}
-                onClick={() => scrollToSection(link.target)}
+                key={link.label}
+                onClick={() => handleNavClick(link)}
                 className="block text-white/80 hover:text-white text-sm font-medium w-full text-left"
               >
                 {link.label}
