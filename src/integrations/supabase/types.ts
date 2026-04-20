@@ -56,6 +56,86 @@ export type Database = {
         }
         Relationships: []
       }
+      buddy_requests: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          receiver_buddy_id: string
+          receiver_id: string
+          sender_id: string
+          status: Database["public"]["Enums"]["buddy_request_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          receiver_buddy_id: string
+          receiver_id: string
+          sender_id: string
+          status?: Database["public"]["Enums"]["buddy_request_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          receiver_buddy_id?: string
+          receiver_id?: string
+          sender_id?: string
+          status?: Database["public"]["Enums"]["buddy_request_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buddy_requests_receiver_buddy_id_fkey"
+            columns: ["receiver_buddy_id"]
+            isOneToOne: false
+            referencedRelation: "travel_buddies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exploration_proofs: {
+        Row: {
+          created_at: string
+          experience: string
+          id: string
+          image_url: string | null
+          location: string
+          rating: number | null
+          title: string
+          updated_at: string
+          user_id: string
+          visited_on: string | null
+        }
+        Insert: {
+          created_at?: string
+          experience: string
+          id?: string
+          image_url?: string | null
+          location: string
+          rating?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+          visited_on?: string | null
+        }
+        Update: {
+          created_at?: string
+          experience?: string
+          id?: string
+          image_url?: string | null
+          location?: string
+          rating?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          visited_on?: string | null
+        }
+        Relationships: []
+      }
       flights: {
         Row: {
           airline: string
@@ -280,14 +360,88 @@ export type Database = {
         }
         Relationships: []
       }
+      travel_buddies: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          destination: string
+          display_name: string
+          id: string
+          interests: string[]
+          is_active: boolean
+          travel_end: string
+          travel_start: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          destination: string
+          display_name: string
+          id?: string
+          interests?: string[]
+          is_active?: boolean
+          travel_end: string
+          travel_start: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          destination?: string
+          display_name?: string
+          id?: string
+          interests?: string[]
+          is_active?: boolean
+          travel_end?: string
+          travel_start?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
+      buddy_request_status: "pending" | "accepted" | "declined"
       local_secret_category:
         | "hidden_place"
         | "food_spot"
@@ -420,6 +574,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
+      buddy_request_status: ["pending", "accepted", "declined"],
       local_secret_category: [
         "hidden_place",
         "food_spot",

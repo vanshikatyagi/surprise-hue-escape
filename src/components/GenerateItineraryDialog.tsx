@@ -17,6 +17,7 @@ const GenerateItineraryDialog = ({ open, onOpenChange }: Props) => {
   const [destination, setDestination] = useState("");
   const [budget, setBudget] = useState("");
   const [duration, setDuration] = useState("");
+  const [vibe, setVibe] = useState("");
 
   const handleGenerate = () => {
     if (!destination.trim()) return;
@@ -24,18 +25,19 @@ const GenerateItineraryDialog = ({ open, onOpenChange }: Props) => {
       state: {
         quizData: {
           departure_city: "",
-          travel_style: ["Cultural", "Adventure"],
+          travel_style: vibe ? [vibe] : ["Cultural", "Adventure"],
           budget: budget || "Comfortable",
           trip_duration: duration || "5-7 days",
           travel_companions: "Solo",
           climate_preference: [],
           activity_preference: [],
-          accommodation_type: ["Hotel"],
+          accommodation_type: ["Boutique Hotel"],
           currency: "USD ($)",
           travel_scope: "Surprise Me",
           travel_pace: "Balanced",
         },
         directDestination: destination.trim(),
+        flow: "dashboard",
       },
     });
     onOpenChange(false);
@@ -47,10 +49,10 @@ const GenerateItineraryDialog = ({ open, onOpenChange }: Props) => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Map className="w-5 h-5 text-accent" />
-            Generate Itinerary
+            Generate Hidden-Gem Itinerary
           </DialogTitle>
           <DialogDescription>
-            Enter your destination and preferences to generate a personalized itinerary.
+            Tell us your destination — we'll craft a hour-by-hour plan with secret spots.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
@@ -58,7 +60,7 @@ const GenerateItineraryDialog = ({ open, onOpenChange }: Props) => {
             <Label htmlFor="dest" className="text-sm font-medium">Destination *</Label>
             <Input
               id="dest"
-              placeholder="e.g. Tokyo, Japan"
+              placeholder="e.g. Spiti Valley, Faroe Islands"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
               className="mt-1"
@@ -70,10 +72,10 @@ const GenerateItineraryDialog = ({ open, onOpenChange }: Props) => {
               <Select value={budget} onValueChange={setBudget}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder="Optional" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Budget-Friendly">Budget</SelectItem>
+                  <SelectItem value="Budget Explorer">Budget</SelectItem>
                   <SelectItem value="Comfortable">Comfortable</SelectItem>
+                  <SelectItem value="Premium">Premium</SelectItem>
                   <SelectItem value="Luxury">Luxury</SelectItem>
-                  <SelectItem value="Ultra-Luxury">Ultra-Luxury</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -90,10 +92,22 @@ const GenerateItineraryDialog = ({ open, onOpenChange }: Props) => {
               </Select>
             </div>
           </div>
+          <div>
+            <Label className="text-sm font-medium">Vibe</Label>
+            <Select value={vibe} onValueChange={setVibe}>
+              <SelectTrigger className="mt-1"><SelectValue placeholder="Optional" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Adventure & Outdoors">Adventure & Outdoors</SelectItem>
+                <SelectItem value="Beach & Relaxation">Beach & Relaxation</SelectItem>
+                <SelectItem value="Culture & History">Culture & History</SelectItem>
+                <SelectItem value="Food & Photography">Food & Photography</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button
             onClick={handleGenerate}
             disabled={!destination.trim()}
-            className="w-full bg-accent text-black hover:bg-accent/90 font-bold gap-2"
+            className="w-full bg-accent text-accent-foreground hover:bg-accent/90 font-bold gap-2"
           >
             <Sparkles className="w-4 h-4" />
             Generate My Itinerary
