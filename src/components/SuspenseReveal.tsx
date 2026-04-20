@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 
 const STAGES = [
   { label: "Decoding your travel DNA", emoji: "🧬" },
