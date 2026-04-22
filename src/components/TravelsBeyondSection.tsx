@@ -73,7 +73,7 @@ const TravelsBeyondSection = () => {
           <Card className="bg-black border-0 overflow-hidden group cursor-pointer rounded-xl">
             <div className="relative h-56 lg:h-64">
               <img
-                src="https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=800"
+                src="https://images.unsplash.com/photo-1431274172761-fca41d930114?w=800&auto=format&fit=crop"
                 alt="France"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-xl"
               />
