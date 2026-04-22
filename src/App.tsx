@@ -17,6 +17,11 @@ import TripReveal from "./pages/TripReveal";
 import SharedItinerary from "./pages/SharedItinerary";
 import NotFound from "./pages/NotFound";
 import LocalSecrets from "./pages/LocalSecrets";
+import MapExplorer from "./pages/MapExplorer";
+import TravelBuddies from "./pages/TravelBuddies";
+import ExplorationProof from "./pages/ExplorationProof";
+import AdminPanel from "./pages/AdminPanel";
+import TravelChatbot from "./components/TravelChatbot";
 
 const queryClient = new QueryClient();
 
@@ -38,8 +43,13 @@ const App = () => (
             <Route path="/itinerary" element={<ProtectedRoute><ItineraryView /></ProtectedRoute>} />
             <Route path="/shared/:token" element={<SharedItinerary />} />
             <Route path="/local-secrets" element={<LocalSecrets />} />
+            <Route path="/explore" element={<MapExplorer />} />
+            <Route path="/buddies" element={<TravelBuddies />} />
+            <Route path="/proofs" element={<ExplorationProof />} />
+            <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <TravelChatbot />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
