@@ -205,7 +205,7 @@ const TravelChatbot = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about any destination..."
-                className="flex-1 rounded-full border-gray-200 text-sm bg-gray-50"
+                className="flex-1 rounded-full border-gray-200 text-sm bg-white text-gray-900 placeholder:text-gray-400"
                 disabled={isLoading}
               />
               <Button
