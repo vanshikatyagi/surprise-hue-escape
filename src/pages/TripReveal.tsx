@@ -77,6 +77,7 @@ const TripReveal = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const quizData = (location.state as any)?.quizData;
+  const directDestination = (location.state as any)?.directDestination;
 
   const [phase, setPhase] = useState<Phase>("generating");
   const [destinations, setDestinations] = useState<DestinationOption[]>([]);
@@ -96,7 +97,12 @@ const TripReveal = () => {
   useEffect(() => {
     if (!user) { navigate("/auth"); return; }
     if (!quizData) { navigate("/#quiz"); return; }
-    suggestDestinations();
+    // Dashboard flow: user typed a destination → skip mystery selection
+    if (directDestination) {
+      generateItinerary(directDestination);
+    } else {
+      suggestDestinations();
+    }
   }, []);
 
   const currencySymbol = (() => {

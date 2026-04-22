@@ -41,6 +41,10 @@
     --card-foreground: 220 25% 12%;
     --card-border: 200 20% 88%;
 
+    /* Popover (dropdowns, selects, etc.) */
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 12%;
+
     /* Interactive */
     --muted: 200 25% 94%;
     --muted-foreground: 220 12% 42%;
@@ -88,6 +92,9 @@
     --card: 220 25% 12%;
     --card-foreground: 0 0% 96%;
     --card-border: 220 15% 25%;
+
+    --popover: 220 25% 14%;
+    --popover-foreground: 0 0% 96%;
 
     --glass: 220 25% 14% / 0.65;
     --glass-border: 184 30% 50% / 0.18;
