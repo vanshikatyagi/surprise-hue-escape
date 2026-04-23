@@ -64,7 +64,15 @@ const FlightBooking = () => {
       });
       if (error) throw error;
       setBookedFlights(prev => new Set(prev).add(index));
-      toast({ title: "Flight Booked! ✈️", description: `${flight.from} → ${flight.to} confirmed. Check your dashboard!` });
+      // Open Skyscanner with prefilled origin → destination → real booking
+      const fromMatch = flight.from.match(/\(([A-Z]{3})\)/);
+      const toMatch = flight.to.match(/\(([A-Z]{3})\)/);
+      const fromCode = fromMatch ? fromMatch[1] : flight.from.slice(0, 3).toUpperCase();
+      const toCode = toMatch ? toMatch[1] : flight.to.slice(0, 3).toUpperCase();
+      const yymmdd = departDate.toISOString().slice(2, 10).replace(/-/g, "");
+      const skyUrl = `https://www.skyscanner.com/transport/flights/${fromCode}/${toCode}/${yymmdd}/`;
+      window.open(skyUrl, "_blank", "noopener,noreferrer");
+      toast({ title: "Opening Skyscanner ✈️", description: `Complete booking for ${flight.from} → ${flight.to}. We saved it to your dashboard.` });
     } catch (e: any) {
       toast({ title: "Booking failed", description: e.message, variant: "destructive" });
     } finally { setBooking(null); }
