@@ -9,6 +9,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Lock, Sparkles, Loader2 } from "lucide-react";
 
+// Forces the map to recalculate its size after mount — fixes blank/grey tiles
+const InvalidateOnMount = () => {
+  const map = useMap();
+  useEffect(() => {
+    const t = setTimeout(() => map.invalidateSize(), 200);
+    return () => clearTimeout(t);
+  }, [map]);
+  return null;
+};
+
 // Fix default marker icon paths
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -86,8 +96,9 @@ const MapExplorer = () => {
         ) : (
           <Card className="overflow-hidden rounded-2xl shadow-card border-border">
             <CardContent className="p-0">
-              <div className="h-[70vh] w-full">
-                <MapContainer center={[20, 0]} zoom={2} className="h-full w-full" worldCopyJump>
+              <div style={{ height: "70vh", width: "100%" }}>
+                <MapContainer center={[20, 0]} zoom={2} style={{ height: "100%", width: "100%" }} worldCopyJump>
+                  <InvalidateOnMount />
                   <TileLayer
                     attribution='&copy; OpenStreetMap'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
