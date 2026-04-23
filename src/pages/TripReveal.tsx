@@ -509,9 +509,21 @@ const TripReveal = () => {
               </Card>
             )}
           </div>
-          <Button onClick={() => { setPhase("flights"); searchFlights(); }} className="w-full bg-accent text-black hover:bg-accent/90 rounded-full py-6 text-base font-bold gap-2">
-            <Plane className="w-5 h-5" /> Find Flights to {itinerary.destination.split(",")[0]} <ArrowRight className="w-5 h-5" />
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              onClick={() => {
+                exportItineraryPdf(itinerary, quizData);
+                toast({ title: "Itinerary exported 📄", description: "Your day-wise PDF is downloading now." });
+              }}
+              variant="outline"
+              className="sm:w-auto rounded-full py-6 px-6 text-base font-bold gap-2 border-2"
+            >
+              <Download className="w-5 h-5" /> Export PDF
+            </Button>
+            <Button onClick={() => { setPhase("flights"); searchFlights(); }} className="flex-1 bg-accent text-black hover:bg-accent/90 rounded-full py-6 text-base font-bold gap-2">
+              <Plane className="w-5 h-5" /> Find Flights to {itinerary.destination.split(",")[0]} <ArrowRight className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </div>
     );
