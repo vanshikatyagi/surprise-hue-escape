@@ -9,6 +9,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Lock, Sparkles, Loader2 } from "lucide-react";
 
+// Forces the map to recalculate its size after mount — fixes blank/grey tiles
+const InvalidateOnMount = () => {
+  const map = useMap();
+  useEffect(() => {
+    const t = setTimeout(() => map.invalidateSize(), 200);
+    return () => clearTimeout(t);
+  }, [map]);
+  return null;
+};
+
 // Fix default marker icon paths
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
