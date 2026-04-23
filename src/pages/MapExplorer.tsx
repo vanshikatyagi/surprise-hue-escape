@@ -96,8 +96,9 @@ const MapExplorer = () => {
         ) : (
           <Card className="overflow-hidden rounded-2xl shadow-card border-border">
             <CardContent className="p-0">
-              <div className="h-[70vh] w-full">
-                <MapContainer center={[20, 0]} zoom={2} className="h-full w-full" worldCopyJump>
+              <div style={{ height: "70vh", width: "100%" }}>
+                <MapContainer center={[20, 0]} zoom={2} style={{ height: "100%", width: "100%" }} worldCopyJump>
+                  <InvalidateOnMount />
                   <TileLayer
                     attribution='&copy; OpenStreetMap'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
