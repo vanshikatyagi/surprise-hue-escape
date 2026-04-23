@@ -115,7 +115,7 @@ const TripReveal = () => {
   const suggestDestinations = async () => {
     try {
       const { data, error: fnError } = await supabase.functions.invoke("generate-itinerary", {
-        body: { ...quizData, mode: "suggest" },
+        body: { ...quizData, mode: "suggest", flow: "reveal" },
       });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
@@ -148,7 +148,7 @@ const TripReveal = () => {
       const secrets = chosenDest !== "mystery" ? await fetchLocalSecrets(chosenDest) : [];
       
       const { data, error: fnError } = await supabase.functions.invoke("generate-itinerary", {
-        body: { ...quizData, mode: "itinerary", chosen_destination: chosenDest, local_secrets: secrets },
+        body: { ...quizData, mode: "itinerary", flow: directDestination ? "dashboard" : "reveal", chosen_destination: chosenDest, local_secrets: secrets },
       });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
@@ -224,6 +224,7 @@ const TripReveal = () => {
     setBookingFlight(true);
     try {
       const departDate = new Date(Date.now() + 14 * 86400000);
+      // Save record for the dashboard
       await supabase.from("flights").insert({
         user_id: user!.id, airline: flight.airline, flight_number: flight.flight_number,
         departure_city: flight.from, arrival_city: flight.to,
@@ -231,7 +232,13 @@ const TripReveal = () => {
         arrival_date: new Date(departDate.getTime() + 12 * 3600000).toISOString(),
         price: flight.price, class: flight.class,
       });
-      toast({ title: "Flight Booked! ✈️", description: `${flight.from} → ${flight.to}` });
+      // Open Skyscanner with prefilled search → real booking
+      const fromCode = (flight.from || "").slice(0, 3).toUpperCase();
+      const toCode = (flight.to || itinerary?.destination_airport || "").slice(0, 3).toUpperCase();
+      const yymmdd = departDate.toISOString().slice(2, 10).replace(/-/g, "");
+      const skyUrl = `https://www.skyscanner.com/transport/flights/${fromCode}/${toCode}/${yymmdd}/`;
+      window.open(skyUrl, "_blank", "noopener,noreferrer");
+      toast({ title: "Opening Skyscanner ✈️", description: "Complete your booking on Skyscanner. We saved this trip to your dashboard." });
     } catch (e: any) {
       toast({ title: "Booking failed", description: e.message, variant: "destructive" });
     } finally { setBookingFlight(false); }
@@ -247,7 +254,11 @@ const TripReveal = () => {
         check_in: cin, check_out: cout, room_type: hotel.room_type,
         price_per_night: hotel.price, total_price: hotel.price * 7, image_url: hotel.image_url,
       });
-      toast({ title: "Hotel Booked! 🏨", description: hotel.name });
+      // Open Booking.com with prefilled search → real booking
+      const dest = encodeURIComponent(`${hotel.name} ${hotel.city}`);
+      const bookingUrl = `https://www.booking.com/searchresults.html?ss=${dest}&checkin=${cin}&checkout=${cout}&group_adults=2`;
+      window.open(bookingUrl, "_blank", "noopener,noreferrer");
+      toast({ title: "Opening Booking.com 🏨", description: "Complete your reservation on Booking.com. We saved this trip to your dashboard." });
     } catch (e: any) {
       toast({ title: "Booking failed", description: e.message, variant: "destructive" });
     } finally { setBookingHotel(false); }
