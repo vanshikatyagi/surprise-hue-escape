@@ -16,6 +16,8 @@ import {
 import Header from "@/components/Header";
 import BudgetBreakdown from "@/components/BudgetBreakdown";
 import SuspenseReveal from "@/components/SuspenseReveal";
+import { Download } from "lucide-react";
+import { exportItineraryPdf } from "@/lib/exportItineraryPdf";
 
 const activityIcons: Record<string, React.ElementType> = {
   sightseeing: Camera, food: UtensilsCrossed, adventure: Mountain,
