@@ -15,6 +15,8 @@ import {
   Globe, Sun, Snowflake, CloudRain, Thermometer,
   Zap, Coffee, Gauge, Timer,
   Plane, Flag, Search, RotateCcw, MapPinOff,
+  Salad, Beef, Wheat, Leaf,
+  Wine, Beer, Coffee as CoffeeIcon, GlassWater,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -166,6 +168,32 @@ const allSteps: QuizStep[] = [
       { label: "Water & Ocean", description: "Diving, sailing, island hopping", icon: Ship },
       { label: "Cycling & Trekking", description: "Active explorations on foot", icon: Bike },
       { label: "Arts & Wellness", description: "Galleries, yoga, spas", icon: Palette },
+    ],
+  },
+  {
+    question: "Any food preferences?",
+    subtitle: "We'll personalize restaurant picks & local food tips",
+    key: "food_preference",
+    type: "options",
+    multiSelect: true,
+    options: [
+      { label: "No restrictions — I eat everything", description: "Surprise me with local specialties", icon: Beef },
+      { label: "Vegetarian", description: "Plant-forward meals only", icon: Salad },
+      { label: "Vegan", description: "100% plant-based", icon: Leaf },
+      { label: "Gluten-free", description: "Avoid wheat & gluten", icon: Wheat },
+    ],
+  },
+  {
+    question: "What about beverages?",
+    subtitle: "Pick all that match your vibe",
+    key: "beverage_preference",
+    type: "options",
+    multiSelect: true,
+    options: [
+      { label: "Local Wine & Cocktails", description: "Vineyards, sunset cocktails, local spirits", icon: Wine },
+      { label: "Craft Beer & Breweries", description: "Local craft brews & beer halls", icon: Beer },
+      { label: "Specialty Coffee & Tea", description: "Hidden cafés, tea ceremonies, latte art", icon: CoffeeIcon },
+      { label: "Non-alcoholic only", description: "Mocktails, juices, fresh drinks", icon: GlassWater },
     ],
   },
   {
