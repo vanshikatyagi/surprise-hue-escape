@@ -154,6 +154,36 @@ const TripReveal = () => {
       });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
+
+      // ── Ensure day count matches requested duration (pad if AI under-returned) ──
+      const durStr = String(getVal(quizData.trip_duration, "5 days")).toLowerCase();
+      let wantDays = 5;
+      const wkM = durStr.match(/(\d+)\s*week/);
+      const dyM = durStr.match(/(\d+)\s*[-\s]?day/);
+      if (wkM) wantDays = parseInt(wkM[1]) * 7;
+      else if (dyM) wantDays = parseInt(dyM[1]);
+      wantDays = Math.max(2, Math.min(wantDays, 14));
+
+      const got: DayPlan[] = Array.isArray(data.days) ? data.days : [];
+      if (got.length < wantDays) {
+        const last = got[got.length - 1];
+        for (let d = got.length + 1; d <= wantDays; d++) {
+          got.push({
+            day: d,
+            title: `Day ${d} — Free Exploration`,
+            activities: last?.activities?.slice(0, 3).map((a) => ({
+              ...a,
+              activity: `${a.activity} (alt area)`,
+              description: "Free day to wander and discover new spots based on your morning mood.",
+            })) || [
+              { time: "Morning", activity: "Slow start & local breakfast", description: "Wake up at your pace and find a local café.", type: "food" },
+              { time: "Afternoon", activity: "Choose your own adventure", description: "Pick from the highlights of previous days you loved most.", type: "sightseeing" },
+              { time: "Evening", activity: "Sunset walk & dinner", description: "End the day relaxed with a long dinner.", type: "relaxation" },
+            ],
+          });
+        }
+        data.days = got.map((d, i) => ({ ...d, day: i + 1 }));
+      }
       setItinerary(data);
 
       const { data: quiz } = await supabase.from("quiz_results")
