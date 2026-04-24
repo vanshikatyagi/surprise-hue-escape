@@ -628,7 +628,7 @@ const TripReveal = () => {
                 </Card>
               ))}
               <div className="flex gap-3 mt-6">
-                <Button disabled={selectedHotel === null || bookingHotel} onClick={async () => { if (selectedHotel !== null) { await bookHotel(hotels[selectedHotel]); setPhase("summary"); } }} className="flex-1 bg-accent text-black hover:bg-accent/90 rounded-full py-6 font-bold gap-2">
+                <Button disabled={selectedHotel === null || bookingHotel} onClick={async () => { if (selectedHotel !== null) { await bookHotel(hotels[selectedHotel]); setPhase("summary"); } }} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-full py-6 font-bold gap-2">
                   {bookingHotel ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}{bookingHotel ? "Booking..." : "Book Selected Hotel"}
                 </Button>
                 <Button variant="outline" onClick={() => setPhase("summary")} className="rounded-full px-6 py-6 font-bold gap-2">Skip <ChevronRight className="w-4 h-4" /></Button>
