@@ -171,6 +171,15 @@ ALL budget estimates in ${curr.code}. Hidden gems ONLY.`,
     const accommodation = Array.isArray(body.accommodation_type) ? body.accommodation_type.join(", ") : (body.accommodation_type || "boutique");
     const seed = Math.floor(Math.random() * 100000);
 
+    // Extract explicit day count from trip_duration (e.g. "7 days", "2 weeks", "5-day trip")
+    const durationStr = String(tripDuration || "").toLowerCase();
+    let numDays = 5;
+    const weekMatch = durationStr.match(/(\d+)\s*week/);
+    const dayMatch = durationStr.match(/(\d+)\s*[-\s]?day/);
+    if (weekMatch) numDays = parseInt(weekMatch[1]) * 7;
+    else if (dayMatch) numDays = parseInt(dayMatch[1]);
+    numDays = Math.max(2, Math.min(numDays, 14));
+
     // Two distinct system tones for the two flows so itineraries differ even for same place
     const flowTone = isReveal
       ? `TONE: Cinematic, suspenseful, narrative — this is a REVEALED MYSTERY itinerary. Use evocative storytelling. Emphasize secret spots, dawn moments, things only locals know. Hour-by-hour structure.`
@@ -204,16 +213,22 @@ Each activity must include a "duration" field (e.g. "1.5 hours").
 Include at least one café/local-food stop per day with the specific dish to order.
 Highlight HIDDEN/SECRET spots (avoid touristy clichés). Mark them with "hidden_gem": true.
 
+🔴 CRITICAL — DAY COUNT:
+- The trip duration is "${tripDuration}" which means EXACTLY ${numDays} DAYS.
+- The "days" array MUST contain EXACTLY ${numDays} day objects (day 1 through day ${numDays}).
+- DO NOT return fewer days. Each day must be unique with different activities, areas, and themes.
+- If you return fewer than ${numDays} days the response will be REJECTED.
+
 Return ONLY valid JSON:
 {
   "destination": "Hidden Region, Country",
   "destination_airport": "XXX",
-  "duration": "X days",
+  "duration": "${numDays} days",
   "currency": "${curr.code}",
   "currency_symbol": "${curr.symbol}",
   "summary": "One enticing 2-3 sentence paragraph",
   "vibe_score": 95,
-  "days": [
+  "days": [ /* EXACTLY ${numDays} DAY OBJECTS — day 1, day 2, ..., day ${numDays} */
     {
       "day": 1,
       "title": "Catchy creative title",
