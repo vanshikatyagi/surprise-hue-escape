@@ -42,8 +42,9 @@ serve(async (req) => {
     const revisitPref = Array.isArray(body.revisit_preference) ? body.revisit_preference[0] : (body.revisit_preference || "");
     const revisitPlace = body.revisit_place || "";
 
-    const exclusionInstruction = visitedPlaces
-      ? `User has already visited: ${visitedPlaces}. Do NOT suggest any of these.`
+    const excludeDests: string[] = Array.isArray(body.exclude_destinations) ? body.exclude_destinations : [];
+    const exclusionInstruction = (visitedPlaces || excludeDests.length)
+      ? `User has already visited / seen: ${[visitedPlaces, ...excludeDests].filter(Boolean).join(", ")}. Do NOT suggest any of these — pick a meaningfully different hidden gem.`
       : "";
 
     const revisitInstruction = revisitPref === "Yes, I'd revisit" && revisitPlace

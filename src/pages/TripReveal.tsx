@@ -11,7 +11,7 @@ import {
   Star, Clock, ChevronRight, Check, Sparkles, Globe,
   ArrowRight, Package, Camera, UtensilsCrossed, Mountain,
   Palmtree, Landmark, Navigation, CheckCircle2, Backpack,
-  HelpCircle, Eye, Lock,
+  HelpCircle, Eye, Lock, RefreshCw, Image as ImageIcon, Target,
 } from "lucide-react";
 import Header from "@/components/Header";
 import BudgetBreakdown from "@/components/BudgetBreakdown";
@@ -95,6 +95,8 @@ const TripReveal = () => {
   const [selectedHotel, setSelectedHotel] = useState<number | null>(null);
   const [bookingFlight, setBookingFlight] = useState(false);
   const [bookingHotel, setBookingHotel] = useState(false);
+  const [previousDestinations, setPreviousDestinations] = useState<string[]>([]);
+  const [exploringAlternative, setExploringAlternative] = useState(false);
 
   useEffect(() => {
     if (!user) { navigate("/auth"); return; }
@@ -143,14 +145,21 @@ const TripReveal = () => {
     }
   };
 
-  const generateItinerary = async (chosenDest: string) => {
+  const generateItinerary = async (chosenDest: string, excludeList: string[] = []) => {
     setPhase("building");
     try {
       // Fetch local secrets for the destination
       const secrets = chosenDest !== "mystery" ? await fetchLocalSecrets(chosenDest) : [];
-      
+
       const { data, error: fnError } = await supabase.functions.invoke("generate-itinerary", {
-        body: { ...quizData, mode: "itinerary", flow: directDestination ? "dashboard" : "reveal", chosen_destination: chosenDest, local_secrets: secrets },
+        body: {
+          ...quizData,
+          mode: "itinerary",
+          flow: directDestination ? "dashboard" : "reveal",
+          chosen_destination: chosenDest,
+          local_secrets: secrets,
+          exclude_destinations: excludeList,
+        },
       });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
@@ -185,6 +194,10 @@ const TripReveal = () => {
         data.days = got.map((d, i) => ({ ...d, day: i + 1 }));
       }
       setItinerary(data);
+      // Track this destination so "Explore another" excludes it next time
+      if (data.destination) {
+        setPreviousDestinations((prev) => Array.from(new Set([...prev, data.destination])));
+      }
 
       const { data: quiz } = await supabase.from("quiz_results")
         .select("id").eq("user_id", user!.id)
@@ -210,6 +223,21 @@ const TripReveal = () => {
     setSelectedDest(dest.id);
     const chosenName = dest.mystery ? "mystery" : dest.name;
     generateItinerary(chosenName);
+  };
+
+  const exploreAnotherOption = async () => {
+    if (!itinerary) return;
+    setExploringAlternative(true);
+    const newExclude = Array.from(new Set([...previousDestinations, itinerary.destination]));
+    setPreviousDestinations(newExclude);
+    try {
+      await generateItinerary("mystery", newExclude);
+      toast({ title: "Found a new option ✨", description: "Here's another hidden gem matched to your vibe." });
+    } catch (e: any) {
+      toast({ title: "Couldn't fetch alternative", description: e.message, variant: "destructive" });
+    } finally {
+      setExploringAlternative(false);
+    }
   };
 
   const searchFlights = async () => {
@@ -444,38 +472,113 @@ const TripReveal = () => {
 
   // ── DESTINATION REVEAL ──
   if (phase === "destination") {
+    const cityQuery = encodeURIComponent(itinerary.destination.split(",")[0].trim());
+    const heroImg = `https://source.unsplash.com/1600x900/?${cityQuery},travel,landscape`;
+    const hotelImg = `https://source.unsplash.com/800x600/?${cityQuery},hotel,room`;
+    const foodImg = `https://source.unsplash.com/800x600/?${cityQuery},food,local`;
+    // Match score: prefer AI vibe_score, fall back to chosen card score, else 90
+    const matchScore = (itinerary as any).vibe_score
+      || destinations.find((d) => d.id === selectedDest)?.match_score
+      || 92;
+
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="h-[52px]" />
-        <div className="flex flex-col items-center justify-center min-h-[80vh] gap-8 px-4 animate-fade-in-up">
-          <Badge className="bg-accent text-black border-0 text-xs font-bold uppercase tracking-widest px-5 py-2">
+
+        {/* HERO IMAGE */}
+        <div className="relative w-full h-[42vh] min-h-[300px] overflow-hidden">
+          <img
+            src={heroImg}
+            alt={itinerary.destination}
+            className="w-full h-full object-cover"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1600"; }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+          <Badge className="absolute top-6 left-6 bg-accent text-accent-foreground border-0 text-xs font-bold uppercase tracking-widest px-4 py-1.5">
             🎯 Your Destination
           </Badge>
-          <h1 className="text-5xl md:text-7xl font-black text-foreground text-center tracking-tight">
+        </div>
+
+        <div className="container mx-auto px-4 -mt-20 relative z-10 flex flex-col items-center gap-6 pb-12 animate-fade-in-up">
+          <h1 className="text-4xl md:text-6xl font-black text-foreground text-center tracking-tight drop-shadow-lg">
             {itinerary.destination}
           </h1>
           <p className="text-muted-foreground text-center max-w-xl leading-relaxed">{itinerary.summary}</p>
-          <div className="flex flex-wrap justify-center gap-4">
+
+          {/* Confidence indicators */}
+          <div className="flex flex-wrap justify-center gap-3">
+            <Badge className="bg-primary/15 text-primary border border-primary/30 text-xs gap-1.5 py-1.5 px-3">
+              <Target className="w-3.5 h-3.5" /> Matches your preferences: {matchScore}%
+            </Badge>
+            <Badge className="bg-green-500/15 text-green-400 border border-green-500/30 text-xs gap-1.5 py-1.5 px-3">
+              <Check className="w-3.5 h-3.5" /> Within your budget
+            </Badge>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-3">
             <Badge variant="outline" className="text-sm gap-2 py-2 px-4"><Calendar className="w-4 h-4 text-accent" />{itinerary.duration}</Badge>
             <Badge variant="outline" className="text-sm gap-2 py-2 px-4"><DollarSign className="w-4 h-4 text-accent" />{itinerary.estimated_budget}</Badge>
             <Badge variant="outline" className="text-sm gap-2 py-2 px-4"><Star className="w-4 h-4 text-accent" />Best: {itinerary.best_season}</Badge>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+
+          {/* Visual previews — hotel + local food */}
+          <div className="grid grid-cols-2 gap-4 w-full max-w-2xl mt-4">
+            <Card className="overflow-hidden bg-card border-border">
+              <div className="h-36 overflow-hidden">
+                <img src={hotelImg} alt="Stay preview" className="w-full h-full object-cover"
+                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800"; }} />
+              </div>
+              <CardContent className="p-3">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold flex items-center gap-1"><Hotel className="w-3 h-3" /> Where you'll stay</p>
+                <p className="text-sm font-bold text-foreground mt-1 line-clamp-1">
+                  {itinerary.hotel_suggestion?.name || "Boutique stay nearby"}
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="overflow-hidden bg-card border-border">
+              <div className="h-36 overflow-hidden">
+                <img src={foodImg} alt="Food preview" className="w-full h-full object-cover"
+                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800"; }} />
+              </div>
+              <CardContent className="p-3">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold flex items-center gap-1"><UtensilsCrossed className="w-3 h-3" /> What you'll taste</p>
+                <p className="text-sm font-bold text-foreground mt-1 line-clamp-1">Local cuisine & hidden cafés</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full max-w-2xl">
+            <Button
+              onClick={exploreAnotherOption}
+              disabled={exploringAlternative}
+              variant="outline"
+              className="rounded-full px-6 py-6 text-sm font-bold gap-2 border-2 border-primary/40 text-primary hover:bg-primary/10"
+            >
+              {exploringAlternative ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+              Not satisfied? Explore another option
+            </Button>
             <Button
               onClick={() => {
                 exportItineraryPdf(itinerary, quizData);
                 toast({ title: "Itinerary exported 📄", description: "Your day-wise PDF is downloading now." });
               }}
               variant="outline"
-              className="rounded-full px-6 py-6 text-base font-bold gap-2 border-2"
+              className="rounded-full px-6 py-6 text-sm font-bold gap-2 border-2"
             >
-              <Download className="w-5 h-5" /> Export PDF
+              <Download className="w-4 h-4" /> Export PDF
             </Button>
-            <Button onClick={() => setPhase("itinerary")} className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-full px-10 py-6 text-base font-bold gap-2">
+            <Button onClick={() => setPhase("itinerary")} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-full px-8 py-6 text-sm font-bold gap-2">
               See Your Itinerary <ChevronRight className="w-5 h-5" />
             </Button>
           </div>
+
+          {previousDestinations.length > 1 && (
+            <p className="text-[10px] text-muted-foreground mt-2">
+              Excluded so far: {previousDestinations.slice(0, -1).join(" · ")}
+            </p>
+          )}
         </div>
       </div>
     );
@@ -601,7 +704,7 @@ const TripReveal = () => {
                       </div>
                       <div className="flex items-center gap-4 text-center">
                         <div><p className="font-black text-lg">{flight.depart}</p><p className="text-[10px] text-muted-foreground">{flight.from}</p></div>
-                        <div className="flex flex-col items-center gap-1"><span className="text-[10px] text-muted-foreground">{flight.duration}</span><div className="w-16 h-[1px] bg-gray-200" /></div>
+                        <div className="flex flex-col items-center gap-1"><span className="text-[10px] text-muted-foreground">{flight.duration}</span><div className="w-16 h-[1px] bg-border" /></div>
                         <div><p className="font-black text-lg">{flight.arrive}</p><p className="text-[10px] text-muted-foreground">{flight.to}</p></div>
                       </div>
                       <div className="text-right"><p className="text-2xl font-black">{currencySymbol}{flight.price}</p><Badge variant="outline" className="text-[10px] capitalize">{flight.class}</Badge></div>
