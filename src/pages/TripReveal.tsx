@@ -269,17 +269,17 @@ const TripReveal = () => {
   // ── GENERATING / BUILDING PHASE ──
   if (phase === "generating" || phase === "building") {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Header />
         <div className="h-[52px]" />
         <div className="flex flex-col items-center justify-center min-h-[80vh] gap-6 px-4">
           {error ? (
             <>
-              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center">
-                <MapPin className="w-8 h-8 text-red-400" />
+              <div className="w-16 h-16 bg-destructive/15 rounded-full flex items-center justify-center">
+                <MapPin className="w-8 h-8 text-destructive" />
               </div>
-              <h2 className="text-xl font-bold text-gray-900">Something went wrong</h2>
-              <p className="text-gray-500 text-sm text-center max-w-md">{error}</p>
+              <h2 className="text-xl font-bold text-foreground">Something went wrong</h2>
+              <p className="text-muted-foreground text-sm text-center max-w-md">{error}</p>
               <Button onClick={() => navigate("/#quiz")} className="bg-primary text-white">Try Again</Button>
             </>
           ) : (
@@ -293,10 +293,10 @@ const TripReveal = () => {
                 </div>
               </div>
               <div className="text-center">
-                <h2 className="text-2xl font-black text-gray-900 mb-2">
+                <h2 className="text-2xl font-black text-foreground mb-2">
                   {phase === "building" ? "Crafting Your Perfect Itinerary..." : "Finding Amazing Destinations..."}
                 </h2>
-                <p className="text-gray-500 text-sm">Our AI is analyzing thousands of possibilities</p>
+                <p className="text-muted-foreground text-sm">Our AI is analyzing thousands of possibilities</p>
               </div>
               <div className="flex gap-3 flex-wrap justify-center">
                 {(phase === "building"
@@ -318,16 +318,16 @@ const TripReveal = () => {
   // ── CHOOSE DESTINATION PHASE ──
   if (phase === "choose") {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Header />
         <div className="h-[52px]" />
-        <div className="bg-[#2d2d2d] text-white py-12">
+        <div className="bg-card text-white py-12">
           <div className="container mx-auto px-4 text-center">
             <Badge className="bg-accent text-black border-0 text-xs font-bold uppercase tracking-widest px-5 py-2 mb-4">
               🎯 Choose Your Adventure
             </Badge>
             <h1 className="text-3xl md:text-4xl font-black">Pick Your Destination</h1>
-            <p className="text-white/60 text-sm mt-2 max-w-lg mx-auto">
+            <p className="text-muted-foreground text-sm mt-2 max-w-lg mx-auto">
               We found a perfect match for you, plus one mystery destination. Which one calls to you?
             </p>
           </div>
@@ -339,7 +339,7 @@ const TripReveal = () => {
               <Card
                 key={dest.id}
                 onClick={() => handleDestinationChoice(dest)}
-                className={`bg-white rounded-2xl overflow-hidden cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1 ${
+                className={`bg-card rounded-2xl overflow-hidden cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1 ${
                   selectedDest === dest.id ? "ring-2 ring-accent shadow-xl" : ""
                 } ${dest.mystery ? "bg-gradient-to-b from-[#2d2d2d] to-[#1a1a1a] text-white" : ""}`}
               >
@@ -355,21 +355,21 @@ const TripReveal = () => {
                   </div>
 
                   {/* Name */}
-                  <h3 className={`text-xl font-black mb-1 ${dest.mystery ? "text-white" : "text-gray-900"}`}>
+                  <h3 className={`text-xl font-black mb-1 ${dest.mystery ? "text-white" : "text-foreground"}`}>
                     {dest.mystery ? "🔮 Mystery Destination" : dest.name}
                   </h3>
-                  <p className={`text-sm mb-4 ${dest.mystery ? "text-white/60" : "text-gray-500"}`}>
+                  <p className={`text-sm mb-4 ${dest.mystery ? "text-muted-foreground" : "text-muted-foreground"}`}>
                     {dest.tagline}
                   </p>
 
                   {/* Hints / Highlights */}
                   <div className="flex-1">
-                    <p className={`text-[10px] uppercase tracking-wider font-bold mb-2 ${dest.mystery ? "text-accent" : "text-gray-400"}`}>
+                    <p className={`text-[10px] uppercase tracking-wider font-bold mb-2 ${dest.mystery ? "text-accent" : "text-muted-foreground"}`}>
                       {dest.mystery ? "Cryptic Hints" : "Highlights"}
                     </p>
                     <ul className="space-y-1.5">
                       {(dest.mystery ? dest.hints : dest.highlights).map((item, i) => (
-                        <li key={i} className={`text-xs flex items-start gap-2 ${dest.mystery ? "text-white/70" : "text-gray-600"}`}>
+                        <li key={i} className={`text-xs flex items-start gap-2 ${dest.mystery ? "text-muted-foreground" : "text-muted-foreground"}`}>
                           {dest.mystery ? <HelpCircle className="w-3 h-3 mt-0.5 flex-shrink-0 text-accent" /> : <Check className="w-3 h-3 mt-0.5 flex-shrink-0 text-green-500" />}
                           {item}
                         </li>
@@ -378,19 +378,19 @@ const TripReveal = () => {
                   </div>
 
                   {/* Budget + CTA */}
-                  <div className="mt-4 pt-4 border-t border-gray-100">
-                    <p className={`text-xs mb-1 ${dest.mystery ? "text-white/50" : "text-gray-400"}`}>Estimated Budget</p>
-                    <p className={`text-lg font-black ${dest.mystery ? "text-accent" : "text-gray-900"}`}>
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <p className={`text-xs mb-1 ${dest.mystery ? "text-muted-foreground" : "text-muted-foreground"}`}>Estimated Budget</p>
+                    <p className={`text-lg font-black ${dest.mystery ? "text-accent" : "text-foreground"}`}>
                       {dest.estimated_budget}
                     </p>
-                    <p className={`text-[10px] mt-1 ${dest.mystery ? "text-white/40" : "text-gray-400"}`}>{dest.best_for}</p>
+                    <p className={`text-[10px] mt-1 ${dest.mystery ? "text-muted-foreground" : "text-muted-foreground"}`}>{dest.best_for}</p>
                   </div>
 
                   <Button
                     className={`mt-4 w-full rounded-full font-bold text-sm py-5 ${
                       dest.mystery
                         ? "bg-accent text-black hover:bg-accent/90"
-                        : "bg-[#2d2d2d] text-white hover:bg-black"
+                        : "bg-card text-white hover:bg-card/80"
                     }`}
                   >
                     {dest.mystery ? (
@@ -415,23 +415,23 @@ const TripReveal = () => {
   // ── DESTINATION REVEAL ──
   if (phase === "destination") {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Header />
         <div className="h-[52px]" />
         <div className="flex flex-col items-center justify-center min-h-[80vh] gap-8 px-4 animate-fade-in-up">
           <Badge className="bg-accent text-black border-0 text-xs font-bold uppercase tracking-widest px-5 py-2">
             🎯 Your Destination
           </Badge>
-          <h1 className="text-5xl md:text-7xl font-black text-[#2d2d2d] text-center tracking-tight">
+          <h1 className="text-5xl md:text-7xl font-black text-foreground text-center tracking-tight">
             {itinerary.destination}
           </h1>
-          <p className="text-gray-500 text-center max-w-xl leading-relaxed">{itinerary.summary}</p>
+          <p className="text-muted-foreground text-center max-w-xl leading-relaxed">{itinerary.summary}</p>
           <div className="flex flex-wrap justify-center gap-4">
             <Badge variant="outline" className="text-sm gap-2 py-2 px-4"><Calendar className="w-4 h-4 text-accent" />{itinerary.duration}</Badge>
             <Badge variant="outline" className="text-sm gap-2 py-2 px-4"><DollarSign className="w-4 h-4 text-accent" />{itinerary.estimated_budget}</Badge>
             <Badge variant="outline" className="text-sm gap-2 py-2 px-4"><Star className="w-4 h-4 text-accent" />Best: {itinerary.best_season}</Badge>
           </div>
-          <Button onClick={() => setPhase("itinerary")} className="bg-[#2d2d2d] text-white hover:bg-black rounded-full px-10 py-6 text-base font-bold gap-2 mt-4">
+          <Button onClick={() => setPhase("itinerary")} className="bg-card text-white hover:bg-card/80 rounded-full px-10 py-6 text-base font-bold gap-2 mt-4">
             See Your Itinerary <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
@@ -442,50 +442,50 @@ const TripReveal = () => {
   // ── ITINERARY PHASE ──
   if (phase === "itinerary") {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Header />
         <div className="h-[52px]" />
-        <div className="bg-[#2d2d2d] text-white py-10">
+        <div className="bg-card text-white py-10">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-3xl font-black">{itinerary.destination}</h1>
-            <p className="text-white/60 text-sm mt-1">{itinerary.duration} · {itinerary.estimated_budget}</p>
+            <p className="text-muted-foreground text-sm mt-1">{itinerary.duration} · {itinerary.estimated_budget}</p>
           </div>
         </div>
         <div className="container mx-auto px-4 py-10 max-w-4xl">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Your Day-by-Day Plan</h2>
+          <h2 className="text-lg font-bold text-foreground mb-4">Your Day-by-Day Plan</h2>
           <div className="flex gap-2 flex-wrap mb-6">
             {itinerary.days?.map((day) => (
-              <button key={day.day} onClick={() => setActiveDay(day.day)} className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${activeDay === day.day ? "bg-[#2d2d2d] text-white" : "bg-white text-gray-600 border border-gray-200 hover:border-gray-300"}`}>
+              <button key={day.day} onClick={() => setActiveDay(day.day)} className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${activeDay === day.day ? "bg-card text-white" : "bg-card text-muted-foreground border border-border hover:border-foreground/40"}`}>
                 Day {day.day}
               </button>
             ))}
           </div>
           {currentDayPlan && (
-            <Card className="bg-white rounded-2xl overflow-hidden shadow-sm mb-6">
-              <div className="bg-[#2d2d2d] px-6 py-4">
-                <span className="text-white/60 text-xs uppercase tracking-wider">Day {currentDayPlan.day}</span>
+            <Card className="bg-card rounded-2xl overflow-hidden shadow-sm mb-6">
+              <div className="bg-card px-6 py-4">
+                <span className="text-muted-foreground text-xs uppercase tracking-wider">Day {currentDayPlan.day}</span>
                 <h3 className="text-white font-bold">{currentDayPlan.title}</h3>
               </div>
               <CardContent className="p-6">
                 {currentDayPlan.activities?.map((act, j) => {
                   const Icon = activityIcons[act.type] || MapPin;
-                  const colorClass = activityTypeColors[act.type] || "bg-gray-50 text-gray-600 border-gray-200";
+                  const colorClass = activityTypeColors[act.type] || "bg-background text-muted-foreground border-border";
                   return (
                     <div key={j} className="flex gap-4 mb-6 last:mb-0">
-                      <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-4 h-4 text-gray-600" />
+                      <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className="text-xs font-mono text-gray-400 flex items-center gap-1"><Clock className="w-3 h-3" />{act.time}</span>
+                          <span className="text-xs font-mono text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{act.time}</span>
                           <span className={`text-[10px] font-semibold border rounded-full px-2 py-0.5 capitalize ${colorClass}`}>{act.type}</span>
-                          {act.cost_estimate && <span className="text-[10px] text-gray-400">{act.cost_estimate}</span>}
+                          {act.cost_estimate && <span className="text-[10px] text-muted-foreground">{act.cost_estimate}</span>}
                           {act.hidden_gem && <Badge className="bg-purple-100 text-purple-700 border-0 text-[9px] gap-0.5 px-1.5 py-0"><Sparkles className="w-2.5 h-2.5" />Hidden Gem</Badge>}
                           {act.photo_spot && <Badge className="bg-blue-100 text-blue-700 border-0 text-[9px] gap-0.5 px-1.5 py-0"><Camera className="w-2.5 h-2.5" />📸 Photo Spot</Badge>}
                           {act.community_pick && <Badge className="bg-green-100 text-green-700 border-0 text-[9px] gap-0.5 px-1.5 py-0">🤝 Community Pick</Badge>}
                         </div>
-                        <p className="font-bold text-sm text-gray-900">{act.activity}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{act.description}</p>
+                        <p className="font-bold text-sm text-foreground">{act.activity}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{act.description}</p>
                         {act.local_food_tip && <p className="text-xs text-orange-600 mt-1 flex items-center gap-1"><UtensilsCrossed className="w-3 h-3" />{act.local_food_tip}</p>}
                         {act.insider_tip && <p className="text-xs text-purple-600 mt-1 italic">💡 {act.insider_tip}</p>}
                       </div>
@@ -497,15 +497,15 @@ const TripReveal = () => {
           )}
           <div className="grid md:grid-cols-2 gap-4 mb-8">
             {itinerary.tips?.length > 0 && (
-              <Card className="bg-white rounded-xl p-5">
-                <h4 className="font-bold text-sm text-gray-900 mb-3 flex items-center gap-2"><Star className="w-4 h-4 text-accent" />Travel Tips</h4>
-                <ul className="space-y-2">{itinerary.tips.map((tip, i) => (<li key={i} className="text-xs text-gray-600 flex items-start gap-2"><Check className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />{tip}</li>))}</ul>
+              <Card className="bg-card rounded-xl p-5">
+                <h4 className="font-bold text-sm text-foreground mb-3 flex items-center gap-2"><Star className="w-4 h-4 text-accent" />Travel Tips</h4>
+                <ul className="space-y-2">{itinerary.tips.map((tip, i) => (<li key={i} className="text-xs text-muted-foreground flex items-start gap-2"><Check className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />{tip}</li>))}</ul>
               </Card>
             )}
             {itinerary.packing_essentials && itinerary.packing_essentials.length > 0 && (
-              <Card className="bg-white rounded-xl p-5">
-                <h4 className="font-bold text-sm text-gray-900 mb-3 flex items-center gap-2"><Backpack className="w-4 h-4 text-accent" />Packing List</h4>
-                <ul className="space-y-2">{itinerary.packing_essentials.map((item, i) => (<li key={i} className="text-xs text-gray-600 flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-blue-500 mt-0.5 flex-shrink-0" />{item}</li>))}</ul>
+              <Card className="bg-card rounded-xl p-5">
+                <h4 className="font-bold text-sm text-foreground mb-3 flex items-center gap-2"><Backpack className="w-4 h-4 text-accent" />Packing List</h4>
+                <ul className="space-y-2">{itinerary.packing_essentials.map((item, i) => (<li key={i} className="text-xs text-muted-foreground flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-blue-500 mt-0.5 flex-shrink-0" />{item}</li>))}</ul>
               </Card>
             )}
           </div>
@@ -515,11 +515,11 @@ const TripReveal = () => {
                 exportItineraryPdf(itinerary, quizData);
                 toast({ title: "Itinerary exported 📄", description: "Your day-wise PDF is downloading now." });
               }}
-              className="sm:w-auto rounded-full py-6 px-6 text-base font-bold gap-2 bg-white text-[#2d2d2d] border-2 border-[#2d2d2d] hover:bg-gray-100"
+              className="sm:w-auto rounded-full py-6 px-6 text-base font-bold gap-2 bg-card text-foreground border-2 border-[#2d2d2d] hover:bg-muted"
             >
               <Download className="w-5 h-5" /> Export PDF
             </Button>
-            <Button onClick={() => { setPhase("flights"); searchFlights(); }} className="flex-1 bg-accent text-[#2d2d2d] hover:bg-accent/90 rounded-full py-6 text-base font-bold gap-2">
+            <Button onClick={() => { setPhase("flights"); searchFlights(); }} className="flex-1 bg-accent text-foreground hover:bg-accent/90 rounded-full py-6 text-base font-bold gap-2">
               <Plane className="w-5 h-5" /> Find Flights to {itinerary.destination.split(",")[0]} <ArrowRight className="w-5 h-5" />
             </Button>
           </div>
@@ -531,35 +531,35 @@ const TripReveal = () => {
   // ── FLIGHTS PHASE ──
   if (phase === "flights") {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Header />
         <div className="h-[52px]" />
-        <div className="bg-[#2d2d2d] text-white py-10">
+        <div className="bg-card text-white py-10">
           <div className="container mx-auto px-4 text-center">
             <Plane className="w-8 h-8 mx-auto mb-2 text-accent" />
             <h1 className="text-2xl font-black">Flights to {itinerary.destination.split(",")[0]}</h1>
-            <p className="text-white/60 text-sm mt-1">From {getVal(quizData?.departure_city, "your city")}</p>
+            <p className="text-muted-foreground text-sm mt-1">From {getVal(quizData?.departure_city, "your city")}</p>
           </div>
         </div>
         <div className="container mx-auto px-4 py-10 max-w-3xl">
           {flightsLoading ? (
-            <div className="flex flex-col items-center py-20 gap-4"><Loader2 className="w-10 h-10 animate-spin text-accent" /><p className="text-gray-500 text-sm">Searching for the best flights...</p></div>
+            <div className="flex flex-col items-center py-20 gap-4"><Loader2 className="w-10 h-10 animate-spin text-accent" /><p className="text-muted-foreground text-sm">Searching for the best flights...</p></div>
           ) : flights.length === 0 ? (
-            <Card className="p-10 text-center"><p className="text-gray-500 mb-4">No flights found.</p><Button onClick={() => { setPhase("hotels"); searchHotels(); }} variant="outline">Skip to Hotels →</Button></Card>
+            <Card className="p-10 text-center"><p className="text-muted-foreground mb-4">No flights found.</p><Button onClick={() => { setPhase("hotels"); searchHotels(); }} variant="outline">Skip to Hotels →</Button></Card>
           ) : (
             <div className="space-y-4">
               {flights.map((flight, i) => (
-                <Card key={i} className={`bg-white rounded-xl overflow-hidden transition-all cursor-pointer ${selectedFlight === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedFlight(i)}>
+                <Card key={i} className={`bg-card rounded-xl overflow-hidden transition-all cursor-pointer ${selectedFlight === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedFlight(i)}>
                   <CardContent className="p-6">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center"><Plane className="w-5 h-5 text-primary" /></div>
-                        <div><p className="font-bold text-sm">{flight.airline}</p><p className="text-[10px] text-gray-400">{flight.flight_number} · {flight.stops}</p></div>
+                        <div><p className="font-bold text-sm">{flight.airline}</p><p className="text-[10px] text-muted-foreground">{flight.flight_number} · {flight.stops}</p></div>
                       </div>
                       <div className="flex items-center gap-4 text-center">
-                        <div><p className="font-black text-lg">{flight.depart}</p><p className="text-[10px] text-gray-500">{flight.from}</p></div>
-                        <div className="flex flex-col items-center gap-1"><span className="text-[10px] text-gray-400">{flight.duration}</span><div className="w-16 h-[1px] bg-gray-200" /></div>
-                        <div><p className="font-black text-lg">{flight.arrive}</p><p className="text-[10px] text-gray-500">{flight.to}</p></div>
+                        <div><p className="font-black text-lg">{flight.depart}</p><p className="text-[10px] text-muted-foreground">{flight.from}</p></div>
+                        <div className="flex flex-col items-center gap-1"><span className="text-[10px] text-muted-foreground">{flight.duration}</span><div className="w-16 h-[1px] bg-gray-200" /></div>
+                        <div><p className="font-black text-lg">{flight.arrive}</p><p className="text-[10px] text-muted-foreground">{flight.to}</p></div>
                       </div>
                       <div className="text-right"><p className="text-2xl font-black">{currencySymbol}{flight.price}</p><Badge variant="outline" className="text-[10px] capitalize">{flight.class}</Badge></div>
                     </div>
@@ -573,7 +573,7 @@ const TripReveal = () => {
                 <Button variant="outline" onClick={() => { setPhase("hotels"); searchHotels(); }} className="rounded-full px-6 py-6 font-bold gap-2">Skip <ChevronRight className="w-4 h-4" /></Button>
               </div>
               {selectedFlight !== null && !bookingFlight && (
-                <Button onClick={() => { bookFlight(flights[selectedFlight!]); setTimeout(() => { setPhase("hotels"); searchHotels(); }, 1500); }} variant="ghost" className="w-full text-sm text-gray-500">Book & Continue to Hotels →</Button>
+                <Button onClick={() => { bookFlight(flights[selectedFlight!]); setTimeout(() => { setPhase("hotels"); searchHotels(); }, 1500); }} variant="ghost" className="w-full text-sm text-muted-foreground">Book & Continue to Hotels →</Button>
               )}
             </div>
           )}
@@ -585,28 +585,28 @@ const TripReveal = () => {
   // ── HOTELS PHASE ──
   if (phase === "hotels") {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Header />
         <div className="h-[52px]" />
-        <div className="bg-[#2d2d2d] text-white py-10">
+        <div className="bg-card text-white py-10">
           <div className="container mx-auto px-4 text-center"><Hotel className="w-8 h-8 mx-auto mb-2 text-accent" /><h1 className="text-2xl font-black">Hotels in {itinerary.destination.split(",")[0]}</h1></div>
         </div>
         <div className="container mx-auto px-4 py-10 max-w-3xl">
           {hotelsLoading ? (
-            <div className="flex flex-col items-center py-20 gap-4"><Loader2 className="w-10 h-10 animate-spin text-accent" /><p className="text-gray-500 text-sm">Finding the best hotels...</p></div>
+            <div className="flex flex-col items-center py-20 gap-4"><Loader2 className="w-10 h-10 animate-spin text-accent" /><p className="text-muted-foreground text-sm">Finding the best hotels...</p></div>
           ) : hotels.length === 0 ? (
-            <Card className="p-10 text-center"><p className="text-gray-500 mb-4">No hotels found.</p><Button onClick={() => setPhase("summary")}>View Trip Summary →</Button></Card>
+            <Card className="p-10 text-center"><p className="text-muted-foreground mb-4">No hotels found.</p><Button onClick={() => setPhase("summary")}>View Trip Summary →</Button></Card>
           ) : (
             <div className="space-y-4">
               {hotels.map((hotel, i) => (
-                <Card key={i} className={`bg-white rounded-xl overflow-hidden transition-all cursor-pointer ${selectedHotel === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedHotel(i)}>
+                <Card key={i} className={`bg-card rounded-xl overflow-hidden transition-all cursor-pointer ${selectedHotel === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedHotel(i)}>
                   <CardContent className="p-0">
                     <div className="flex flex-col sm:flex-row">
                       <div className="sm:w-48 h-36 sm:h-auto"><img src={hotel.image_url} alt={hotel.name} className="w-full h-full object-cover" /></div>
                       <div className="flex-1 p-5">
                         <div className="flex justify-between items-start">
-                          <div><h3 className="font-bold text-sm">{hotel.name}</h3><p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" />{hotel.city}</p></div>
-                          <div className="text-right"><p className="text-xl font-black">{currencySymbol}{hotel.price}<span className="text-xs font-normal text-gray-400">/night</span></p><div className="flex items-center gap-1 justify-end mt-1"><Star className="w-3 h-3 fill-yellow-400 text-yellow-400" /><span className="text-xs font-bold">{hotel.rating}</span></div></div>
+                          <div><h3 className="font-bold text-sm">{hotel.name}</h3><p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" />{hotel.city}</p></div>
+                          <div className="text-right"><p className="text-xl font-black">{currencySymbol}{hotel.price}<span className="text-xs font-normal text-muted-foreground">/night</span></p><div className="flex items-center gap-1 justify-end mt-1"><Star className="w-3 h-3 fill-yellow-400 text-yellow-400" /><span className="text-xs font-bold">{hotel.rating}</span></div></div>
                         </div>
                         <Badge variant="outline" className="text-[10px] capitalize mt-2">{hotel.room_type}</Badge>
                       </div>
@@ -629,47 +629,47 @@ const TripReveal = () => {
 
   // ── SUMMARY PHASE ──
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       <div className="h-[52px]" />
-      <div className="bg-[#2d2d2d] text-white py-14">
+      <div className="bg-card text-white py-14">
         <div className="container mx-auto px-4 text-center">
           <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4"><Package className="w-8 h-8 text-black" /></div>
           <h1 className="text-3xl font-black mb-2">Your Trip is Ready! 🎉</h1>
-          <p className="text-white/60 text-sm">{itinerary.destination} · {itinerary.duration}</p>
+          <p className="text-muted-foreground text-sm">{itinerary.destination} · {itinerary.duration}</p>
         </div>
       </div>
       <div className="container mx-auto px-4 py-10 max-w-3xl">
         <div className="space-y-4">
-          <Card className="bg-white rounded-xl p-6">
+          <Card className="bg-card rounded-xl p-6">
             <div className="flex items-center gap-3 mb-3"><MapPin className="w-5 h-5 text-accent" /><h3 className="font-bold text-sm">Destination</h3></div>
-            <p className="text-xl font-black text-gray-900">{itinerary.destination}</p>
-            <p className="text-xs text-gray-500 mt-1">{itinerary.duration} · Budget: {itinerary.estimated_budget}</p>
+            <p className="text-xl font-black text-foreground">{itinerary.destination}</p>
+            <p className="text-xs text-muted-foreground mt-1">{itinerary.duration} · Budget: {itinerary.estimated_budget}</p>
           </Card>
           {selectedFlight !== null && flights[selectedFlight] && (
-            <Card className="bg-white rounded-xl p-6">
+            <Card className="bg-card rounded-xl p-6">
               <div className="flex items-center gap-3 mb-3"><Plane className="w-5 h-5 text-accent" /><h3 className="font-bold text-sm">Flight Booked</h3><Badge className="bg-green-100 text-green-700 border-0 text-[10px]">Confirmed</Badge></div>
-              <p className="font-bold text-gray-900">{flights[selectedFlight].from} → {flights[selectedFlight].to}</p>
-              <p className="text-xs text-gray-500">{flights[selectedFlight].airline} · {flights[selectedFlight].flight_number} · {currencySymbol}{flights[selectedFlight].price}</p>
+              <p className="font-bold text-foreground">{flights[selectedFlight].from} → {flights[selectedFlight].to}</p>
+              <p className="text-xs text-muted-foreground">{flights[selectedFlight].airline} · {flights[selectedFlight].flight_number} · {currencySymbol}{flights[selectedFlight].price}</p>
             </Card>
           )}
           {selectedHotel !== null && hotels[selectedHotel] && (
-            <Card className="bg-white rounded-xl p-6">
+            <Card className="bg-card rounded-xl p-6">
               <div className="flex items-center gap-3 mb-3"><Hotel className="w-5 h-5 text-accent" /><h3 className="font-bold text-sm">Hotel Booked</h3><Badge className="bg-green-100 text-green-700 border-0 text-[10px]">Confirmed</Badge></div>
-              <p className="font-bold text-gray-900">{hotels[selectedHotel].name}</p>
-              <p className="text-xs text-gray-500">{currencySymbol}{hotels[selectedHotel].price}/night · {hotels[selectedHotel].room_type}</p>
+              <p className="font-bold text-foreground">{hotels[selectedHotel].name}</p>
+              <p className="text-xs text-muted-foreground">{currencySymbol}{hotels[selectedHotel].price}/night · {hotels[selectedHotel].room_type}</p>
             </Card>
           )}
           <BudgetBreakdown flightCost={selectedFlight !== null && flights[selectedFlight] ? flights[selectedFlight].price : 0} hotelCost={selectedHotel !== null && hotels[selectedHotel] ? hotels[selectedHotel].price * 7 : 0} currencySymbol={currencySymbol} estimatedBudget={itinerary.estimated_budget} />
           <Card className="bg-accent/10 border-accent/20 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-3"><DollarSign className="w-5 h-5 text-accent" /><h3 className="font-bold text-sm">Estimated Total</h3></div>
-            <p className="text-3xl font-black text-gray-900">
+            <p className="text-3xl font-black text-foreground">
               {currencySymbol}{((selectedFlight !== null && flights[selectedFlight] ? flights[selectedFlight].price : 0) + (selectedHotel !== null && hotels[selectedHotel] ? hotels[selectedHotel].price * 7 : 0)).toLocaleString()}
             </p>
-            <p className="text-xs text-gray-500 mt-1">Flight + 7 nights accommodation (activities not included)</p>
+            <p className="text-xs text-muted-foreground mt-1">Flight + 7 nights accommodation (activities not included)</p>
           </Card>
           <div className="flex gap-3 pt-4">
-            <Button onClick={() => navigate("/dashboard")} className="flex-1 bg-[#2d2d2d] text-white hover:bg-black rounded-full py-6 font-bold">Go to Dashboard</Button>
+            <Button onClick={() => navigate("/dashboard")} className="flex-1 bg-card text-white hover:bg-card/80 rounded-full py-6 font-bold">Go to Dashboard</Button>
             <Button onClick={() => navigate("/#quiz")} variant="outline" className="rounded-full px-6 py-6 font-bold">Plan Another Trip</Button>
           </div>
         </div>
