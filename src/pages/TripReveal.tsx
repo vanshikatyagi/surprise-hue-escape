@@ -389,8 +389,8 @@ const TripReveal = () => {
                   <Button
                     className={`mt-4 w-full rounded-full font-bold text-sm py-5 ${
                       dest.mystery
-                        ? "bg-accent text-black hover:bg-accent/90"
-                        : "bg-card text-white hover:bg-card/80"
+                        ? "bg-accent text-accent-foreground hover:bg-accent/90"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90"
                     }`}
                   >
                     {dest.mystery ? (
