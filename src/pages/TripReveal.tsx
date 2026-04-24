@@ -95,6 +95,8 @@ const TripReveal = () => {
   const [selectedHotel, setSelectedHotel] = useState<number | null>(null);
   const [bookingFlight, setBookingFlight] = useState(false);
   const [bookingHotel, setBookingHotel] = useState(false);
+  const [previousDestinations, setPreviousDestinations] = useState<string[]>([]);
+  const [exploringAlternative, setExploringAlternative] = useState(false);
 
   useEffect(() => {
     if (!user) { navigate("/auth"); return; }
