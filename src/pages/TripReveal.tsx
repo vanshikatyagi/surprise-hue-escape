@@ -11,7 +11,7 @@ import {
   Star, Clock, ChevronRight, Check, Sparkles, Globe,
   ArrowRight, Package, Camera, UtensilsCrossed, Mountain,
   Palmtree, Landmark, Navigation, CheckCircle2, Backpack,
-  HelpCircle, Eye, Lock,
+  HelpCircle, Eye, Lock, RefreshCw, Image as ImageIcon, Target,
 } from "lucide-react";
 import Header from "@/components/Header";
 import BudgetBreakdown from "@/components/BudgetBreakdown";
