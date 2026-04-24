@@ -154,6 +154,36 @@ const TripReveal = () => {
       });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
+
+      // ── Ensure day count matches requested duration (pad if AI under-returned) ──
+      const durStr = String(getVal(quizData.trip_duration, "5 days")).toLowerCase();
+      let wantDays = 5;
+      const wkM = durStr.match(/(\d+)\s*week/);
+      const dyM = durStr.match(/(\d+)\s*[-\s]?day/);
+      if (wkM) wantDays = parseInt(wkM[1]) * 7;
+      else if (dyM) wantDays = parseInt(dyM[1]);
+      wantDays = Math.max(2, Math.min(wantDays, 14));
+
+      const got: DayPlan[] = Array.isArray(data.days) ? data.days : [];
+      if (got.length < wantDays) {
+        const last = got[got.length - 1];
+        for (let d = got.length + 1; d <= wantDays; d++) {
+          got.push({
+            day: d,
+            title: `Day ${d} — Free Exploration`,
+            activities: last?.activities?.slice(0, 3).map((a) => ({
+              ...a,
+              activity: `${a.activity} (alt area)`,
+              description: "Free day to wander and discover new spots based on your morning mood.",
+            })) || [
+              { time: "Morning", activity: "Slow start & local breakfast", description: "Wake up at your pace and find a local café.", type: "food" },
+              { time: "Afternoon", activity: "Choose your own adventure", description: "Pick from the highlights of previous days you loved most.", type: "sightseeing" },
+              { time: "Evening", activity: "Sunset walk & dinner", description: "End the day relaxed with a long dinner.", type: "relaxation" },
+            ],
+          });
+        }
+        data.days = got.map((d, i) => ({ ...d, day: i + 1 }));
+      }
       setItinerary(data);
 
       const { data: quiz } = await supabase.from("quiz_results")
@@ -389,8 +419,8 @@ const TripReveal = () => {
                   <Button
                     className={`mt-4 w-full rounded-full font-bold text-sm py-5 ${
                       dest.mystery
-                        ? "bg-accent text-black hover:bg-accent/90"
-                        : "bg-card text-white hover:bg-card/80"
+                        ? "bg-accent text-accent-foreground hover:bg-accent/90"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90"
                     }`}
                   >
                     {dest.mystery ? (
@@ -580,7 +610,7 @@ const TripReveal = () => {
                 </Card>
               ))}
               <div className="flex gap-3 mt-6">
-                <Button disabled={selectedFlight === null || bookingFlight} onClick={() => selectedFlight !== null && bookFlight(flights[selectedFlight])} className="flex-1 bg-accent text-black hover:bg-accent/90 rounded-full py-6 font-bold gap-2">
+                <Button disabled={selectedFlight === null || bookingFlight} onClick={() => selectedFlight !== null && bookFlight(flights[selectedFlight])} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-full py-6 font-bold gap-2">
                   {bookingFlight ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}{bookingFlight ? "Booking..." : "Book Selected Flight"}
                 </Button>
                 <Button variant="outline" onClick={() => { setPhase("hotels"); searchHotels(); }} className="rounded-full px-6 py-6 font-bold gap-2">Skip <ChevronRight className="w-4 h-4" /></Button>
@@ -628,7 +658,7 @@ const TripReveal = () => {
                 </Card>
               ))}
               <div className="flex gap-3 mt-6">
-                <Button disabled={selectedHotel === null || bookingHotel} onClick={async () => { if (selectedHotel !== null) { await bookHotel(hotels[selectedHotel]); setPhase("summary"); } }} className="flex-1 bg-accent text-black hover:bg-accent/90 rounded-full py-6 font-bold gap-2">
+                <Button disabled={selectedHotel === null || bookingHotel} onClick={async () => { if (selectedHotel !== null) { await bookHotel(hotels[selectedHotel]); setPhase("summary"); } }} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-full py-6 font-bold gap-2">
                   {bookingHotel ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}{bookingHotel ? "Booking..." : "Book Selected Hotel"}
                 </Button>
                 <Button variant="outline" onClick={() => setPhase("summary")} className="rounded-full px-6 py-6 font-bold gap-2">Skip <ChevronRight className="w-4 h-4" /></Button>
