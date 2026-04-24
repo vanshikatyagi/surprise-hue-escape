@@ -145,14 +145,21 @@ const TripReveal = () => {
     }
   };
 
-  const generateItinerary = async (chosenDest: string) => {
+  const generateItinerary = async (chosenDest: string, excludeList: string[] = []) => {
     setPhase("building");
     try {
       // Fetch local secrets for the destination
       const secrets = chosenDest !== "mystery" ? await fetchLocalSecrets(chosenDest) : [];
-      
+
       const { data, error: fnError } = await supabase.functions.invoke("generate-itinerary", {
-        body: { ...quizData, mode: "itinerary", flow: directDestination ? "dashboard" : "reveal", chosen_destination: chosenDest, local_secrets: secrets },
+        body: {
+          ...quizData,
+          mode: "itinerary",
+          flow: directDestination ? "dashboard" : "reveal",
+          chosen_destination: chosenDest,
+          local_secrets: secrets,
+          exclude_destinations: excludeList,
+        },
       });
       if (fnError) throw fnError;
       if (data?.error) throw new Error(data.error);
