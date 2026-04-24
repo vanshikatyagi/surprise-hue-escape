@@ -194,6 +194,10 @@ const TripReveal = () => {
         data.days = got.map((d, i) => ({ ...d, day: i + 1 }));
       }
       setItinerary(data);
+      // Track this destination so "Explore another" excludes it next time
+      if (data.destination) {
+        setPreviousDestinations((prev) => Array.from(new Set([...prev, data.destination])));
+      }
 
       const { data: quiz } = await supabase.from("quiz_results")
         .select("id").eq("user_id", user!.id)
