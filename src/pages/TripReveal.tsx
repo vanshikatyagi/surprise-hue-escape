@@ -25,12 +25,12 @@ const activityIcons: Record<string, React.ElementType> = {
 };
 
 const activityTypeColors: Record<string, string> = {
-  sightseeing: "bg-blue-50 text-blue-700 border-blue-200",
-  food: "bg-orange-50 text-orange-700 border-orange-200",
-  adventure: "bg-green-50 text-green-700 border-green-200",
-  relaxation: "bg-purple-50 text-purple-700 border-purple-200",
-  culture: "bg-yellow-50 text-yellow-800 border-yellow-200",
-  transport: "bg-gray-50 text-gray-600 border-gray-200",
+  sightseeing: "bg-blue-500/15 text-blue-300 border-blue-500/30",
+  food: "bg-orange-500/15 text-orange-300 border-orange-500/30",
+  adventure: "bg-green-500/15 text-green-300 border-green-500/30",
+  relaxation: "bg-purple-500/15 text-purple-300 border-purple-500/30",
+  culture: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30",
+  transport: "bg-muted text-muted-foreground border-border",
 };
 
 type Phase = "generating" | "choose" | "building" | "destination" | "itinerary" | "flights" | "hotels" | "summary";
