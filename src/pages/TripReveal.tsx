@@ -225,6 +225,21 @@ const TripReveal = () => {
     generateItinerary(chosenName);
   };
 
+  const exploreAnotherOption = async () => {
+    if (!itinerary) return;
+    setExploringAlternative(true);
+    const newExclude = Array.from(new Set([...previousDestinations, itinerary.destination]));
+    setPreviousDestinations(newExclude);
+    try {
+      await generateItinerary("mystery", newExclude);
+      toast({ title: "Found a new option ✨", description: "Here's another hidden gem matched to your vibe." });
+    } catch (e: any) {
+      toast({ title: "Couldn't fetch alternative", description: e.message, variant: "destructive" });
+    } finally {
+      setExploringAlternative(false);
+    }
+  };
+
   const searchFlights = async () => {
     if (!itinerary) return;
     setFlightsLoading(true);
