@@ -601,7 +601,7 @@ const TripReveal = () => {
                       </div>
                       <div className="flex items-center gap-4 text-center">
                         <div><p className="font-black text-lg">{flight.depart}</p><p className="text-[10px] text-muted-foreground">{flight.from}</p></div>
-                        <div className="flex flex-col items-center gap-1"><span className="text-[10px] text-muted-foreground">{flight.duration}</span><div className="w-16 h-[1px] bg-gray-200" /></div>
+                        <div className="flex flex-col items-center gap-1"><span className="text-[10px] text-muted-foreground">{flight.duration}</span><div className="w-16 h-[1px] bg-border" /></div>
                         <div><p className="font-black text-lg">{flight.arrive}</p><p className="text-[10px] text-muted-foreground">{flight.to}</p></div>
                       </div>
                       <div className="text-right"><p className="text-2xl font-black">{currencySymbol}{flight.price}</p><Badge variant="outline" className="text-[10px] capitalize">{flight.class}</Badge></div>
