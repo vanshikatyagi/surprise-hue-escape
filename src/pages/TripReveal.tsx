@@ -431,9 +431,21 @@ const TripReveal = () => {
             <Badge variant="outline" className="text-sm gap-2 py-2 px-4"><DollarSign className="w-4 h-4 text-accent" />{itinerary.estimated_budget}</Badge>
             <Badge variant="outline" className="text-sm gap-2 py-2 px-4"><Star className="w-4 h-4 text-accent" />Best: {itinerary.best_season}</Badge>
           </div>
-          <Button onClick={() => setPhase("itinerary")} className="bg-card text-white hover:bg-card/80 rounded-full px-10 py-6 text-base font-bold gap-2 mt-4">
-            See Your Itinerary <ChevronRight className="w-5 h-5" />
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+            <Button
+              onClick={() => {
+                exportItineraryPdf(itinerary, quizData);
+                toast({ title: "Itinerary exported 📄", description: "Your day-wise PDF is downloading now." });
+              }}
+              variant="outline"
+              className="rounded-full px-6 py-6 text-base font-bold gap-2 border-2"
+            >
+              <Download className="w-5 h-5" /> Export PDF
+            </Button>
+            <Button onClick={() => setPhase("itinerary")} className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-full px-10 py-6 text-base font-bold gap-2">
+              See Your Itinerary <ChevronRight className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -445,9 +457,9 @@ const TripReveal = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="h-[52px]" />
-        <div className="bg-card text-white py-10">
+        <div className="bg-card text-card-foreground py-10 border-b border-border">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-3xl font-black">{itinerary.destination}</h1>
+            <h1 className="text-3xl font-black text-foreground">{itinerary.destination}</h1>
             <p className="text-muted-foreground text-sm mt-1">{itinerary.duration} · {itinerary.estimated_budget}</p>
           </div>
         </div>
@@ -455,16 +467,16 @@ const TripReveal = () => {
           <h2 className="text-lg font-bold text-foreground mb-4">Your Day-by-Day Plan</h2>
           <div className="flex gap-2 flex-wrap mb-6">
             {itinerary.days?.map((day) => (
-              <button key={day.day} onClick={() => setActiveDay(day.day)} className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${activeDay === day.day ? "bg-card text-white" : "bg-card text-muted-foreground border border-border hover:border-foreground/40"}`}>
+              <button key={day.day} onClick={() => setActiveDay(day.day)} className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${activeDay === day.day ? "bg-accent text-accent-foreground" : "bg-card text-muted-foreground border border-border hover:border-foreground/40"}`}>
                 Day {day.day}
               </button>
             ))}
           </div>
           {currentDayPlan && (
-            <Card className="bg-card rounded-2xl overflow-hidden shadow-sm mb-6">
-              <div className="bg-card px-6 py-4">
-                <span className="text-muted-foreground text-xs uppercase tracking-wider">Day {currentDayPlan.day}</span>
-                <h3 className="text-white font-bold">{currentDayPlan.title}</h3>
+            <Card className="bg-card rounded-2xl overflow-hidden shadow-sm mb-6 border border-border">
+              <div className="bg-background-muted px-6 py-4 border-b border-border">
+                <span className="text-accent text-xs uppercase tracking-wider font-bold">Day {currentDayPlan.day}</span>
+                <h3 className="text-foreground font-bold">{currentDayPlan.title}</h3>
               </div>
               <CardContent className="p-6">
                 {currentDayPlan.activities?.map((act, j) => {
@@ -515,11 +527,12 @@ const TripReveal = () => {
                 exportItineraryPdf(itinerary, quizData);
                 toast({ title: "Itinerary exported 📄", description: "Your day-wise PDF is downloading now." });
               }}
-              className="sm:w-auto rounded-full py-6 px-6 text-base font-bold gap-2 bg-card text-foreground border-2 border-[#2d2d2d] hover:bg-muted"
+              variant="outline"
+              className="sm:w-auto rounded-full py-6 px-6 text-base font-bold gap-2 border-2"
             >
               <Download className="w-5 h-5" /> Export PDF
             </Button>
-            <Button onClick={() => { setPhase("flights"); searchFlights(); }} className="flex-1 bg-accent text-foreground hover:bg-accent/90 rounded-full py-6 text-base font-bold gap-2">
+            <Button onClick={() => { setPhase("flights"); searchFlights(); }} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-full py-6 text-base font-bold gap-2">
               <Plane className="w-5 h-5" /> Find Flights to {itinerary.destination.split(",")[0]} <ArrowRight className="w-5 h-5" />
             </Button>
           </div>
