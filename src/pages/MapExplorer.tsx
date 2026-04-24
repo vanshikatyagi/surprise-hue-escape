@@ -13,8 +13,13 @@ import { MapPin, Lock, Sparkles, Loader2 } from "lucide-react";
 const InvalidateOnMount = () => {
   const map = useMap();
   useEffect(() => {
-    const t = setTimeout(() => map.invalidateSize(), 200);
-    return () => clearTimeout(t);
+    const timers = [50, 200, 500, 1000].map((d) => setTimeout(() => map.invalidateSize(), d));
+    const onResize = () => map.invalidateSize();
+    window.addEventListener("resize", onResize);
+    return () => {
+      timers.forEach(clearTimeout);
+      window.removeEventListener("resize", onResize);
+    };
   }, [map]);
   return null;
 };
@@ -97,11 +102,13 @@ const MapExplorer = () => {
           <Card className="overflow-hidden rounded-2xl shadow-card border-border">
             <CardContent className="p-0">
               <div style={{ height: "70vh", width: "100%" }}>
-                <MapContainer center={[20, 0]} zoom={2} style={{ height: "100%", width: "100%" }} worldCopyJump>
+                <MapContainer center={[20, 0]} zoom={2} style={{ height: "100%", width: "100%" }} worldCopyJump scrollWheelZoom>
                   <InvalidateOnMount />
                   <TileLayer
-                    attribution='&copy; OpenStreetMap'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; OpenStreetMap &copy; CARTO'
+                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    subdomains="abcd"
+                    maxZoom={19}
                   />
                   {secrets.map((s) => {
                     const [lat, lng] = s.lat && s.lng ? [s.lat, s.lng] : seedCoords(s.id);
