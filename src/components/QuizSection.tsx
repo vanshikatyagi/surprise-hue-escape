@@ -17,6 +17,10 @@ import {
   Plane, Flag, Search, RotateCcw, MapPinOff,
   Salad, Beef, Wheat, Leaf,
   Wine, Beer, Coffee as CoffeeIcon, GlassWater,
+  BedDouble, UtensilsCrossed, Sparkle, Car,
+  Clock3, UsersRound, Banknote, Rocket,
+  CalendarClock, CalendarCheck, CalendarPlus, CalendarOff,
+  TrendingUp,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
