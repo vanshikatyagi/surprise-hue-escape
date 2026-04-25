@@ -637,6 +637,29 @@ const TripReveal = () => {
                     </div>
                   );
                 })}
+                {/* Prev / Next day navigation */}
+                <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={activeDay <= 1}
+                    onClick={() => setActiveDay((d) => Math.max(1, d - 1))}
+                    className="rounded-full gap-1"
+                  >
+                    <ChevronRight className="w-4 h-4 rotate-180" /> Day {Math.max(1, activeDay - 1)}
+                  </Button>
+                  <span className="text-xs text-muted-foreground">
+                    Day {activeDay} of {itinerary.days.length}
+                  </span>
+                  <Button
+                    size="sm"
+                    disabled={activeDay >= itinerary.days.length}
+                    onClick={() => setActiveDay((d) => Math.min(itinerary.days.length, d + 1))}
+                    className="rounded-full gap-1 bg-accent text-accent-foreground hover:bg-accent/90"
+                  >
+                    Day {Math.min(itinerary.days.length, activeDay + 1)} <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}
