@@ -680,9 +680,10 @@ const TripReveal = () => {
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
-              onClick={() => {
-                exportItineraryPdf(itinerary, quizData);
-                toast({ title: "Itinerary exported 📄", description: "Your day-wise PDF is downloading now." });
+              onClick={async () => {
+                toast({ title: "Preparing your premium guide...", description: "Fetching images and assembling pages." });
+                await exportItineraryPdf(itinerary, quizData);
+                toast({ title: "Itinerary exported", description: "Your premium PDF guide is downloading." });
               }}
               variant="outline"
               className="sm:w-auto rounded-full py-6 px-6 text-base font-bold gap-2 border-2"
