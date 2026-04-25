@@ -71,6 +71,9 @@ const Dashboard = () => {
           <a href="/" className="text-xl font-extrabold tracking-widest uppercase">MYSTIGO</a>
           <div className="flex items-center gap-3">
             <span className="text-sm text-white/70">{user?.email}</span>
+            <Button onClick={() => navigate("/profile")} variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
+              Account
+            </Button>
             <Button onClick={handleSignOut} variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
               <LogOut className="w-4 h-4" />
             </Button>
