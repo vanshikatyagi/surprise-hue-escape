@@ -625,14 +625,14 @@ const TripReveal = () => {
                           <span className="text-xs font-mono text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{act.time}</span>
                           <span className={`text-[10px] font-semibold border rounded-full px-2 py-0.5 capitalize ${colorClass}`}>{act.type}</span>
                           {act.cost_estimate && <span className="text-[10px] text-muted-foreground">{act.cost_estimate}</span>}
-                          {act.hidden_gem && <Badge className="bg-purple-100 text-purple-700 border-0 text-[9px] gap-0.5 px-1.5 py-0"><Sparkles className="w-2.5 h-2.5" />Hidden Gem</Badge>}
-                          {act.photo_spot && <Badge className="bg-blue-100 text-blue-700 border-0 text-[9px] gap-0.5 px-1.5 py-0"><Camera className="w-2.5 h-2.5" />📸 Photo Spot</Badge>}
-                          {act.community_pick && <Badge className="bg-green-100 text-green-700 border-0 text-[9px] gap-0.5 px-1.5 py-0">🤝 Community Pick</Badge>}
+                          {act.hidden_gem && <Badge className="bg-purple-500/15 text-purple-300 border border-purple-500/30 text-[9px] gap-0.5 px-1.5 py-0"><Sparkles className="w-2.5 h-2.5" />Hidden Gem</Badge>}
+                          {act.photo_spot && <Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30 text-[9px] gap-0.5 px-1.5 py-0"><Camera className="w-2.5 h-2.5" />📸 Photo Spot</Badge>}
+                          {act.community_pick && <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 text-[9px] gap-0.5 px-1.5 py-0">🤝 Community Pick</Badge>}
                         </div>
                         <p className="font-bold text-sm text-foreground">{act.activity}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">{act.description}</p>
-                        {act.local_food_tip && <p className="text-xs text-orange-600 mt-1 flex items-center gap-1"><UtensilsCrossed className="w-3 h-3" />{act.local_food_tip}</p>}
-                        {act.insider_tip && <p className="text-xs text-purple-600 mt-1 italic">💡 {act.insider_tip}</p>}
+                        {act.local_food_tip && <p className="text-xs text-orange-300 mt-1 flex items-center gap-1"><UtensilsCrossed className="w-3 h-3" />{act.local_food_tip}</p>}
+                        {act.insider_tip && <p className="text-xs text-purple-300 mt-1 italic">💡 {act.insider_tip}</p>}
                       </div>
                     </div>
                   );
