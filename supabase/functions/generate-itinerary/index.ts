@@ -287,6 +287,9 @@ RULES:
 - Style: ${travelStyle}
 - Duration: ${tripDuration}
 - Budget: ${budget}
+- Spend more on: ${Array.isArray(body.budget_priority) ? body.budget_priority[0] : (body.budget_priority || "balanced")}
+- Avoid: ${Array.isArray(body.avoid_preferences) ? body.avoid_preferences.join(", ") : (body.avoid_preferences || "nothing specific")}
+- Travel timing: ${Array.isArray(body.travel_timing) ? body.travel_timing[0] : (body.travel_timing || "flexible")}
 - With: ${companions}
 - Activities: ${activities}
 - Accommodation: ${accommodation}
@@ -296,7 +299,10 @@ RULES:
 - Visited: ${visitedPlaces || "none"}
 - Flow: ${isReveal ? "REVEAL (cinematic)" : isDashboard ? "DASHBOARD (planner)" : "default"}
 
-ALL PRICES in ${curr.code}. Hidden spots ONLY.`,
+ALL PRICES in ${curr.code}. Hidden spots ONLY.
+PRIORITIZE quality on the user's "Spend more on" choice (better hotels OR better food OR better experiences OR better transport).
+RESPECT "Avoid" preferences strictly (no long travel/layovers/crowds/expensive picks as listed).
+Use travel timing to factor seasonality and availability hints.`,
           },
         ],
       }),
