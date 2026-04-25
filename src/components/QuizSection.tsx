@@ -238,6 +238,7 @@ const allSteps: QuizStep[] = [
     ],
   },
   {
+    question: "Where do you prefer to sleep?",
     subtitle: "Pick all styles you'd enjoy",
     key: "accommodation_type",
     type: "options",
