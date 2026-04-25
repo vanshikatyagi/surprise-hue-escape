@@ -560,9 +560,10 @@ const TripReveal = () => {
               Not satisfied? Explore another option
             </Button>
             <Button
-              onClick={() => {
-                exportItineraryPdf(itinerary, quizData);
-                toast({ title: "Itinerary exported 📄", description: "Your day-wise PDF is downloading now." });
+              onClick={async () => {
+                toast({ title: "Preparing your premium guide...", description: "Fetching images and assembling pages." });
+                await exportItineraryPdf(itinerary, quizData);
+                toast({ title: "Itinerary exported", description: "Your premium PDF guide is downloading." });
               }}
               variant="outline"
               className="rounded-full px-6 py-6 text-sm font-bold gap-2 border-2"
