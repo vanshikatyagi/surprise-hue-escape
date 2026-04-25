@@ -123,6 +123,9 @@ The mystery option's hints must be poetic and never reveal the name.`,
 - Scope: ${body.travel_scope || "Surprise Me"}
 - Style: ${Array.isArray(body.travel_style) ? body.travel_style.join(", ") : body.travel_style}
 - Budget: ${Array.isArray(body.budget) ? body.budget[0] : body.budget}
+- Spend more on: ${Array.isArray(body.budget_priority) ? body.budget_priority[0] : (body.budget_priority || "balanced")}
+- Avoid: ${Array.isArray(body.avoid_preferences) ? body.avoid_preferences.join(", ") : (body.avoid_preferences || "nothing specific")}
+- Travel timing: ${Array.isArray(body.travel_timing) ? body.travel_timing[0] : (body.travel_timing || "flexible")}
 - Duration: ${Array.isArray(body.trip_duration) ? body.trip_duration[0] : body.trip_duration}
 - With: ${Array.isArray(body.travel_companions) ? body.travel_companions[0] : body.travel_companions}
 - Climate: ${Array.isArray(body.climate_preference) ? body.climate_preference.join(", ") : (body.climate_preference || "any")}
@@ -131,7 +134,7 @@ The mystery option's hints must be poetic and never reveal the name.`,
 - Already visited: ${visitedPlaces || "none"}
 - Wants to revisit: ${revisitPlace || "no"}
 
-ALL budget estimates in ${curr.code}. Hidden gems ONLY.`,
+ALL budget estimates in ${curr.code}. Hidden gems ONLY. Respect the "Avoid" list strictly (skip crowded/expensive/long-travel destinations as listed). Use travel timing to factor seasonality.`,
             },
           ],
         }),
