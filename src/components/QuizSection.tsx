@@ -20,7 +20,7 @@ import {
   BedDouble, UtensilsCrossed, Sparkle, Car,
   Clock3, UsersRound, Banknote, Rocket,
   CalendarClock, CalendarCheck, CalendarPlus, CalendarOff,
-  TrendingUp,
+  Bell, Mail, Tag, HeartHandshake,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
