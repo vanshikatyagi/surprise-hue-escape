@@ -14,6 +14,7 @@ import {
   HelpCircle, Eye, Lock, RefreshCw, Image as ImageIcon, Target,
   Wifi, Coffee, Briefcase, Award, Zap, TrendingDown, Gauge,
   Heart, Info, Users as UsersIcon,
+  Train, Bus, Car, Ship, Anchor, Leaf,
 } from "lucide-react";
 import Header from "@/components/Header";
 import BudgetBreakdown from "@/components/BudgetBreakdown";
@@ -35,7 +36,7 @@ const activityTypeColors: Record<string, string> = {
   transport: "bg-muted text-muted-foreground border-border",
 };
 
-type Phase = "generating" | "choose" | "building" | "destination" | "itinerary" | "flights" | "hotels" | "summary";
+type Phase = "generating" | "choose" | "building" | "destination" | "itinerary" | "transport" | "hotels" | "summary";
 
 interface DestinationOption {
   id: number; name: string; tagline: string; hints: string[];
@@ -59,11 +60,15 @@ interface Itinerary {
   budget_breakdown?: Record<string, string>; place_brief?: PlaceBrief;
 }
 
-interface RealFlight {
-  airline: string; flight_number: string; from: string; to: string;
+interface TransportOption {
+  mode: string; operator: string; service_name?: string;
+  airline?: string; flight_number?: string;
+  from: string; to: string;
   depart: string; arrive: string; duration: string; price: number;
   class: string; stops: string;
-  perks?: string[]; baggage?: string; on_time_rating?: number; tags?: string[];
+  perks?: string[]; baggage?: string; on_time_rating?: number;
+  comfort_rating?: number; eco_score?: string; booking_hint?: string;
+  tags?: string[];
 }
 
 interface RealHotel {
@@ -95,15 +100,15 @@ const TripReveal = () => {
   const [destinations, setDestinations] = useState<DestinationOption[]>([]);
   const [selectedDest, setSelectedDest] = useState<number | null>(null);
   const [itinerary, setItinerary] = useState<Itinerary | null>(null);
-  const [flights, setFlights] = useState<RealFlight[]>([]);
+  const [transport, setTransport] = useState<TransportOption[]>([]);
   const [hotels, setHotels] = useState<RealHotel[]>([]);
-  const [flightsLoading, setFlightsLoading] = useState(false);
+  const [transportLoading, setTransportLoading] = useState(false);
   const [hotelsLoading, setHotelsLoading] = useState(false);
   const [activeDay, setActiveDay] = useState(1);
   const [error, setError] = useState("");
-  const [selectedFlight, setSelectedFlight] = useState<number | null>(null);
+  const [selectedTransport, setSelectedTransport] = useState<number | null>(null);
   const [selectedHotel, setSelectedHotel] = useState<number | null>(null);
-  const [bookingFlight, setBookingFlight] = useState(false);
+  const [bookingTransport, setBookingTransport] = useState(false);
   const [bookingHotel, setBookingHotel] = useState(false);
   const [previousDestinations, setPreviousDestinations] = useState<string[]>([]);
   const [exploringAlternative, setExploringAlternative] = useState(false);
@@ -250,24 +255,25 @@ const TripReveal = () => {
     }
   };
 
-  const searchFlights = async () => {
+  const searchTransport = async () => {
     if (!itinerary) return;
-    setFlightsLoading(true);
+    setTransportLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("search-flights", {
-        body: { origin: getVal(quizData.departure_city, ""), destination: itinerary.destination, destination_airport: itinerary.destination_airport, budget: getVal(quizData.budget, "Comfortable"), currency: quizData.currency || "USD ($)" },
+      const { data, error } = await supabase.functions.invoke("search-transport", {
+        body: { origin: getVal(quizData.departure_city, ""), destination: itinerary.destination, budget: getVal(quizData.budget, "Comfortable"), currency: quizData.currency || "USD ($)" },
       });
       if (error) throw error;
-      setFlights(data?.flights || []);
+      setTransport(data?.options || []);
     } catch (e: any) {
-      console.error("Flight search error:", e);
+      console.error("Transport search error:", e);
       if (itinerary.flight_suggestion) {
-        setFlights([
-          { airline: "MystiGo Air", flight_number: "MG-" + Math.floor(Math.random() * 900 + 100), from: itinerary.flight_suggestion.from_hub, to: itinerary.flight_suggestion.to, depart: "08:00", arrive: "16:30", duration: itinerary.flight_suggestion.flight_duration, price: parseInt(itinerary.flight_suggestion.estimated_price_range.replace(/[^0-9]/g, "")) || 800, class: "economy", stops: "1 stop" },
-          { airline: "MystiGo Air", flight_number: "MG-" + Math.floor(Math.random() * 900 + 100), from: itinerary.flight_suggestion.from_hub, to: itinerary.flight_suggestion.to, depart: "14:30", arrive: "22:00", duration: itinerary.flight_suggestion.flight_duration, price: (parseInt(itinerary.flight_suggestion.estimated_price_range.replace(/[^0-9]/g, "")) || 800) + 200, class: "business", stops: "Direct" },
+        const basePrice = parseInt(itinerary.flight_suggestion.estimated_price_range.replace(/[^0-9]/g, "")) || 800;
+        setTransport([
+          { mode: "flight", operator: "MystiGo Air", service_name: "MG-" + Math.floor(Math.random() * 900 + 100), from: itinerary.flight_suggestion.from_hub, to: itinerary.flight_suggestion.to, depart: "08:00", arrive: "16:30", duration: itinerary.flight_suggestion.flight_duration, price: basePrice, class: "economy", stops: "1 stop" },
+          { mode: "flight", operator: "MystiGo Air", service_name: "MG-" + Math.floor(Math.random() * 900 + 100), from: itinerary.flight_suggestion.from_hub, to: itinerary.flight_suggestion.to, depart: "14:30", arrive: "22:00", duration: itinerary.flight_suggestion.flight_duration, price: basePrice + 200, class: "business", stops: "Direct" },
         ]);
       }
-    } finally { setFlightsLoading(false); }
+    } finally { setTransportLoading(false); }
   };
 
   const searchHotels = async () => {
@@ -290,28 +296,67 @@ const TripReveal = () => {
     } finally { setHotelsLoading(false); }
   };
 
-  const bookFlight = async (flight: RealFlight) => {
-    setBookingFlight(true);
+  const bookTransport = async (t: TransportOption) => {
+    setBookingTransport(true);
     try {
       const departDate = new Date(Date.now() + 14 * 86400000);
-      // Save record for the dashboard
+      // Persist a flights row for any mode (schema reuse) — operator stored as airline.
       await supabase.from("flights").insert({
-        user_id: user!.id, airline: flight.airline, flight_number: flight.flight_number,
-        departure_city: flight.from, arrival_city: flight.to,
+        user_id: user!.id,
+        airline: `${t.operator}${t.mode !== "flight" ? ` (${t.mode})` : ""}`,
+        flight_number: t.service_name || t.mode.toUpperCase(),
+        departure_city: t.from, arrival_city: t.to,
         departure_date: departDate.toISOString(),
         arrival_date: new Date(departDate.getTime() + 12 * 3600000).toISOString(),
-        price: flight.price, class: flight.class,
+        price: t.price, class: t.class,
       });
-      // Open Skyscanner with prefilled search → real booking
-      const fromCode = (flight.from || "").slice(0, 3).toUpperCase();
-      const toCode = (flight.to || itinerary?.destination_airport || "").slice(0, 3).toUpperCase();
+
+      // Mode-aware booking handoff
+      const fromQ = encodeURIComponent(t.from);
+      const toQ = encodeURIComponent(t.to);
       const yymmdd = departDate.toISOString().slice(2, 10).replace(/-/g, "");
-      const skyUrl = `https://www.skyscanner.com/transport/flights/${fromCode}/${toCode}/${yymmdd}/`;
-      window.open(skyUrl, "_blank", "noopener,noreferrer");
-      toast({ title: "Opening Skyscanner ✈️", description: "Complete your booking on Skyscanner. We saved this trip to your dashboard." });
+      const dateISO = departDate.toISOString().split("T")[0];
+      let url = "";
+      let label = "";
+      switch (t.mode) {
+        case "flight": {
+          const fromCode = (t.from || "").slice(0, 3).toUpperCase();
+          const toCode = (t.to || itinerary?.destination_airport || "").slice(0, 3).toUpperCase();
+          url = `https://www.skyscanner.com/transport/flights/${fromCode}/${toCode}/${yymmdd}/`;
+          label = "Skyscanner ✈️";
+          break;
+        }
+        case "train":
+          url = `https://www.google.com/travel/things-to-do?q=trains+from+${fromQ}+to+${toQ}`;
+          label = "train booking 🚆";
+          break;
+        case "bus":
+        case "shared_taxi":
+          url = `https://12go.asia/en/travel/${fromQ}/${toQ}?date=${dateISO}`;
+          label = "12Go 🚌";
+          break;
+        case "car_rental":
+          url = `https://www.rentalcars.com/SearchResults.do?location=${toQ}`;
+          label = "Rentalcars 🚗";
+          break;
+        case "rideshare":
+          url = `https://m.uber.com/?action=setPickup&pickup[formatted_address]=${fromQ}&dropoff[formatted_address]=${toQ}`;
+          label = "Uber 🚖";
+          break;
+        case "ferry":
+        case "cruise":
+          url = `https://www.directferries.com/ferry_route_search.htm?dept=${fromQ}&arr=${toQ}`;
+          label = "Direct Ferries ⛴️";
+          break;
+        default:
+          url = `https://www.google.com/search?q=${encodeURIComponent(`${t.mode} from ${t.from} to ${t.to}`)}`;
+          label = "search results";
+      }
+      window.open(url, "_blank", "noopener,noreferrer");
+      toast({ title: `Opening ${label}`, description: "Complete your booking there. We saved this leg to your dashboard." });
     } catch (e: any) {
       toast({ title: "Booking failed", description: e.message, variant: "destructive" });
-    } finally { setBookingFlight(false); }
+    } finally { setBookingTransport(false); }
   };
 
   const bookHotel = async (hotel: RealHotel) => {
@@ -790,8 +835,8 @@ const TripReveal = () => {
             >
               <Download className="w-5 h-5" /> Export PDF
             </Button>
-            <Button onClick={() => { setPhase("flights"); searchFlights(); }} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-full py-6 text-base font-bold gap-2">
-              <Plane className="w-5 h-5" /> Find Flights to {itinerary.destination.split(",")[0]} <ArrowRight className="w-5 h-5" />
+            <Button onClick={() => { setPhase("transport"); searchTransport(); }} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-full py-6 text-base font-bold gap-2">
+              <Navigation className="w-5 h-5" /> Compare All Transport to {itinerary.destination.split(",")[0]} <ArrowRight className="w-5 h-5" />
             </Button>
           </div>
         </div>
@@ -799,89 +844,106 @@ const TripReveal = () => {
     );
   }
 
-  // ── FLIGHTS PHASE ──
-  if (phase === "flights") {
+  // ── TRANSPORT PHASE (all modes) ──
+  const modeMeta: Record<string, { icon: React.ElementType; label: string; color: string }> = {
+    flight: { icon: Plane, label: "Flight", color: "bg-sky-500/15 text-sky-300 border-sky-500/30" },
+    train: { icon: Train, label: "Train", color: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" },
+    bus: { icon: Bus, label: "Bus", color: "bg-orange-500/15 text-orange-300 border-orange-500/30" },
+    car_rental: { icon: Car, label: "Self-drive", color: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30" },
+    rideshare: { icon: Car, label: "Rideshare", color: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30" },
+    ferry: { icon: Ship, label: "Ferry", color: "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" },
+    cruise: { icon: Anchor, label: "Cruise", color: "bg-blue-500/15 text-blue-300 border-blue-500/30" },
+    shared_taxi: { icon: Car, label: "Shared taxi", color: "bg-amber-500/15 text-amber-300 border-amber-500/30" },
+    metro_combo: { icon: Navigation, label: "Multi-leg", color: "bg-purple-500/15 text-purple-300 border-purple-500/30" },
+  };
+
+  if (phase === "transport") {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="h-[52px]" />
         <div className="bg-card text-white py-10">
           <div className="container mx-auto px-4 text-center">
-            <Plane className="w-8 h-8 mx-auto mb-2 text-accent" />
-            <h1 className="text-2xl font-black">Flights to {itinerary.destination.split(",")[0]}</h1>
-            <p className="text-muted-foreground text-sm mt-1">From {getVal(quizData?.departure_city, "your city")}</p>
+            <Navigation className="w-8 h-8 mx-auto mb-2 text-accent" />
+            <h1 className="text-2xl font-black">All Ways to Reach {itinerary.destination.split(",")[0]}</h1>
+            <p className="text-muted-foreground text-sm mt-1">Flights, trains, buses, ferries & more · From {getVal(quizData?.departure_city, "your city")}</p>
           </div>
         </div>
         <div className="container mx-auto px-4 py-10 max-w-3xl">
-          {flightsLoading ? (
-            <div className="flex flex-col items-center py-20 gap-4"><Loader2 className="w-10 h-10 animate-spin text-accent" /><p className="text-muted-foreground text-sm">Searching for the best flights...</p></div>
-          ) : flights.length === 0 ? (
-            <Card className="p-10 text-center"><p className="text-muted-foreground mb-4">No flights found.</p><Button onClick={() => { setPhase("hotels"); searchHotels(); }} variant="outline">Skip to Hotels →</Button></Card>
+          {transportLoading ? (
+            <div className="flex flex-col items-center py-20 gap-4"><Loader2 className="w-10 h-10 animate-spin text-accent" /><p className="text-muted-foreground text-sm">Comparing every mode of transport...</p></div>
+          ) : transport.length === 0 ? (
+            <Card className="p-10 text-center"><p className="text-muted-foreground mb-4">No transport options found.</p><Button onClick={() => { setPhase("hotels"); searchHotels(); }} variant="outline">Skip to Hotels →</Button></Card>
           ) : (
             <div className="space-y-4">
-              {/* Compare-all summary strip */}
-              <div className="grid grid-cols-3 gap-2 mb-2">
-                <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 justify-center py-2 text-[10px] gap-1"><TrendingDown className="w-3 h-3" /> Cheapest tagged</Badge>
-                <Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30 justify-center py-2 text-[10px] gap-1"><Zap className="w-3 h-3" /> Fastest tagged</Badge>
-                <Badge className="bg-accent/20 text-accent border border-accent/40 justify-center py-2 text-[10px] gap-1"><Award className="w-3 h-3" /> Best value tagged</Badge>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+                <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 justify-center py-2 text-[10px] gap-1"><TrendingDown className="w-3 h-3" /> Cheapest</Badge>
+                <Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30 justify-center py-2 text-[10px] gap-1"><Zap className="w-3 h-3" /> Fastest</Badge>
+                <Badge className="bg-accent/20 text-accent border border-accent/40 justify-center py-2 text-[10px] gap-1"><Award className="w-3 h-3" /> Best value</Badge>
+                <Badge className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 justify-center py-2 text-[10px] gap-1"><Leaf className="w-3 h-3" /> Eco pick</Badge>
               </div>
-              {flights.map((flight, i) => (
-                <Card key={i} className={`bg-card rounded-xl overflow-hidden transition-all cursor-pointer ${selectedFlight === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedFlight(i)}>
-                  <CardContent className="p-6">
-                    {flight.tags && flight.tags.length > 0 && (
-                      <div className="flex gap-1.5 flex-wrap mb-3">
-                        {flight.tags.includes("cheapest") && <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 text-[10px] gap-1"><TrendingDown className="w-3 h-3" />Cheapest</Badge>}
-                        {flight.tags.includes("fastest") && <Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30 text-[10px] gap-1"><Zap className="w-3 h-3" />Fastest</Badge>}
-                        {flight.tags.includes("best-value") && <Badge className="bg-accent/20 text-accent border border-accent/40 text-[10px] gap-1"><Award className="w-3 h-3" />Best Value</Badge>}
+              {transport.map((t, i) => {
+                const meta = modeMeta[t.mode] || { icon: Navigation, label: t.mode, color: "bg-muted text-muted-foreground border-border" };
+                const ModeIcon = meta.icon;
+                return (
+                  <Card key={i} className={`bg-card rounded-xl overflow-hidden transition-all cursor-pointer ${selectedTransport === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedTransport(i)}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+                        <Badge className={`${meta.color} border text-[10px] gap-1 capitalize`}><ModeIcon className="w-3 h-3" />{meta.label}</Badge>
+                        {t.tags && t.tags.length > 0 && (
+                          <div className="flex gap-1.5 flex-wrap">
+                            {t.tags.includes("cheapest") && <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 text-[10px] gap-1"><TrendingDown className="w-3 h-3" />Cheapest</Badge>}
+                            {t.tags.includes("fastest") && <Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30 text-[10px] gap-1"><Zap className="w-3 h-3" />Fastest</Badge>}
+                            {t.tags.includes("best-value") && <Badge className="bg-accent/20 text-accent border border-accent/40 text-[10px] gap-1"><Award className="w-3 h-3" />Best Value</Badge>}
+                            {t.tags.includes("eco-pick") && <Badge className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] gap-1"><Leaf className="w-3 h-3" />Eco</Badge>}
+                          </div>
+                        )}
                       </div>
-                    )}
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className="flex items-center gap-3 sm:w-32">
-                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center"><Plane className="w-5 h-5 text-primary" /></div>
-                        <div>
-                          <p className="font-bold text-sm">{flight.airline}</p>
-                          <p className="text-[10px] text-muted-foreground">{flight.flight_number} · {flight.stops}</p>
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 sm:w-40">
+                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center"><ModeIcon className="w-5 h-5 text-primary" /></div>
+                          <div>
+                            <p className="font-bold text-sm">{t.operator}</p>
+                            <p className="text-[10px] text-muted-foreground">{t.service_name || ""} · {t.stops}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 text-center">
+                          <div><p className="font-black text-lg">{t.depart}</p><p className="text-[10px] text-muted-foreground truncate max-w-[80px]">{t.from}</p></div>
+                          <div className="flex flex-col items-center gap-1"><span className="text-[10px] text-muted-foreground">{t.duration}</span><div className="w-16 h-[1px] bg-border" /></div>
+                          <div><p className="font-black text-lg">{t.arrive}</p><p className="text-[10px] text-muted-foreground truncate max-w-[80px]">{t.to}</p></div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-black">{currencySymbol}{t.price}</p>
+                          <Badge variant="outline" className="text-[10px] capitalize">{t.class}</Badge>
+                          {t.on_time_rating && (
+                            <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1 justify-end"><Gauge className="w-3 h-3" /> {t.on_time_rating}/5</p>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-4 text-center">
-                        <div><p className="font-black text-lg">{flight.depart}</p><p className="text-[10px] text-muted-foreground">{flight.from}</p></div>
-                        <div className="flex flex-col items-center gap-1"><span className="text-[10px] text-muted-foreground">{flight.duration}</span><div className="w-16 h-[1px] bg-border" /></div>
-                        <div><p className="font-black text-lg">{flight.arrive}</p><p className="text-[10px] text-muted-foreground">{flight.to}</p></div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-black">{currencySymbol}{flight.price}</p>
-                        <Badge variant="outline" className="text-[10px] capitalize">{flight.class}</Badge>
-                        {flight.on_time_rating && (
-                          <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1 justify-end">
-                            <Gauge className="w-3 h-3" /> {flight.on_time_rating}/5 on-time
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    {(flight.perks?.length || flight.baggage) && (
-                      <div className="mt-4 pt-3 border-t border-border flex flex-wrap gap-2 items-center">
-                        {flight.baggage && (
-                          <Badge variant="outline" className="text-[10px] gap-1"><Briefcase className="w-3 h-3" />{flight.baggage}</Badge>
-                        )}
-                        {flight.perks?.slice(0, 4).map((p, k) => (
-                          <Badge key={k} variant="outline" className="text-[10px] gap-1">
-                            {/wifi/i.test(p) ? <Wifi className="w-3 h-3" /> : /meal|food|coffee|snack/i.test(p) ? <Coffee className="w-3 h-3" /> : <Check className="w-3 h-3" />}
-                            {p}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+                      {(t.perks?.length || t.baggage || t.booking_hint) && (
+                        <div className="mt-4 pt-3 border-t border-border flex flex-wrap gap-2 items-center">
+                          {t.baggage && <Badge variant="outline" className="text-[10px] gap-1"><Briefcase className="w-3 h-3" />{t.baggage}</Badge>}
+                          {t.perks?.slice(0, 4).map((p, k) => (
+                            <Badge key={k} variant="outline" className="text-[10px] gap-1">
+                              {/wifi/i.test(p) ? <Wifi className="w-3 h-3" /> : /meal|food|coffee|snack/i.test(p) ? <Coffee className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+                              {p}
+                            </Badge>
+                          ))}
+                          {t.booking_hint && <Badge variant="outline" className="text-[10px] gap-1 ml-auto"><Info className="w-3 h-3" />Book on {t.booking_hint}</Badge>}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
               <div className="flex gap-3 mt-6">
-                <Button disabled={selectedFlight === null || bookingFlight} onClick={() => selectedFlight !== null && bookFlight(flights[selectedFlight])} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-full py-6 font-bold gap-2">
-                  {bookingFlight ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}{bookingFlight ? "Booking..." : "Book Selected Flight"}
+                <Button disabled={selectedTransport === null || bookingTransport} onClick={() => selectedTransport !== null && bookTransport(transport[selectedTransport])} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-full py-6 font-bold gap-2">
+                  {bookingTransport ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}{bookingTransport ? "Booking..." : "Book Selected Option"}
                 </Button>
                 <Button variant="outline" onClick={() => { setPhase("hotels"); searchHotels(); }} className="rounded-full px-6 py-6 font-bold gap-2">Skip <ChevronRight className="w-4 h-4" /></Button>
               </div>
-              {selectedFlight !== null && !bookingFlight && (
-                <Button onClick={() => { bookFlight(flights[selectedFlight!]); setTimeout(() => { setPhase("hotels"); searchHotels(); }, 1500); }} variant="ghost" className="w-full text-sm text-muted-foreground">Book & Continue to Hotels →</Button>
+              {selectedTransport !== null && !bookingTransport && (
+                <Button onClick={() => { bookTransport(transport[selectedTransport!]); setTimeout(() => { setPhase("hotels"); searchHotels(); }, 1500); }} variant="ghost" className="w-full text-sm text-muted-foreground">Book & Continue to Hotels →</Button>
               )}
             </div>
           )}
@@ -991,11 +1053,11 @@ const TripReveal = () => {
             <p className="text-xl font-black text-foreground">{itinerary.destination}</p>
             <p className="text-xs text-muted-foreground mt-1">{itinerary.duration} · Budget: {itinerary.estimated_budget}</p>
           </Card>
-          {selectedFlight !== null && flights[selectedFlight] && (
+          {selectedTransport !== null && transport[selectedTransport] && (
             <Card className="bg-card rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-3"><Plane className="w-5 h-5 text-accent" /><h3 className="font-bold text-sm">Flight Booked</h3><Badge className="bg-green-100 text-green-700 border-0 text-[10px]">Confirmed</Badge></div>
-              <p className="font-bold text-foreground">{flights[selectedFlight].from} → {flights[selectedFlight].to}</p>
-              <p className="text-xs text-muted-foreground">{flights[selectedFlight].airline} · {flights[selectedFlight].flight_number} · {currencySymbol}{flights[selectedFlight].price}</p>
+              <div className="flex items-center gap-3 mb-3"><Navigation className="w-5 h-5 text-accent" /><h3 className="font-bold text-sm">Transport Booked</h3><Badge className="bg-green-100 text-green-700 border-0 text-[10px] capitalize">{transport[selectedTransport].mode}</Badge></div>
+              <p className="font-bold text-foreground">{transport[selectedTransport].from} → {transport[selectedTransport].to}</p>
+              <p className="text-xs text-muted-foreground">{transport[selectedTransport].operator} · {transport[selectedTransport].service_name || ""} · {currencySymbol}{transport[selectedTransport].price}</p>
             </Card>
           )}
           {selectedHotel !== null && hotels[selectedHotel] && (
@@ -1005,13 +1067,13 @@ const TripReveal = () => {
               <p className="text-xs text-muted-foreground">{currencySymbol}{hotels[selectedHotel].price}/night · {hotels[selectedHotel].room_type}</p>
             </Card>
           )}
-          <BudgetBreakdown flightCost={selectedFlight !== null && flights[selectedFlight] ? flights[selectedFlight].price : 0} hotelCost={selectedHotel !== null && hotels[selectedHotel] ? hotels[selectedHotel].price * 7 : 0} currencySymbol={currencySymbol} estimatedBudget={itinerary.estimated_budget} />
+          <BudgetBreakdown flightCost={selectedTransport !== null && transport[selectedTransport] ? transport[selectedTransport].price : 0} hotelCost={selectedHotel !== null && hotels[selectedHotel] ? hotels[selectedHotel].price * 7 : 0} currencySymbol={currencySymbol} estimatedBudget={itinerary.estimated_budget} />
           <Card className="bg-accent/10 border-accent/20 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-3"><DollarSign className="w-5 h-5 text-accent" /><h3 className="font-bold text-sm">Estimated Total</h3></div>
             <p className="text-3xl font-black text-foreground">
-              {currencySymbol}{((selectedFlight !== null && flights[selectedFlight] ? flights[selectedFlight].price : 0) + (selectedHotel !== null && hotels[selectedHotel] ? hotels[selectedHotel].price * 7 : 0)).toLocaleString()}
+              {currencySymbol}{((selectedTransport !== null && transport[selectedTransport] ? transport[selectedTransport].price : 0) + (selectedHotel !== null && hotels[selectedHotel] ? hotels[selectedHotel].price * 7 : 0)).toLocaleString()}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">Flight + 7 nights accommodation (activities not included)</p>
+            <p className="text-xs text-muted-foreground mt-1">Transport + 7 nights accommodation (activities not included)</p>
           </Card>
           <div className="flex gap-3 pt-4">
             <Button onClick={() => navigate("/dashboard")} className="flex-1 bg-card text-white hover:bg-card/80 rounded-full py-6 font-bold">Go to Dashboard</Button>
