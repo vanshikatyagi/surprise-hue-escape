@@ -20,7 +20,7 @@ import {
   BedDouble, UtensilsCrossed, Sparkle, Car,
   Clock3, UsersRound, Banknote, Rocket,
   CalendarClock, CalendarCheck, CalendarPlus, CalendarOff,
-  TrendingUp,
+  Bell, Mail, Tag, HeartHandshake,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -254,6 +254,19 @@ const allSteps: QuizStep[] = [
       { label: "City Apartment", description: "Live like a local", icon: Home },
     ],
   },
+  {
+    question: "One last thing — stay in the loop?",
+    subtitle: "Pick anything you'd like (optional). You can change this later in your profile.",
+    key: "opt_ins",
+    type: "options",
+    multiSelect: true,
+    options: [
+      { label: "Trip-ready alerts", description: "Notify me when my plan is ready", icon: Bell },
+      { label: "Weekly travel ideas", description: "Curated mystery picks in my inbox", icon: Mail },
+      { label: "Exclusive deals", description: "Early access to flight & hotel offers", icon: Tag },
+      { label: "Travel buddy matches", description: "Suggest people heading the same way", icon: HeartHandshake },
+    ],
+  },
 ];
 
 // Comprehensive world currencies
@@ -476,64 +489,6 @@ const QuizSection = () => {
 
   if (!currentStepData) return null;
 
-  // ── Live Trip Preview (updates as user answers) ──
-  const getOne = (k: string): string => {
-    const v = answers[k];
-    if (!v) return "";
-    return Array.isArray(v) ? v[0] || "" : v;
-  };
-  const getMany = (k: string): string[] => {
-    const v = answers[k];
-    if (!v) return [];
-    return Array.isArray(v) ? v : [v];
-  };
-  const budgetLabel = getOne("budget");
-  const paceLabel = getOne("travel_pace");
-  const durLabel = getOne("trip_duration");
-  const styles = getMany("travel_style");
-  const climates = getMany("climate_preference");
-  const scope = getOne("travel_scope");
-  const previewStyle =
-    budgetLabel === "Luxury" ? "Luxury" :
-    budgetLabel === "Premium" ? "Premium" :
-    budgetLabel === "Comfortable" ? "Balanced" :
-    budgetLabel === "Budget Explorer" ? "Budget" : "—";
-  const previewPace =
-    paceLabel === "Action-Packed" ? "Packed" :
-    paceLabel === "Slow & Relaxed" ? "Relaxed" :
-    paceLabel || "—";
-  const budgetEstimate = (() => {
-    const base =
-      budgetLabel === "Luxury" ? 4500 :
-      budgetLabel === "Premium" ? 2800 :
-      budgetLabel === "Comfortable" ? 1500 :
-      budgetLabel === "Budget Explorer" ? 700 : 0;
-    if (!base) return "—";
-    const days =
-      durLabel === "Weekend Getaway" ? 3 :
-      durLabel === "Short Break" ? 5 :
-      durLabel === "Full Week" ? 8 :
-      durLabel === "Extended Journey" ? 12 : 5;
-    const intl = scope === "International" || scope === "Nearby Countries" ? 1.4 : 1;
-    const total = Math.round((base * (days / 5) * intl) / 50) * 50;
-    const sym = (() => {
-      const c = getOne("currency");
-      const m = c?.match(/\((.+)\)$/);
-      return m ? m[1] : "$";
-    })();
-    return `${sym}${total.toLocaleString()}`;
-  })();
-  const direction = (() => {
-    if (climates.includes("Tropical & Warm")) return "Tropical hideaway";
-    if (climates.includes("Cold & Snowy")) return "Snowy mountain region";
-    if (climates.includes("Rainy & Lush")) return "Lush green valley";
-    if (styles.includes("Adventure & Outdoors")) return "Offbeat adventure region";
-    if (styles.includes("Beach & Relaxation")) return "Hidden coastal gem";
-    if (styles.includes("Culture & History")) return "Cultural heritage town";
-    return "Hidden gem matching your vibe";
-  })();
-  const showPreview = Object.keys(answers).length > 0;
-
   return (
     <section className="bg-primary py-20" id="quiz">
       <div className="container mx-auto px-4 flex justify-center">
@@ -553,36 +508,6 @@ const QuizSection = () => {
               style={{ width: `${progress}%` }}
             />
           </div>
-
-          {/* Live Trip Preview */}
-          {showPreview && (
-            <div className="mb-8 rounded-xl bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/30 p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="w-4 h-4 text-accent" />
-                <span className="text-[10px] uppercase tracking-widest font-bold text-[#2d2d2d]">
-                  Live Trip Preview
-                </span>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-                <div>
-                  <p className="text-[9px] uppercase text-gray-500 font-semibold">Est. Budget</p>
-                  <p className="text-sm font-black text-[#2d2d2d] mt-0.5">{budgetEstimate}</p>
-                </div>
-                <div>
-                  <p className="text-[9px] uppercase text-gray-500 font-semibold">Style</p>
-                  <p className="text-sm font-black text-[#2d2d2d] mt-0.5">{previewStyle}</p>
-                </div>
-                <div>
-                  <p className="text-[9px] uppercase text-gray-500 font-semibold">Pace</p>
-                  <p className="text-sm font-black text-[#2d2d2d] mt-0.5">{previewPace}</p>
-                </div>
-                <div>
-                  <p className="text-[9px] uppercase text-gray-500 font-semibold">Direction</p>
-                  <p className="text-[11px] font-bold text-[#2d2d2d] mt-0.5 leading-tight">{direction}</p>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Question */}
           <div className="mb-8 text-center">

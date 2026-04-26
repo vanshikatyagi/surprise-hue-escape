@@ -12,6 +12,8 @@ import {
   ArrowRight, Package, Camera, UtensilsCrossed, Mountain,
   Palmtree, Landmark, Navigation, CheckCircle2, Backpack,
   HelpCircle, Eye, Lock, RefreshCw, Image as ImageIcon, Target,
+  Wifi, Coffee, Briefcase, Award, Zap, TrendingDown, Gauge,
+  Heart, Info, Users as UsersIcon,
 } from "lucide-react";
 import Header from "@/components/Header";
 import BudgetBreakdown from "@/components/BudgetBreakdown";
@@ -45,22 +47,30 @@ interface Activity { time: string; activity: string; description: string; type: 
 interface DayPlan { day: number; title: string; activities: Activity[]; }
 interface FlightSuggestion { from_hub: string; to: string; estimated_price_range: string; flight_duration: string; }
 interface HotelSuggestion { name: string; area: string; style: string; estimated_price_range: string; }
+interface PlaceBrief {
+  tagline?: string; why_visit?: string; culture?: string; food_scene?: string;
+  top_experiences?: string[]; best_time_detail?: string; good_to_know?: string[];
+  gallery_keywords?: string[];
+}
 interface Itinerary {
   destination: string; destination_airport?: string; duration: string; summary: string;
   days: DayPlan[]; estimated_budget: string; best_season: string; tips: string[];
   packing_essentials?: string[]; flight_suggestion?: FlightSuggestion; hotel_suggestion?: HotelSuggestion;
-  budget_breakdown?: Record<string, string>;
+  budget_breakdown?: Record<string, string>; place_brief?: PlaceBrief;
 }
 
 interface RealFlight {
   airline: string; flight_number: string; from: string; to: string;
   depart: string; arrive: string; duration: string; price: number;
   class: string; stops: string;
+  perks?: string[]; baggage?: string; on_time_rating?: number; tags?: string[];
 }
 
 interface RealHotel {
   name: string; city: string; price: number; rating: number;
   room_type: string; image_url: string;
+  review_count?: number; amenities?: string[]; distance_to_center?: string;
+  free_cancellation?: boolean; breakfast_included?: boolean; tags?: string[];
 }
 
 function getVal(v: string | string[] | undefined, fallback: string): string {
@@ -474,8 +484,20 @@ const TripReveal = () => {
   if (phase === "destination") {
     const cityQuery = encodeURIComponent(itinerary.destination.split(",")[0].trim());
     const heroImg = `https://source.unsplash.com/1600x900/?${cityQuery},travel,landscape`;
-    const hotelImg = `https://source.unsplash.com/800x600/?${cityQuery},hotel,room`;
-    const foodImg = `https://source.unsplash.com/800x600/?${cityQuery},food,local`;
+    const brief = itinerary.place_brief || {};
+    const galleryKeywords =
+      brief.gallery_keywords && brief.gallery_keywords.length >= 2
+        ? brief.gallery_keywords
+        : ["landmark", "street", "food", "nature"];
+    const galleryImgs = galleryKeywords.slice(0, 4).map(
+      (kw, i) =>
+        `https://source.unsplash.com/600x600/?${cityQuery},${encodeURIComponent(kw)}&sig=${i + 1}`
+    );
+    while (galleryImgs.length < 4) {
+      galleryImgs.push(
+        `https://source.unsplash.com/600x600/?${cityQuery}&sig=${galleryImgs.length + 10}`
+      );
+    }
     // Match score: prefer AI vibe_score, fall back to chosen card score, else 90
     const matchScore = (itinerary as any).vibe_score
       || destinations.find((d) => d.id === selectedDest)?.match_score
@@ -504,6 +526,11 @@ const TripReveal = () => {
           <h1 className="text-4xl md:text-6xl font-black text-foreground text-center tracking-tight drop-shadow-lg">
             {itinerary.destination}
           </h1>
+          {brief.tagline && (
+            <p className="text-accent text-base md:text-lg font-semibold text-center max-w-2xl italic">
+              "{brief.tagline}"
+            </p>
+          )}
           <p className="text-muted-foreground text-center max-w-xl leading-relaxed">{itinerary.summary}</p>
 
           {/* Confidence indicators */}
@@ -522,31 +549,104 @@ const TripReveal = () => {
             <Badge variant="outline" className="text-sm gap-2 py-2 px-4"><Star className="w-4 h-4 text-accent" />Best: {itinerary.best_season}</Badge>
           </div>
 
-          {/* Visual previews — hotel + local food */}
-          <div className="grid grid-cols-2 gap-4 w-full max-w-2xl mt-4">
-            <Card className="overflow-hidden bg-card border-border">
-              <div className="h-36 overflow-hidden">
-                <img src={hotelImg} alt="Stay preview" className="w-full h-full object-cover"
-                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800"; }} />
+          {/* ── PREMIUM DESTINATION BRIEF ── */}
+          <Card className="w-full max-w-4xl bg-card border-border overflow-hidden">
+            {/* Image gallery */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
+              {galleryImgs.map((src, i) => (
+                <div key={i} className="relative aspect-square overflow-hidden group">
+                  <img
+                    src={src}
+                    alt={`${itinerary.destination} ${galleryKeywords[i] || ""}`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=600"; }}
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-white capitalize">
+                      {galleryKeywords[i]}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <CardContent className="p-6 md:p-8 space-y-6">
+              {/* Why visit */}
+              {brief.why_visit && (
+                <div>
+                  <h3 className="text-xs uppercase tracking-widest font-bold text-accent flex items-center gap-2 mb-2">
+                    <Heart className="w-3.5 h-3.5" /> Why You'll Love It
+                  </h3>
+                  <p className="text-sm md:text-base text-foreground leading-relaxed">{brief.why_visit}</p>
+                </div>
+              )}
+
+              {/* Top experiences */}
+              {brief.top_experiences && brief.top_experiences.length > 0 && (
+                <div>
+                  <h3 className="text-xs uppercase tracking-widest font-bold text-accent flex items-center gap-2 mb-3">
+                    <Award className="w-3.5 h-3.5" /> Iconic Experiences
+                  </h3>
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    {brief.top_experiences.slice(0, 4).map((exp, i) => (
+                      <div key={i} className="flex items-start gap-2 text-sm text-foreground bg-muted/50 rounded-lg px-3 py-2">
+                        <Sparkles className="w-3.5 h-3.5 text-accent mt-0.5 flex-shrink-0" />
+                        <span>{exp}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Culture + Food side by side */}
+              <div className="grid md:grid-cols-2 gap-4">
+                {brief.culture && (
+                  <div className="bg-purple-500/5 border border-purple-500/20 rounded-xl p-4">
+                    <h3 className="text-xs uppercase tracking-wider font-bold text-purple-300 flex items-center gap-2 mb-2">
+                      <UsersIcon className="w-3.5 h-3.5" /> Culture & Vibe
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{brief.culture}</p>
+                  </div>
+                )}
+                {brief.food_scene && (
+                  <div className="bg-orange-500/5 border border-orange-500/20 rounded-xl p-4">
+                    <h3 className="text-xs uppercase tracking-wider font-bold text-orange-300 flex items-center gap-2 mb-2">
+                      <UtensilsCrossed className="w-3.5 h-3.5" /> Food Scene
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{brief.food_scene}</p>
+                  </div>
+                )}
               </div>
-              <CardContent className="p-3">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold flex items-center gap-1"><Hotel className="w-3 h-3" /> Where you'll stay</p>
-                <p className="text-sm font-bold text-foreground mt-1 line-clamp-1">
-                  {itinerary.hotel_suggestion?.name || "Boutique stay nearby"}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="overflow-hidden bg-card border-border">
-              <div className="h-36 overflow-hidden">
-                <img src={foodImg} alt="Food preview" className="w-full h-full object-cover"
-                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800"; }} />
-              </div>
-              <CardContent className="p-3">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold flex items-center gap-1"><UtensilsCrossed className="w-3 h-3" /> What you'll taste</p>
-                <p className="text-sm font-bold text-foreground mt-1 line-clamp-1">Local cuisine & hidden cafés</p>
-              </CardContent>
-            </Card>
-          </div>
+
+              {/* Best time detail */}
+              {brief.best_time_detail && (
+                <div className="flex items-start gap-3 bg-accent/5 border border-accent/20 rounded-xl p-4">
+                  <Calendar className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs uppercase tracking-wider font-bold text-accent mb-1">Best Time to Go</p>
+                    <p className="text-sm text-foreground">{brief.best_time_detail}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Good to know */}
+              {brief.good_to_know && brief.good_to_know.length > 0 && (
+                <div>
+                  <h3 className="text-xs uppercase tracking-widest font-bold text-accent flex items-center gap-2 mb-3">
+                    <Info className="w-3.5 h-3.5" /> Good to Know
+                  </h3>
+                  <ul className="grid sm:grid-cols-2 gap-2">
+                    {brief.good_to_know.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Action buttons */}
           <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full max-w-2xl">
@@ -719,21 +819,58 @@ const TripReveal = () => {
             <Card className="p-10 text-center"><p className="text-muted-foreground mb-4">No flights found.</p><Button onClick={() => { setPhase("hotels"); searchHotels(); }} variant="outline">Skip to Hotels →</Button></Card>
           ) : (
             <div className="space-y-4">
+              {/* Compare-all summary strip */}
+              <div className="grid grid-cols-3 gap-2 mb-2">
+                <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 justify-center py-2 text-[10px] gap-1"><TrendingDown className="w-3 h-3" /> Cheapest tagged</Badge>
+                <Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30 justify-center py-2 text-[10px] gap-1"><Zap className="w-3 h-3" /> Fastest tagged</Badge>
+                <Badge className="bg-accent/20 text-accent border border-accent/40 justify-center py-2 text-[10px] gap-1"><Award className="w-3 h-3" /> Best value tagged</Badge>
+              </div>
               {flights.map((flight, i) => (
                 <Card key={i} className={`bg-card rounded-xl overflow-hidden transition-all cursor-pointer ${selectedFlight === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedFlight(i)}>
                   <CardContent className="p-6">
+                    {flight.tags && flight.tags.length > 0 && (
+                      <div className="flex gap-1.5 flex-wrap mb-3">
+                        {flight.tags.includes("cheapest") && <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 text-[10px] gap-1"><TrendingDown className="w-3 h-3" />Cheapest</Badge>}
+                        {flight.tags.includes("fastest") && <Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30 text-[10px] gap-1"><Zap className="w-3 h-3" />Fastest</Badge>}
+                        {flight.tags.includes("best-value") && <Badge className="bg-accent/20 text-accent border border-accent/40 text-[10px] gap-1"><Award className="w-3 h-3" />Best Value</Badge>}
+                      </div>
+                    )}
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 sm:w-32">
                         <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center"><Plane className="w-5 h-5 text-primary" /></div>
-                        <div><p className="font-bold text-sm">{flight.airline}</p><p className="text-[10px] text-muted-foreground">{flight.flight_number} · {flight.stops}</p></div>
+                        <div>
+                          <p className="font-bold text-sm">{flight.airline}</p>
+                          <p className="text-[10px] text-muted-foreground">{flight.flight_number} · {flight.stops}</p>
+                        </div>
                       </div>
                       <div className="flex items-center gap-4 text-center">
                         <div><p className="font-black text-lg">{flight.depart}</p><p className="text-[10px] text-muted-foreground">{flight.from}</p></div>
                         <div className="flex flex-col items-center gap-1"><span className="text-[10px] text-muted-foreground">{flight.duration}</span><div className="w-16 h-[1px] bg-border" /></div>
                         <div><p className="font-black text-lg">{flight.arrive}</p><p className="text-[10px] text-muted-foreground">{flight.to}</p></div>
                       </div>
-                      <div className="text-right"><p className="text-2xl font-black">{currencySymbol}{flight.price}</p><Badge variant="outline" className="text-[10px] capitalize">{flight.class}</Badge></div>
+                      <div className="text-right">
+                        <p className="text-2xl font-black">{currencySymbol}{flight.price}</p>
+                        <Badge variant="outline" className="text-[10px] capitalize">{flight.class}</Badge>
+                        {flight.on_time_rating && (
+                          <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1 justify-end">
+                            <Gauge className="w-3 h-3" /> {flight.on_time_rating}/5 on-time
+                          </p>
+                        )}
+                      </div>
                     </div>
+                    {(flight.perks?.length || flight.baggage) && (
+                      <div className="mt-4 pt-3 border-t border-border flex flex-wrap gap-2 items-center">
+                        {flight.baggage && (
+                          <Badge variant="outline" className="text-[10px] gap-1"><Briefcase className="w-3 h-3" />{flight.baggage}</Badge>
+                        )}
+                        {flight.perks?.slice(0, 4).map((p, k) => (
+                          <Badge key={k} variant="outline" className="text-[10px] gap-1">
+                            {/wifi/i.test(p) ? <Wifi className="w-3 h-3" /> : /meal|food|coffee|snack/i.test(p) ? <Coffee className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+                            {p}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -769,17 +906,54 @@ const TripReveal = () => {
             <Card className="p-10 text-center"><p className="text-muted-foreground mb-4">No hotels found.</p><Button onClick={() => setPhase("summary")}>View Trip Summary →</Button></Card>
           ) : (
             <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-2 mb-2">
+                <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 justify-center py-2 text-[10px] gap-1"><TrendingDown className="w-3 h-3" /> Cheapest</Badge>
+                <Badge className="bg-yellow-500/15 text-yellow-300 border border-yellow-500/30 justify-center py-2 text-[10px] gap-1"><Star className="w-3 h-3" /> Top rated</Badge>
+                <Badge className="bg-accent/20 text-accent border border-accent/40 justify-center py-2 text-[10px] gap-1"><Award className="w-3 h-3" /> Best value</Badge>
+              </div>
               {hotels.map((hotel, i) => (
                 <Card key={i} className={`bg-card rounded-xl overflow-hidden transition-all cursor-pointer ${selectedHotel === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedHotel(i)}>
                   <CardContent className="p-0">
                     <div className="flex flex-col sm:flex-row">
-                      <div className="sm:w-48 h-36 sm:h-auto"><img src={hotel.image_url} alt={hotel.name} className="w-full h-full object-cover" /></div>
+                      <div className="sm:w-52 h-44 sm:h-auto relative">
+                        <img src={hotel.image_url} alt={hotel.name} className="w-full h-full object-cover"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=600"; }} />
+                        {hotel.tags && hotel.tags.length > 0 && (
+                          <div className="absolute top-2 left-2 flex flex-col gap-1">
+                            {hotel.tags.includes("cheapest") && <Badge className="bg-green-500 text-white border-0 text-[10px] gap-1"><TrendingDown className="w-3 h-3" />Cheapest</Badge>}
+                            {hotel.tags.includes("top-rated") && <Badge className="bg-yellow-500 text-black border-0 text-[10px] gap-1"><Star className="w-3 h-3" />Top Rated</Badge>}
+                            {hotel.tags.includes("best-value") && <Badge className="bg-accent text-accent-foreground border-0 text-[10px] gap-1"><Award className="w-3 h-3" />Best Value</Badge>}
+                          </div>
+                        )}
+                      </div>
                       <div className="flex-1 p-5">
-                        <div className="flex justify-between items-start">
-                          <div><h3 className="font-bold text-sm">{hotel.name}</h3><p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" />{hotel.city}</p></div>
-                          <div className="text-right"><p className="text-xl font-black">{currencySymbol}{hotel.price}<span className="text-xs font-normal text-muted-foreground">/night</span></p><div className="flex items-center gap-1 justify-end mt-1"><Star className="w-3 h-3 fill-yellow-400 text-yellow-400" /><span className="text-xs font-bold">{hotel.rating}</span></div></div>
+                        <div className="flex justify-between items-start gap-3">
+                          <div className="min-w-0">
+                            <h3 className="font-bold text-sm text-foreground">{hotel.name}</h3>
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" />{hotel.city}</p>
+                            {hotel.distance_to_center && (
+                              <p className="text-[10px] text-muted-foreground mt-0.5">{hotel.distance_to_center} from center</p>
+                            )}
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <p className="text-xl font-black text-foreground">{currencySymbol}{hotel.price}<span className="text-xs font-normal text-muted-foreground">/night</span></p>
+                            <div className="flex items-center gap-1 justify-end mt-1">
+                              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                              <span className="text-xs font-bold">{hotel.rating}</span>
+                              {hotel.review_count && <span className="text-[10px] text-muted-foreground">({hotel.review_count})</span>}
+                            </div>
+                          </div>
                         </div>
-                        <Badge variant="outline" className="text-[10px] capitalize mt-2">{hotel.room_type}</Badge>
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          <Badge variant="outline" className="text-[10px] capitalize">{hotel.room_type}</Badge>
+                          {hotel.free_cancellation && <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 text-[10px] gap-1"><Check className="w-2.5 h-2.5" />Free cancellation</Badge>}
+                          {hotel.breakfast_included && <Badge className="bg-orange-500/15 text-orange-300 border border-orange-500/30 text-[10px] gap-1"><Coffee className="w-2.5 h-2.5" />Breakfast</Badge>}
+                          {hotel.amenities?.slice(0, 4).map((a, k) => (
+                            <Badge key={k} variant="outline" className="text-[10px] gap-1">
+                              {/wifi/i.test(a) ? <Wifi className="w-2.5 h-2.5" /> : <Check className="w-2.5 h-2.5" />}{a}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </CardContent>
