@@ -60,11 +60,15 @@ interface Itinerary {
   budget_breakdown?: Record<string, string>; place_brief?: PlaceBrief;
 }
 
-interface RealFlight {
-  airline: string; flight_number: string; from: string; to: string;
+interface TransportOption {
+  mode: string; operator: string; service_name?: string;
+  airline?: string; flight_number?: string;
+  from: string; to: string;
   depart: string; arrive: string; duration: string; price: number;
   class: string; stops: string;
-  perks?: string[]; baggage?: string; on_time_rating?: number; tags?: string[];
+  perks?: string[]; baggage?: string; on_time_rating?: number;
+  comfort_rating?: number; eco_score?: string; booking_hint?: string;
+  tags?: string[];
 }
 
 interface RealHotel {
