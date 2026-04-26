@@ -14,6 +14,7 @@ import {
   HelpCircle, Eye, Lock, RefreshCw, Image as ImageIcon, Target,
   Wifi, Coffee, Briefcase, Award, Zap, TrendingDown, Gauge,
   Heart, Info, Users as UsersIcon,
+  Train, Bus, Car, Ship, Anchor, Leaf,
 } from "lucide-react";
 import Header from "@/components/Header";
 import BudgetBreakdown from "@/components/BudgetBreakdown";
