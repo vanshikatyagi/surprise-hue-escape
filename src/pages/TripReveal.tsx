@@ -844,89 +844,106 @@ const TripReveal = () => {
     );
   }
 
-  // ── FLIGHTS PHASE ──
-  if (phase === "flights") {
+  // ── TRANSPORT PHASE (all modes) ──
+  const modeMeta: Record<string, { icon: React.ElementType; label: string; color: string }> = {
+    flight: { icon: Plane, label: "Flight", color: "bg-sky-500/15 text-sky-300 border-sky-500/30" },
+    train: { icon: Train, label: "Train", color: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" },
+    bus: { icon: Bus, label: "Bus", color: "bg-orange-500/15 text-orange-300 border-orange-500/30" },
+    car_rental: { icon: Car, label: "Self-drive", color: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30" },
+    rideshare: { icon: Car, label: "Rideshare", color: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30" },
+    ferry: { icon: Ship, label: "Ferry", color: "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" },
+    cruise: { icon: Anchor, label: "Cruise", color: "bg-blue-500/15 text-blue-300 border-blue-500/30" },
+    shared_taxi: { icon: Car, label: "Shared taxi", color: "bg-amber-500/15 text-amber-300 border-amber-500/30" },
+    metro_combo: { icon: Navigation, label: "Multi-leg", color: "bg-purple-500/15 text-purple-300 border-purple-500/30" },
+  };
+
+  if (phase === "transport") {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="h-[52px]" />
         <div className="bg-card text-white py-10">
           <div className="container mx-auto px-4 text-center">
-            <Plane className="w-8 h-8 mx-auto mb-2 text-accent" />
-            <h1 className="text-2xl font-black">Flights to {itinerary.destination.split(",")[0]}</h1>
-            <p className="text-muted-foreground text-sm mt-1">From {getVal(quizData?.departure_city, "your city")}</p>
+            <Navigation className="w-8 h-8 mx-auto mb-2 text-accent" />
+            <h1 className="text-2xl font-black">All Ways to Reach {itinerary.destination.split(",")[0]}</h1>
+            <p className="text-muted-foreground text-sm mt-1">Flights, trains, buses, ferries & more · From {getVal(quizData?.departure_city, "your city")}</p>
           </div>
         </div>
         <div className="container mx-auto px-4 py-10 max-w-3xl">
-          {flightsLoading ? (
-            <div className="flex flex-col items-center py-20 gap-4"><Loader2 className="w-10 h-10 animate-spin text-accent" /><p className="text-muted-foreground text-sm">Searching for the best flights...</p></div>
-          ) : flights.length === 0 ? (
-            <Card className="p-10 text-center"><p className="text-muted-foreground mb-4">No flights found.</p><Button onClick={() => { setPhase("hotels"); searchHotels(); }} variant="outline">Skip to Hotels →</Button></Card>
+          {transportLoading ? (
+            <div className="flex flex-col items-center py-20 gap-4"><Loader2 className="w-10 h-10 animate-spin text-accent" /><p className="text-muted-foreground text-sm">Comparing every mode of transport...</p></div>
+          ) : transport.length === 0 ? (
+            <Card className="p-10 text-center"><p className="text-muted-foreground mb-4">No transport options found.</p><Button onClick={() => { setPhase("hotels"); searchHotels(); }} variant="outline">Skip to Hotels →</Button></Card>
           ) : (
             <div className="space-y-4">
-              {/* Compare-all summary strip */}
-              <div className="grid grid-cols-3 gap-2 mb-2">
-                <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 justify-center py-2 text-[10px] gap-1"><TrendingDown className="w-3 h-3" /> Cheapest tagged</Badge>
-                <Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30 justify-center py-2 text-[10px] gap-1"><Zap className="w-3 h-3" /> Fastest tagged</Badge>
-                <Badge className="bg-accent/20 text-accent border border-accent/40 justify-center py-2 text-[10px] gap-1"><Award className="w-3 h-3" /> Best value tagged</Badge>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+                <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 justify-center py-2 text-[10px] gap-1"><TrendingDown className="w-3 h-3" /> Cheapest</Badge>
+                <Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30 justify-center py-2 text-[10px] gap-1"><Zap className="w-3 h-3" /> Fastest</Badge>
+                <Badge className="bg-accent/20 text-accent border border-accent/40 justify-center py-2 text-[10px] gap-1"><Award className="w-3 h-3" /> Best value</Badge>
+                <Badge className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 justify-center py-2 text-[10px] gap-1"><Leaf className="w-3 h-3" /> Eco pick</Badge>
               </div>
-              {flights.map((flight, i) => (
-                <Card key={i} className={`bg-card rounded-xl overflow-hidden transition-all cursor-pointer ${selectedFlight === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedFlight(i)}>
-                  <CardContent className="p-6">
-                    {flight.tags && flight.tags.length > 0 && (
-                      <div className="flex gap-1.5 flex-wrap mb-3">
-                        {flight.tags.includes("cheapest") && <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 text-[10px] gap-1"><TrendingDown className="w-3 h-3" />Cheapest</Badge>}
-                        {flight.tags.includes("fastest") && <Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30 text-[10px] gap-1"><Zap className="w-3 h-3" />Fastest</Badge>}
-                        {flight.tags.includes("best-value") && <Badge className="bg-accent/20 text-accent border border-accent/40 text-[10px] gap-1"><Award className="w-3 h-3" />Best Value</Badge>}
+              {transport.map((t, i) => {
+                const meta = modeMeta[t.mode] || { icon: Navigation, label: t.mode, color: "bg-muted text-muted-foreground border-border" };
+                const ModeIcon = meta.icon;
+                return (
+                  <Card key={i} className={`bg-card rounded-xl overflow-hidden transition-all cursor-pointer ${selectedTransport === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedTransport(i)}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+                        <Badge className={`${meta.color} border text-[10px] gap-1 capitalize`}><ModeIcon className="w-3 h-3" />{meta.label}</Badge>
+                        {t.tags && t.tags.length > 0 && (
+                          <div className="flex gap-1.5 flex-wrap">
+                            {t.tags.includes("cheapest") && <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 text-[10px] gap-1"><TrendingDown className="w-3 h-3" />Cheapest</Badge>}
+                            {t.tags.includes("fastest") && <Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30 text-[10px] gap-1"><Zap className="w-3 h-3" />Fastest</Badge>}
+                            {t.tags.includes("best-value") && <Badge className="bg-accent/20 text-accent border border-accent/40 text-[10px] gap-1"><Award className="w-3 h-3" />Best Value</Badge>}
+                            {t.tags.includes("eco-pick") && <Badge className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] gap-1"><Leaf className="w-3 h-3" />Eco</Badge>}
+                          </div>
+                        )}
                       </div>
-                    )}
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className="flex items-center gap-3 sm:w-32">
-                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center"><Plane className="w-5 h-5 text-primary" /></div>
-                        <div>
-                          <p className="font-bold text-sm">{flight.airline}</p>
-                          <p className="text-[10px] text-muted-foreground">{flight.flight_number} · {flight.stops}</p>
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 sm:w-40">
+                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center"><ModeIcon className="w-5 h-5 text-primary" /></div>
+                          <div>
+                            <p className="font-bold text-sm">{t.operator}</p>
+                            <p className="text-[10px] text-muted-foreground">{t.service_name || ""} · {t.stops}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 text-center">
+                          <div><p className="font-black text-lg">{t.depart}</p><p className="text-[10px] text-muted-foreground truncate max-w-[80px]">{t.from}</p></div>
+                          <div className="flex flex-col items-center gap-1"><span className="text-[10px] text-muted-foreground">{t.duration}</span><div className="w-16 h-[1px] bg-border" /></div>
+                          <div><p className="font-black text-lg">{t.arrive}</p><p className="text-[10px] text-muted-foreground truncate max-w-[80px]">{t.to}</p></div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-black">{currencySymbol}{t.price}</p>
+                          <Badge variant="outline" className="text-[10px] capitalize">{t.class}</Badge>
+                          {t.on_time_rating && (
+                            <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1 justify-end"><Gauge className="w-3 h-3" /> {t.on_time_rating}/5</p>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-4 text-center">
-                        <div><p className="font-black text-lg">{flight.depart}</p><p className="text-[10px] text-muted-foreground">{flight.from}</p></div>
-                        <div className="flex flex-col items-center gap-1"><span className="text-[10px] text-muted-foreground">{flight.duration}</span><div className="w-16 h-[1px] bg-border" /></div>
-                        <div><p className="font-black text-lg">{flight.arrive}</p><p className="text-[10px] text-muted-foreground">{flight.to}</p></div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-black">{currencySymbol}{flight.price}</p>
-                        <Badge variant="outline" className="text-[10px] capitalize">{flight.class}</Badge>
-                        {flight.on_time_rating && (
-                          <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1 justify-end">
-                            <Gauge className="w-3 h-3" /> {flight.on_time_rating}/5 on-time
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    {(flight.perks?.length || flight.baggage) && (
-                      <div className="mt-4 pt-3 border-t border-border flex flex-wrap gap-2 items-center">
-                        {flight.baggage && (
-                          <Badge variant="outline" className="text-[10px] gap-1"><Briefcase className="w-3 h-3" />{flight.baggage}</Badge>
-                        )}
-                        {flight.perks?.slice(0, 4).map((p, k) => (
-                          <Badge key={k} variant="outline" className="text-[10px] gap-1">
-                            {/wifi/i.test(p) ? <Wifi className="w-3 h-3" /> : /meal|food|coffee|snack/i.test(p) ? <Coffee className="w-3 h-3" /> : <Check className="w-3 h-3" />}
-                            {p}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+                      {(t.perks?.length || t.baggage || t.booking_hint) && (
+                        <div className="mt-4 pt-3 border-t border-border flex flex-wrap gap-2 items-center">
+                          {t.baggage && <Badge variant="outline" className="text-[10px] gap-1"><Briefcase className="w-3 h-3" />{t.baggage}</Badge>}
+                          {t.perks?.slice(0, 4).map((p, k) => (
+                            <Badge key={k} variant="outline" className="text-[10px] gap-1">
+                              {/wifi/i.test(p) ? <Wifi className="w-3 h-3" /> : /meal|food|coffee|snack/i.test(p) ? <Coffee className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+                              {p}
+                            </Badge>
+                          ))}
+                          {t.booking_hint && <Badge variant="outline" className="text-[10px] gap-1 ml-auto"><Info className="w-3 h-3" />Book on {t.booking_hint}</Badge>}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
               <div className="flex gap-3 mt-6">
-                <Button disabled={selectedFlight === null || bookingFlight} onClick={() => selectedFlight !== null && bookFlight(flights[selectedFlight])} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-full py-6 font-bold gap-2">
-                  {bookingFlight ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}{bookingFlight ? "Booking..." : "Book Selected Flight"}
+                <Button disabled={selectedTransport === null || bookingTransport} onClick={() => selectedTransport !== null && bookTransport(transport[selectedTransport])} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-full py-6 font-bold gap-2">
+                  {bookingTransport ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}{bookingTransport ? "Booking..." : "Book Selected Option"}
                 </Button>
                 <Button variant="outline" onClick={() => { setPhase("hotels"); searchHotels(); }} className="rounded-full px-6 py-6 font-bold gap-2">Skip <ChevronRight className="w-4 h-4" /></Button>
               </div>
-              {selectedFlight !== null && !bookingFlight && (
-                <Button onClick={() => { bookFlight(flights[selectedFlight!]); setTimeout(() => { setPhase("hotels"); searchHotels(); }, 1500); }} variant="ghost" className="w-full text-sm text-muted-foreground">Book & Continue to Hotels →</Button>
+              {selectedTransport !== null && !bookingTransport && (
+                <Button onClick={() => { bookTransport(transport[selectedTransport!]); setTimeout(() => { setPhase("hotels"); searchHotels(); }, 1500); }} variant="ghost" className="w-full text-sm text-muted-foreground">Book & Continue to Hotels →</Button>
               )}
             </div>
           )}
