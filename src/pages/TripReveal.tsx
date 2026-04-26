@@ -484,8 +484,20 @@ const TripReveal = () => {
   if (phase === "destination") {
     const cityQuery = encodeURIComponent(itinerary.destination.split(",")[0].trim());
     const heroImg = `https://source.unsplash.com/1600x900/?${cityQuery},travel,landscape`;
-    const hotelImg = `https://source.unsplash.com/800x600/?${cityQuery},hotel,room`;
-    const foodImg = `https://source.unsplash.com/800x600/?${cityQuery},food,local`;
+    const brief = itinerary.place_brief || {};
+    const galleryKeywords =
+      brief.gallery_keywords && brief.gallery_keywords.length >= 2
+        ? brief.gallery_keywords
+        : ["landmark", "street", "food", "nature"];
+    const galleryImgs = galleryKeywords.slice(0, 4).map(
+      (kw, i) =>
+        `https://source.unsplash.com/600x600/?${cityQuery},${encodeURIComponent(kw)}&sig=${i + 1}`
+    );
+    while (galleryImgs.length < 4) {
+      galleryImgs.push(
+        `https://source.unsplash.com/600x600/?${cityQuery}&sig=${galleryImgs.length + 10}`
+      );
+    }
     // Match score: prefer AI vibe_score, fall back to chosen card score, else 90
     const matchScore = (itinerary as any).vibe_score
       || destinations.find((d) => d.id === selectedDest)?.match_score
@@ -514,6 +526,11 @@ const TripReveal = () => {
           <h1 className="text-4xl md:text-6xl font-black text-foreground text-center tracking-tight drop-shadow-lg">
             {itinerary.destination}
           </h1>
+          {brief.tagline && (
+            <p className="text-accent text-base md:text-lg font-semibold text-center max-w-2xl italic">
+              "{brief.tagline}"
+            </p>
+          )}
           <p className="text-muted-foreground text-center max-w-xl leading-relaxed">{itinerary.summary}</p>
 
           {/* Confidence indicators */}
@@ -532,31 +549,104 @@ const TripReveal = () => {
             <Badge variant="outline" className="text-sm gap-2 py-2 px-4"><Star className="w-4 h-4 text-accent" />Best: {itinerary.best_season}</Badge>
           </div>
 
-          {/* Visual previews — hotel + local food */}
-          <div className="grid grid-cols-2 gap-4 w-full max-w-2xl mt-4">
-            <Card className="overflow-hidden bg-card border-border">
-              <div className="h-36 overflow-hidden">
-                <img src={hotelImg} alt="Stay preview" className="w-full h-full object-cover"
-                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800"; }} />
+          {/* ── PREMIUM DESTINATION BRIEF ── */}
+          <Card className="w-full max-w-4xl bg-card border-border overflow-hidden">
+            {/* Image gallery */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
+              {galleryImgs.map((src, i) => (
+                <div key={i} className="relative aspect-square overflow-hidden group">
+                  <img
+                    src={src}
+                    alt={`${itinerary.destination} ${galleryKeywords[i] || ""}`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=600"; }}
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-white capitalize">
+                      {galleryKeywords[i]}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <CardContent className="p-6 md:p-8 space-y-6">
+              {/* Why visit */}
+              {brief.why_visit && (
+                <div>
+                  <h3 className="text-xs uppercase tracking-widest font-bold text-accent flex items-center gap-2 mb-2">
+                    <Heart className="w-3.5 h-3.5" /> Why You'll Love It
+                  </h3>
+                  <p className="text-sm md:text-base text-foreground leading-relaxed">{brief.why_visit}</p>
+                </div>
+              )}
+
+              {/* Top experiences */}
+              {brief.top_experiences && brief.top_experiences.length > 0 && (
+                <div>
+                  <h3 className="text-xs uppercase tracking-widest font-bold text-accent flex items-center gap-2 mb-3">
+                    <Award className="w-3.5 h-3.5" /> Iconic Experiences
+                  </h3>
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    {brief.top_experiences.slice(0, 4).map((exp, i) => (
+                      <div key={i} className="flex items-start gap-2 text-sm text-foreground bg-muted/50 rounded-lg px-3 py-2">
+                        <Sparkles className="w-3.5 h-3.5 text-accent mt-0.5 flex-shrink-0" />
+                        <span>{exp}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Culture + Food side by side */}
+              <div className="grid md:grid-cols-2 gap-4">
+                {brief.culture && (
+                  <div className="bg-purple-500/5 border border-purple-500/20 rounded-xl p-4">
+                    <h3 className="text-xs uppercase tracking-wider font-bold text-purple-300 flex items-center gap-2 mb-2">
+                      <UsersIcon className="w-3.5 h-3.5" /> Culture & Vibe
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{brief.culture}</p>
+                  </div>
+                )}
+                {brief.food_scene && (
+                  <div className="bg-orange-500/5 border border-orange-500/20 rounded-xl p-4">
+                    <h3 className="text-xs uppercase tracking-wider font-bold text-orange-300 flex items-center gap-2 mb-2">
+                      <UtensilsCrossed className="w-3.5 h-3.5" /> Food Scene
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{brief.food_scene}</p>
+                  </div>
+                )}
               </div>
-              <CardContent className="p-3">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold flex items-center gap-1"><Hotel className="w-3 h-3" /> Where you'll stay</p>
-                <p className="text-sm font-bold text-foreground mt-1 line-clamp-1">
-                  {itinerary.hotel_suggestion?.name || "Boutique stay nearby"}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="overflow-hidden bg-card border-border">
-              <div className="h-36 overflow-hidden">
-                <img src={foodImg} alt="Food preview" className="w-full h-full object-cover"
-                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800"; }} />
-              </div>
-              <CardContent className="p-3">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold flex items-center gap-1"><UtensilsCrossed className="w-3 h-3" /> What you'll taste</p>
-                <p className="text-sm font-bold text-foreground mt-1 line-clamp-1">Local cuisine & hidden cafés</p>
-              </CardContent>
-            </Card>
-          </div>
+
+              {/* Best time detail */}
+              {brief.best_time_detail && (
+                <div className="flex items-start gap-3 bg-accent/5 border border-accent/20 rounded-xl p-4">
+                  <Calendar className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs uppercase tracking-wider font-bold text-accent mb-1">Best Time to Go</p>
+                    <p className="text-sm text-foreground">{brief.best_time_detail}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Good to know */}
+              {brief.good_to_know && brief.good_to_know.length > 0 && (
+                <div>
+                  <h3 className="text-xs uppercase tracking-widest font-bold text-accent flex items-center gap-2 mb-3">
+                    <Info className="w-3.5 h-3.5" /> Good to Know
+                  </h3>
+                  <ul className="grid sm:grid-cols-2 gap-2">
+                    {brief.good_to_know.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Action buttons */}
           <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full max-w-2xl">
