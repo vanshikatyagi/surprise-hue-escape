@@ -1053,11 +1053,11 @@ const TripReveal = () => {
             <p className="text-xl font-black text-foreground">{itinerary.destination}</p>
             <p className="text-xs text-muted-foreground mt-1">{itinerary.duration} · Budget: {itinerary.estimated_budget}</p>
           </Card>
-          {selectedFlight !== null && flights[selectedFlight] && (
+          {selectedTransport !== null && transport[selectedTransport] && (
             <Card className="bg-card rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-3"><Plane className="w-5 h-5 text-accent" /><h3 className="font-bold text-sm">Flight Booked</h3><Badge className="bg-green-100 text-green-700 border-0 text-[10px]">Confirmed</Badge></div>
-              <p className="font-bold text-foreground">{flights[selectedFlight].from} → {flights[selectedFlight].to}</p>
-              <p className="text-xs text-muted-foreground">{flights[selectedFlight].airline} · {flights[selectedFlight].flight_number} · {currencySymbol}{flights[selectedFlight].price}</p>
+              <div className="flex items-center gap-3 mb-3"><Navigation className="w-5 h-5 text-accent" /><h3 className="font-bold text-sm">Transport Booked</h3><Badge className="bg-green-100 text-green-700 border-0 text-[10px] capitalize">{transport[selectedTransport].mode}</Badge></div>
+              <p className="font-bold text-foreground">{transport[selectedTransport].from} → {transport[selectedTransport].to}</p>
+              <p className="text-xs text-muted-foreground">{transport[selectedTransport].operator} · {transport[selectedTransport].service_name || ""} · {currencySymbol}{transport[selectedTransport].price}</p>
             </Card>
           )}
           {selectedHotel !== null && hotels[selectedHotel] && (
@@ -1067,13 +1067,13 @@ const TripReveal = () => {
               <p className="text-xs text-muted-foreground">{currencySymbol}{hotels[selectedHotel].price}/night · {hotels[selectedHotel].room_type}</p>
             </Card>
           )}
-          <BudgetBreakdown flightCost={selectedFlight !== null && flights[selectedFlight] ? flights[selectedFlight].price : 0} hotelCost={selectedHotel !== null && hotels[selectedHotel] ? hotels[selectedHotel].price * 7 : 0} currencySymbol={currencySymbol} estimatedBudget={itinerary.estimated_budget} />
+          <BudgetBreakdown flightCost={selectedTransport !== null && transport[selectedTransport] ? transport[selectedTransport].price : 0} hotelCost={selectedHotel !== null && hotels[selectedHotel] ? hotels[selectedHotel].price * 7 : 0} currencySymbol={currencySymbol} estimatedBudget={itinerary.estimated_budget} />
           <Card className="bg-accent/10 border-accent/20 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-3"><DollarSign className="w-5 h-5 text-accent" /><h3 className="font-bold text-sm">Estimated Total</h3></div>
             <p className="text-3xl font-black text-foreground">
-              {currencySymbol}{((selectedFlight !== null && flights[selectedFlight] ? flights[selectedFlight].price : 0) + (selectedHotel !== null && hotels[selectedHotel] ? hotels[selectedHotel].price * 7 : 0)).toLocaleString()}
+              {currencySymbol}{((selectedTransport !== null && transport[selectedTransport] ? transport[selectedTransport].price : 0) + (selectedHotel !== null && hotels[selectedHotel] ? hotels[selectedHotel].price * 7 : 0)).toLocaleString()}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">Flight + 7 nights accommodation (activities not included)</p>
+            <p className="text-xs text-muted-foreground mt-1">Transport + 7 nights accommodation (activities not included)</p>
           </Card>
           <div className="flex gap-3 pt-4">
             <Button onClick={() => navigate("/dashboard")} className="flex-1 bg-card text-white hover:bg-card/80 rounded-full py-6 font-bold">Go to Dashboard</Button>
