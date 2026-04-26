@@ -12,6 +12,8 @@ import {
   ArrowRight, Package, Camera, UtensilsCrossed, Mountain,
   Palmtree, Landmark, Navigation, CheckCircle2, Backpack,
   HelpCircle, Eye, Lock, RefreshCw, Image as ImageIcon, Target,
+  Wifi, Coffee, Briefcase, Award, Zap, TrendingDown, Gauge,
+  Heart, Info, Users as UsersIcon,
 } from "lucide-react";
 import Header from "@/components/Header";
 import BudgetBreakdown from "@/components/BudgetBreakdown";
@@ -45,22 +47,30 @@ interface Activity { time: string; activity: string; description: string; type: 
 interface DayPlan { day: number; title: string; activities: Activity[]; }
 interface FlightSuggestion { from_hub: string; to: string; estimated_price_range: string; flight_duration: string; }
 interface HotelSuggestion { name: string; area: string; style: string; estimated_price_range: string; }
+interface PlaceBrief {
+  tagline?: string; why_visit?: string; culture?: string; food_scene?: string;
+  top_experiences?: string[]; best_time_detail?: string; good_to_know?: string[];
+  gallery_keywords?: string[];
+}
 interface Itinerary {
   destination: string; destination_airport?: string; duration: string; summary: string;
   days: DayPlan[]; estimated_budget: string; best_season: string; tips: string[];
   packing_essentials?: string[]; flight_suggestion?: FlightSuggestion; hotel_suggestion?: HotelSuggestion;
-  budget_breakdown?: Record<string, string>;
+  budget_breakdown?: Record<string, string>; place_brief?: PlaceBrief;
 }
 
 interface RealFlight {
   airline: string; flight_number: string; from: string; to: string;
   depart: string; arrive: string; duration: string; price: number;
   class: string; stops: string;
+  perks?: string[]; baggage?: string; on_time_rating?: number; tags?: string[];
 }
 
 interface RealHotel {
   name: string; city: string; price: number; rating: number;
   room_type: string; image_url: string;
+  review_count?: number; amenities?: string[]; distance_to_center?: string;
+  free_cancellation?: boolean; breakfast_included?: boolean; tags?: string[];
 }
 
 function getVal(v: string | string[] | undefined, fallback: string): string {
