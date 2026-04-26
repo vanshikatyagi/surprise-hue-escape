@@ -263,6 +263,16 @@ Return ONLY valid JSON:
   "tips": ["tip1", "tip2", "tip3", "tip4"],
   "packing_essentials": ["item1", "item2", "item3"],
   "local_phrases": ["Hello = word", "Thank you = word"],
+  "place_brief": {
+    "tagline": "One catchy line capturing the soul of this place",
+    "why_visit": "2-3 sentence vivid pitch on why this place is special right now",
+    "culture": "1-2 sentences on the people, vibe, and culture",
+    "food_scene": "1-2 sentences on what makes the food special + 1-2 must-try dishes",
+    "top_experiences": ["Iconic experience 1", "Iconic 2", "Iconic 3", "Iconic 4"],
+    "best_time_detail": "Why these months are ideal (weather, festivals, prices)",
+    "good_to_know": ["Visa/entry note", "Currency tip", "Safety tip", "Cultural etiquette"],
+    "gallery_keywords": ["landmark1", "street", "food", "nature"]
+  },
   "budget_breakdown": {
     "flights": "${curr.symbol}XXX",
     "accommodation": "${curr.symbol}XXX",
