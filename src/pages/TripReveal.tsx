@@ -835,8 +835,8 @@ const TripReveal = () => {
             >
               <Download className="w-5 h-5" /> Export PDF
             </Button>
-            <Button onClick={() => { setPhase("flights"); searchFlights(); }} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-full py-6 text-base font-bold gap-2">
-              <Plane className="w-5 h-5" /> Find Flights to {itinerary.destination.split(",")[0]} <ArrowRight className="w-5 h-5" />
+            <Button onClick={() => { setPhase("transport"); searchTransport(); }} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-full py-6 text-base font-bold gap-2">
+              <Navigation className="w-5 h-5" /> Compare All Transport to {itinerary.destination.split(",")[0]} <ArrowRight className="w-5 h-5" />
             </Button>
           </div>
         </div>
