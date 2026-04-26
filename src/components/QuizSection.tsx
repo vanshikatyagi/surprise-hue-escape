@@ -254,6 +254,19 @@ const allSteps: QuizStep[] = [
       { label: "City Apartment", description: "Live like a local", icon: Home },
     ],
   },
+  {
+    question: "One last thing — stay in the loop?",
+    subtitle: "Pick anything you'd like (optional). You can change this later in your profile.",
+    key: "opt_ins",
+    type: "options",
+    multiSelect: true,
+    options: [
+      { label: "Trip-ready alerts", description: "Notify me when my plan is ready", icon: Bell },
+      { label: "Weekly travel ideas", description: "Curated mystery picks in my inbox", icon: Mail },
+      { label: "Exclusive deals", description: "Early access to flight & hotel offers", icon: Tag },
+      { label: "Travel buddy matches", description: "Suggest people heading the same way", icon: HeartHandshake },
+    ],
+  },
 ];
 
 // Comprehensive world currencies
