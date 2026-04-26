@@ -906,17 +906,54 @@ const TripReveal = () => {
             <Card className="p-10 text-center"><p className="text-muted-foreground mb-4">No hotels found.</p><Button onClick={() => setPhase("summary")}>View Trip Summary →</Button></Card>
           ) : (
             <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-2 mb-2">
+                <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 justify-center py-2 text-[10px] gap-1"><TrendingDown className="w-3 h-3" /> Cheapest</Badge>
+                <Badge className="bg-yellow-500/15 text-yellow-300 border border-yellow-500/30 justify-center py-2 text-[10px] gap-1"><Star className="w-3 h-3" /> Top rated</Badge>
+                <Badge className="bg-accent/20 text-accent border border-accent/40 justify-center py-2 text-[10px] gap-1"><Award className="w-3 h-3" /> Best value</Badge>
+              </div>
               {hotels.map((hotel, i) => (
                 <Card key={i} className={`bg-card rounded-xl overflow-hidden transition-all cursor-pointer ${selectedHotel === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedHotel(i)}>
                   <CardContent className="p-0">
                     <div className="flex flex-col sm:flex-row">
-                      <div className="sm:w-48 h-36 sm:h-auto"><img src={hotel.image_url} alt={hotel.name} className="w-full h-full object-cover" /></div>
+                      <div className="sm:w-52 h-44 sm:h-auto relative">
+                        <img src={hotel.image_url} alt={hotel.name} className="w-full h-full object-cover"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=600"; }} />
+                        {hotel.tags && hotel.tags.length > 0 && (
+                          <div className="absolute top-2 left-2 flex flex-col gap-1">
+                            {hotel.tags.includes("cheapest") && <Badge className="bg-green-500 text-white border-0 text-[10px] gap-1"><TrendingDown className="w-3 h-3" />Cheapest</Badge>}
+                            {hotel.tags.includes("top-rated") && <Badge className="bg-yellow-500 text-black border-0 text-[10px] gap-1"><Star className="w-3 h-3" />Top Rated</Badge>}
+                            {hotel.tags.includes("best-value") && <Badge className="bg-accent text-accent-foreground border-0 text-[10px] gap-1"><Award className="w-3 h-3" />Best Value</Badge>}
+                          </div>
+                        )}
+                      </div>
                       <div className="flex-1 p-5">
-                        <div className="flex justify-between items-start">
-                          <div><h3 className="font-bold text-sm">{hotel.name}</h3><p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" />{hotel.city}</p></div>
-                          <div className="text-right"><p className="text-xl font-black">{currencySymbol}{hotel.price}<span className="text-xs font-normal text-muted-foreground">/night</span></p><div className="flex items-center gap-1 justify-end mt-1"><Star className="w-3 h-3 fill-yellow-400 text-yellow-400" /><span className="text-xs font-bold">{hotel.rating}</span></div></div>
+                        <div className="flex justify-between items-start gap-3">
+                          <div className="min-w-0">
+                            <h3 className="font-bold text-sm text-foreground">{hotel.name}</h3>
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" />{hotel.city}</p>
+                            {hotel.distance_to_center && (
+                              <p className="text-[10px] text-muted-foreground mt-0.5">{hotel.distance_to_center} from center</p>
+                            )}
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <p className="text-xl font-black text-foreground">{currencySymbol}{hotel.price}<span className="text-xs font-normal text-muted-foreground">/night</span></p>
+                            <div className="flex items-center gap-1 justify-end mt-1">
+                              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                              <span className="text-xs font-bold">{hotel.rating}</span>
+                              {hotel.review_count && <span className="text-[10px] text-muted-foreground">({hotel.review_count})</span>}
+                            </div>
+                          </div>
                         </div>
-                        <Badge variant="outline" className="text-[10px] capitalize mt-2">{hotel.room_type}</Badge>
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          <Badge variant="outline" className="text-[10px] capitalize">{hotel.room_type}</Badge>
+                          {hotel.free_cancellation && <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 text-[10px] gap-1"><Check className="w-2.5 h-2.5" />Free cancellation</Badge>}
+                          {hotel.breakfast_included && <Badge className="bg-orange-500/15 text-orange-300 border border-orange-500/30 text-[10px] gap-1"><Coffee className="w-2.5 h-2.5" />Breakfast</Badge>}
+                          {hotel.amenities?.slice(0, 4).map((a, k) => (
+                            <Badge key={k} variant="outline" className="text-[10px] gap-1">
+                              {/wifi/i.test(a) ? <Wifi className="w-2.5 h-2.5" /> : <Check className="w-2.5 h-2.5" />}{a}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </CardContent>
