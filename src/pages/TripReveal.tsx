@@ -255,24 +255,25 @@ const TripReveal = () => {
     }
   };
 
-  const searchFlights = async () => {
+  const searchTransport = async () => {
     if (!itinerary) return;
-    setFlightsLoading(true);
+    setTransportLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("search-flights", {
-        body: { origin: getVal(quizData.departure_city, ""), destination: itinerary.destination, destination_airport: itinerary.destination_airport, budget: getVal(quizData.budget, "Comfortable"), currency: quizData.currency || "USD ($)" },
+      const { data, error } = await supabase.functions.invoke("search-transport", {
+        body: { origin: getVal(quizData.departure_city, ""), destination: itinerary.destination, budget: getVal(quizData.budget, "Comfortable"), currency: quizData.currency || "USD ($)" },
       });
       if (error) throw error;
-      setFlights(data?.flights || []);
+      setTransport(data?.options || []);
     } catch (e: any) {
-      console.error("Flight search error:", e);
+      console.error("Transport search error:", e);
       if (itinerary.flight_suggestion) {
-        setFlights([
-          { airline: "MystiGo Air", flight_number: "MG-" + Math.floor(Math.random() * 900 + 100), from: itinerary.flight_suggestion.from_hub, to: itinerary.flight_suggestion.to, depart: "08:00", arrive: "16:30", duration: itinerary.flight_suggestion.flight_duration, price: parseInt(itinerary.flight_suggestion.estimated_price_range.replace(/[^0-9]/g, "")) || 800, class: "economy", stops: "1 stop" },
-          { airline: "MystiGo Air", flight_number: "MG-" + Math.floor(Math.random() * 900 + 100), from: itinerary.flight_suggestion.from_hub, to: itinerary.flight_suggestion.to, depart: "14:30", arrive: "22:00", duration: itinerary.flight_suggestion.flight_duration, price: (parseInt(itinerary.flight_suggestion.estimated_price_range.replace(/[^0-9]/g, "")) || 800) + 200, class: "business", stops: "Direct" },
+        const basePrice = parseInt(itinerary.flight_suggestion.estimated_price_range.replace(/[^0-9]/g, "")) || 800;
+        setTransport([
+          { mode: "flight", operator: "MystiGo Air", service_name: "MG-" + Math.floor(Math.random() * 900 + 100), from: itinerary.flight_suggestion.from_hub, to: itinerary.flight_suggestion.to, depart: "08:00", arrive: "16:30", duration: itinerary.flight_suggestion.flight_duration, price: basePrice, class: "economy", stops: "1 stop" },
+          { mode: "flight", operator: "MystiGo Air", service_name: "MG-" + Math.floor(Math.random() * 900 + 100), from: itinerary.flight_suggestion.from_hub, to: itinerary.flight_suggestion.to, depart: "14:30", arrive: "22:00", duration: itinerary.flight_suggestion.flight_duration, price: basePrice + 200, class: "business", stops: "Direct" },
         ]);
       }
-    } finally { setFlightsLoading(false); }
+    } finally { setTransportLoading(false); }
   };
 
   const searchHotels = async () => {
@@ -295,28 +296,67 @@ const TripReveal = () => {
     } finally { setHotelsLoading(false); }
   };
 
-  const bookFlight = async (flight: RealFlight) => {
-    setBookingFlight(true);
+  const bookTransport = async (t: TransportOption) => {
+    setBookingTransport(true);
     try {
       const departDate = new Date(Date.now() + 14 * 86400000);
-      // Save record for the dashboard
+      // Persist a flights row for any mode (schema reuse) — operator stored as airline.
       await supabase.from("flights").insert({
-        user_id: user!.id, airline: flight.airline, flight_number: flight.flight_number,
-        departure_city: flight.from, arrival_city: flight.to,
+        user_id: user!.id,
+        airline: `${t.operator}${t.mode !== "flight" ? ` (${t.mode})` : ""}`,
+        flight_number: t.service_name || t.mode.toUpperCase(),
+        departure_city: t.from, arrival_city: t.to,
         departure_date: departDate.toISOString(),
         arrival_date: new Date(departDate.getTime() + 12 * 3600000).toISOString(),
-        price: flight.price, class: flight.class,
+        price: t.price, class: t.class,
       });
-      // Open Skyscanner with prefilled search → real booking
-      const fromCode = (flight.from || "").slice(0, 3).toUpperCase();
-      const toCode = (flight.to || itinerary?.destination_airport || "").slice(0, 3).toUpperCase();
+
+      // Mode-aware booking handoff
+      const fromQ = encodeURIComponent(t.from);
+      const toQ = encodeURIComponent(t.to);
       const yymmdd = departDate.toISOString().slice(2, 10).replace(/-/g, "");
-      const skyUrl = `https://www.skyscanner.com/transport/flights/${fromCode}/${toCode}/${yymmdd}/`;
-      window.open(skyUrl, "_blank", "noopener,noreferrer");
-      toast({ title: "Opening Skyscanner ✈️", description: "Complete your booking on Skyscanner. We saved this trip to your dashboard." });
+      const dateISO = departDate.toISOString().split("T")[0];
+      let url = "";
+      let label = "";
+      switch (t.mode) {
+        case "flight": {
+          const fromCode = (t.from || "").slice(0, 3).toUpperCase();
+          const toCode = (t.to || itinerary?.destination_airport || "").slice(0, 3).toUpperCase();
+          url = `https://www.skyscanner.com/transport/flights/${fromCode}/${toCode}/${yymmdd}/`;
+          label = "Skyscanner ✈️";
+          break;
+        }
+        case "train":
+          url = `https://www.google.com/travel/things-to-do?q=trains+from+${fromQ}+to+${toQ}`;
+          label = "train booking 🚆";
+          break;
+        case "bus":
+        case "shared_taxi":
+          url = `https://12go.asia/en/travel/${fromQ}/${toQ}?date=${dateISO}`;
+          label = "12Go 🚌";
+          break;
+        case "car_rental":
+          url = `https://www.rentalcars.com/SearchResults.do?location=${toQ}`;
+          label = "Rentalcars 🚗";
+          break;
+        case "rideshare":
+          url = `https://m.uber.com/?action=setPickup&pickup[formatted_address]=${fromQ}&dropoff[formatted_address]=${toQ}`;
+          label = "Uber 🚖";
+          break;
+        case "ferry":
+        case "cruise":
+          url = `https://www.directferries.com/ferry_route_search.htm?dept=${fromQ}&arr=${toQ}`;
+          label = "Direct Ferries ⛴️";
+          break;
+        default:
+          url = `https://www.google.com/search?q=${encodeURIComponent(`${t.mode} from ${t.from} to ${t.to}`)}`;
+          label = "search results";
+      }
+      window.open(url, "_blank", "noopener,noreferrer");
+      toast({ title: `Opening ${label}`, description: "Complete your booking there. We saved this leg to your dashboard." });
     } catch (e: any) {
       toast({ title: "Booking failed", description: e.message, variant: "destructive" });
-    } finally { setBookingFlight(false); }
+    } finally { setBookingTransport(false); }
   };
 
   const bookHotel = async (hotel: RealHotel) => {
