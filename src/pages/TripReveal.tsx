@@ -819,21 +819,58 @@ const TripReveal = () => {
             <Card className="p-10 text-center"><p className="text-muted-foreground mb-4">No flights found.</p><Button onClick={() => { setPhase("hotels"); searchHotels(); }} variant="outline">Skip to Hotels →</Button></Card>
           ) : (
             <div className="space-y-4">
+              {/* Compare-all summary strip */}
+              <div className="grid grid-cols-3 gap-2 mb-2">
+                <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 justify-center py-2 text-[10px] gap-1"><TrendingDown className="w-3 h-3" /> Cheapest tagged</Badge>
+                <Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30 justify-center py-2 text-[10px] gap-1"><Zap className="w-3 h-3" /> Fastest tagged</Badge>
+                <Badge className="bg-accent/20 text-accent border border-accent/40 justify-center py-2 text-[10px] gap-1"><Award className="w-3 h-3" /> Best value tagged</Badge>
+              </div>
               {flights.map((flight, i) => (
                 <Card key={i} className={`bg-card rounded-xl overflow-hidden transition-all cursor-pointer ${selectedFlight === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedFlight(i)}>
                   <CardContent className="p-6">
+                    {flight.tags && flight.tags.length > 0 && (
+                      <div className="flex gap-1.5 flex-wrap mb-3">
+                        {flight.tags.includes("cheapest") && <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 text-[10px] gap-1"><TrendingDown className="w-3 h-3" />Cheapest</Badge>}
+                        {flight.tags.includes("fastest") && <Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30 text-[10px] gap-1"><Zap className="w-3 h-3" />Fastest</Badge>}
+                        {flight.tags.includes("best-value") && <Badge className="bg-accent/20 text-accent border border-accent/40 text-[10px] gap-1"><Award className="w-3 h-3" />Best Value</Badge>}
+                      </div>
+                    )}
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 sm:w-32">
                         <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center"><Plane className="w-5 h-5 text-primary" /></div>
-                        <div><p className="font-bold text-sm">{flight.airline}</p><p className="text-[10px] text-muted-foreground">{flight.flight_number} · {flight.stops}</p></div>
+                        <div>
+                          <p className="font-bold text-sm">{flight.airline}</p>
+                          <p className="text-[10px] text-muted-foreground">{flight.flight_number} · {flight.stops}</p>
+                        </div>
                       </div>
                       <div className="flex items-center gap-4 text-center">
                         <div><p className="font-black text-lg">{flight.depart}</p><p className="text-[10px] text-muted-foreground">{flight.from}</p></div>
                         <div className="flex flex-col items-center gap-1"><span className="text-[10px] text-muted-foreground">{flight.duration}</span><div className="w-16 h-[1px] bg-border" /></div>
                         <div><p className="font-black text-lg">{flight.arrive}</p><p className="text-[10px] text-muted-foreground">{flight.to}</p></div>
                       </div>
-                      <div className="text-right"><p className="text-2xl font-black">{currencySymbol}{flight.price}</p><Badge variant="outline" className="text-[10px] capitalize">{flight.class}</Badge></div>
+                      <div className="text-right">
+                        <p className="text-2xl font-black">{currencySymbol}{flight.price}</p>
+                        <Badge variant="outline" className="text-[10px] capitalize">{flight.class}</Badge>
+                        {flight.on_time_rating && (
+                          <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1 justify-end">
+                            <Gauge className="w-3 h-3" /> {flight.on_time_rating}/5 on-time
+                          </p>
+                        )}
+                      </div>
                     </div>
+                    {(flight.perks?.length || flight.baggage) && (
+                      <div className="mt-4 pt-3 border-t border-border flex flex-wrap gap-2 items-center">
+                        {flight.baggage && (
+                          <Badge variant="outline" className="text-[10px] gap-1"><Briefcase className="w-3 h-3" />{flight.baggage}</Badge>
+                        )}
+                        {flight.perks?.slice(0, 4).map((p, k) => (
+                          <Badge key={k} variant="outline" className="text-[10px] gap-1">
+                            {/wifi/i.test(p) ? <Wifi className="w-3 h-3" /> : /meal|food|coffee|snack/i.test(p) ? <Coffee className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+                            {p}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
