@@ -36,7 +36,7 @@ const activityTypeColors: Record<string, string> = {
   transport: "bg-muted text-muted-foreground border-border",
 };
 
-type Phase = "generating" | "choose" | "building" | "destination" | "itinerary" | "flights" | "hotels" | "summary";
+type Phase = "generating" | "choose" | "building" | "destination" | "itinerary" | "transport" | "hotels" | "summary";
 
 interface DestinationOption {
   id: number; name: string; tagline: string; hints: string[];
