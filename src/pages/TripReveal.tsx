@@ -19,8 +19,9 @@ import {
 import Header from "@/components/Header";
 import BudgetBreakdown from "@/components/BudgetBreakdown";
 import SuspenseReveal from "@/components/SuspenseReveal";
-import { Download } from "lucide-react";
+import { Download, ExternalLink, ChevronDown } from "lucide-react";
 import { exportItineraryPdf } from "@/lib/exportItineraryPdf";
+import { getHotelComparisons, getTransportComparisons } from "@/lib/priceComparison";
 
 const activityIcons: Record<string, React.ElementType> = {
   sightseeing: Camera, food: UtensilsCrossed, adventure: Mountain,
