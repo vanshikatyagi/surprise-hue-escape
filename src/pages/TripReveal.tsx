@@ -113,6 +113,11 @@ const TripReveal = () => {
   const [bookingHotel, setBookingHotel] = useState(false);
   const [previousDestinations, setPreviousDestinations] = useState<string[]>([]);
   const [exploringAlternative, setExploringAlternative] = useState(false);
+  const [preferredModes, setPreferredModes] = useState<string[]>([]);
+  const [transportFilter, setTransportFilter] = useState<"all" | "cheapest" | "fastest" | "best-value" | "eco-pick">("all");
+  const [hotelFilter, setHotelFilter] = useState<"all" | "cheapest" | "top-rated" | "best-value">("all");
+  const [expandedTransport, setExpandedTransport] = useState<number | null>(null);
+  const [expandedHotel, setExpandedHotel] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user) { navigate("/auth"); return; }
