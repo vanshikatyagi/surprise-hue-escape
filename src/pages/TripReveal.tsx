@@ -864,6 +864,13 @@ const TripReveal = () => {
   };
 
   if (phase === "transport") {
+    const allModes = Array.from(new Set(transport.map((t) => t.mode)));
+    const filtered = transport.filter((t) => {
+      if (preferredModes.length > 0 && !preferredModes.includes(t.mode)) return false;
+      if (transportFilter !== "all" && !(t.tags || []).includes(transportFilter)) return false;
+      return true;
+    });
+
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -882,15 +889,64 @@ const TripReveal = () => {
             <Card className="p-10 text-center"><p className="text-muted-foreground mb-4">No transport options found.</p><Button onClick={() => { setPhase("hotels"); searchHotels(); }} variant="outline">Skip to Hotels →</Button></Card>
           ) : (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
-                <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 justify-center py-2 text-[10px] gap-1"><TrendingDown className="w-3 h-3" /> Cheapest</Badge>
-                <Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30 justify-center py-2 text-[10px] gap-1"><Zap className="w-3 h-3" /> Fastest</Badge>
-                <Badge className="bg-accent/20 text-accent border border-accent/40 justify-center py-2 text-[10px] gap-1"><Award className="w-3 h-3" /> Best value</Badge>
-                <Badge className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 justify-center py-2 text-[10px] gap-1"><Leaf className="w-3 h-3" /> Eco pick</Badge>
+              {/* Preferred mode picker */}
+              {allModes.length > 1 && (
+                <Card className="bg-card border-border p-4">
+                  <p className="text-xs uppercase tracking-wider font-bold text-accent mb-3">How would you like to travel?</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setPreferredModes([])}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${preferredModes.length === 0 ? "bg-accent text-accent-foreground border-accent" : "bg-background border-border text-muted-foreground hover:border-foreground/40"}`}
+                    >Any mode</button>
+                    {allModes.map((m) => {
+                      const meta = modeMeta[m] || { icon: Navigation, label: m, color: "" };
+                      const MIcon = meta.icon;
+                      const active = preferredModes.includes(m);
+                      return (
+                        <button
+                          key={m}
+                          onClick={() => setPreferredModes((p) => active ? p.filter((x) => x !== m) : [...p, m])}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 ${active ? "bg-accent text-accent-foreground border-accent" : "bg-background border-border text-muted-foreground hover:border-foreground/40"}`}
+                        ><MIcon className="w-3 h-3" />{meta.label}</button>
+                      );
+                    })}
+                  </div>
+                </Card>
+              )}
+
+              {/* Filter tabs */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                {([
+                  { k: "all", label: "All", icon: Globe, cls: "bg-muted text-foreground border-border" },
+                  { k: "cheapest", label: "Cheapest", icon: TrendingDown, cls: "bg-green-500/15 text-green-300 border-green-500/30" },
+                  { k: "fastest", label: "Fastest", icon: Zap, cls: "bg-blue-500/15 text-blue-300 border-blue-500/30" },
+                  { k: "best-value", label: "Best value", icon: Award, cls: "bg-accent/20 text-accent border-accent/40" },
+                  { k: "eco-pick", label: "Eco pick", icon: Leaf, cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" },
+                ] as const).map((tab) => {
+                  const TIcon = tab.icon;
+                  const active = transportFilter === tab.k;
+                  return (
+                    <button
+                      key={tab.k}
+                      onClick={() => setTransportFilter(tab.k)}
+                      className={`justify-center py-2 text-[11px] gap-1 rounded-full border flex items-center font-semibold transition-all ${active ? tab.cls + " ring-2 ring-offset-1 ring-offset-background ring-current" : "border-border text-muted-foreground hover:border-foreground/40"}`}
+                    ><TIcon className="w-3 h-3" /> {tab.label}</button>
+                  );
+                })}
               </div>
-              {transport.map((t, i) => {
+
+              {filtered.length === 0 && (
+                <Card className="p-6 text-center text-sm text-muted-foreground">
+                  No options match this filter. <button onClick={() => { setPreferredModes([]); setTransportFilter("all"); }} className="text-accent underline">Reset filters</button>
+                </Card>
+              )}
+
+              {filtered.map((t) => {
+                const i = transport.indexOf(t);
                 const meta = modeMeta[t.mode] || { icon: Navigation, label: t.mode, color: "bg-muted text-muted-foreground border-border" };
                 const ModeIcon = meta.icon;
+                const isExpanded = expandedTransport === i;
+                const compares = isExpanded ? getTransportComparisons(t) : [];
                 return (
                   <Card key={i} className={`bg-card rounded-xl overflow-hidden transition-all cursor-pointer ${selectedTransport === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedTransport(i)}>
                     <CardContent className="p-6">
@@ -935,7 +991,37 @@ const TripReveal = () => {
                               {p}
                             </Badge>
                           ))}
-                          {t.booking_hint && <Badge variant="outline" className="text-[10px] gap-1 ml-auto"><Info className="w-3 h-3" />Book on {t.booking_hint}</Badge>}
+                        </div>
+                      )}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setExpandedTransport(isExpanded ? null : i); }}
+                        className="mt-4 w-full flex items-center justify-center gap-2 text-xs font-semibold text-accent hover:underline py-2"
+                      >
+                        {isExpanded ? "Hide price comparison" : "Compare prices across booking sites"}
+                        <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                      </button>
+                      {isExpanded && (
+                        <div className="mt-2 grid sm:grid-cols-2 gap-2">
+                          {compares.map((c, k) => (
+                            <a
+                              key={k}
+                              href={c.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg border text-xs transition-all hover:border-accent hover:bg-accent/5 ${c.badge === "lowest" ? "border-green-500/40 bg-green-500/5" : "border-border"}`}
+                            >
+                              <div className="flex flex-col">
+                                <span className="font-bold text-foreground">{c.site}</span>
+                                {c.cancellation && <span className="text-[10px] text-muted-foreground">{c.cancellation}</span>}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className={`font-black ${c.badge === "lowest" ? "text-green-400" : "text-foreground"}`}>{currencySymbol}{c.price}</span>
+                                {c.badge === "lowest" && <Badge className="bg-green-500 text-white border-0 text-[9px]">Lowest</Badge>}
+                                <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                              </div>
+                            </a>
+                          ))}
                         </div>
                       )}
                     </CardContent>
