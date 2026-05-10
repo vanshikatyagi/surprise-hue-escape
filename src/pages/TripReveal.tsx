@@ -1060,59 +1060,130 @@ const TripReveal = () => {
             <Card className="p-10 text-center"><p className="text-muted-foreground mb-4">No hotels found.</p><Button onClick={() => setPhase("summary")}>View Trip Summary →</Button></Card>
           ) : (
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-2 mb-2">
-                <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 justify-center py-2 text-[10px] gap-1"><TrendingDown className="w-3 h-3" /> Cheapest</Badge>
-                <Badge className="bg-yellow-500/15 text-yellow-300 border border-yellow-500/30 justify-center py-2 text-[10px] gap-1"><Star className="w-3 h-3" /> Top rated</Badge>
-                <Badge className="bg-accent/20 text-accent border border-accent/40 justify-center py-2 text-[10px] gap-1"><Award className="w-3 h-3" /> Best value</Badge>
+              {/* Filter tabs */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {([
+                  { k: "all", label: "All hotels", icon: Hotel, cls: "bg-muted text-foreground border-border" },
+                  { k: "cheapest", label: "Cheapest", icon: TrendingDown, cls: "bg-green-500/15 text-green-300 border-green-500/30" },
+                  { k: "top-rated", label: "Top rated", icon: Star, cls: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30" },
+                  { k: "best-value", label: "Best value", icon: Award, cls: "bg-accent/20 text-accent border-accent/40" },
+                ] as const).map((tab) => {
+                  const TIcon = tab.icon;
+                  const active = hotelFilter === tab.k;
+                  return (
+                    <button
+                      key={tab.k}
+                      onClick={() => setHotelFilter(tab.k)}
+                      className={`justify-center py-2 text-[11px] gap-1 rounded-full border flex items-center font-semibold transition-all ${active ? tab.cls + " ring-2 ring-offset-1 ring-offset-background ring-current" : "border-border text-muted-foreground hover:border-foreground/40"}`}
+                    ><TIcon className="w-3 h-3" /> {tab.label}</button>
+                  );
+                })}
               </div>
-              {hotels.map((hotel, i) => (
-                <Card key={i} className={`bg-card rounded-xl overflow-hidden transition-all cursor-pointer ${selectedHotel === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedHotel(i)}>
-                  <CardContent className="p-0">
-                    <div className="flex flex-col sm:flex-row">
-                      <div className="sm:w-52 h-44 sm:h-auto relative">
-                        <img src={hotel.image_url} alt={hotel.name} className="w-full h-full object-cover"
-                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=600"; }} />
-                        {hotel.tags && hotel.tags.length > 0 && (
-                          <div className="absolute top-2 left-2 flex flex-col gap-1">
-                            {hotel.tags.includes("cheapest") && <Badge className="bg-green-500 text-white border-0 text-[10px] gap-1"><TrendingDown className="w-3 h-3" />Cheapest</Badge>}
-                            {hotel.tags.includes("top-rated") && <Badge className="bg-yellow-500 text-black border-0 text-[10px] gap-1"><Star className="w-3 h-3" />Top Rated</Badge>}
-                            {hotel.tags.includes("best-value") && <Badge className="bg-accent text-accent-foreground border-0 text-[10px] gap-1"><Award className="w-3 h-3" />Best Value</Badge>}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 p-5">
-                        <div className="flex justify-between items-start gap-3">
-                          <div className="min-w-0">
-                            <h3 className="font-bold text-sm text-foreground">{hotel.name}</h3>
-                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" />{hotel.city}</p>
-                            {hotel.distance_to_center && (
-                              <p className="text-[10px] text-muted-foreground mt-0.5">{hotel.distance_to_center} from center</p>
+
+              {(() => {
+                const minP = Math.min(...hotels.map((x) => x.price));
+                const maxR = Math.max(...hotels.map((x) => x.rating));
+                const visible = hotels
+                  .map((h, idx) => ({ h, idx }))
+                  .filter(({ h }) => {
+                    if (hotelFilter === "all") return true;
+                    if (hotelFilter === "cheapest") return (h.tags || []).includes("cheapest") || h.price === minP;
+                    if (hotelFilter === "top-rated") return (h.tags || []).includes("top-rated") || h.rating === maxR;
+                    if (hotelFilter === "best-value") return (h.tags || []).includes("best-value");
+                    return true;
+                  });
+                if (visible.length === 0) {
+                  return (
+                    <Card className="p-6 text-center text-sm text-muted-foreground">
+                      No hotels match this filter. <button onClick={() => setHotelFilter("all")} className="text-accent underline">Show all</button>
+                    </Card>
+                  );
+                }
+                return visible.map(({ h: hotel, idx: i }) => {
+                  const isExpanded = expandedHotel === i;
+                  const compares = isExpanded ? getHotelComparisons(hotel) : [];
+                  return (
+                    <Card key={i} className={`bg-card rounded-xl overflow-hidden transition-all cursor-pointer ${selectedHotel === i ? "ring-2 ring-accent shadow-lg" : "hover:shadow-md"}`} onClick={() => setSelectedHotel(i)}>
+                      <CardContent className="p-0">
+                        <div className="flex flex-col sm:flex-row">
+                          <div className="sm:w-52 h-44 sm:h-auto relative">
+                            <img src={hotel.image_url} alt={hotel.name} className="w-full h-full object-cover"
+                              onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=600"; }} />
+                            {hotel.tags && hotel.tags.length > 0 && (
+                              <div className="absolute top-2 left-2 flex flex-col gap-1">
+                                {hotel.tags.includes("cheapest") && <Badge className="bg-green-500 text-white border-0 text-[10px] gap-1"><TrendingDown className="w-3 h-3" />Cheapest</Badge>}
+                                {hotel.tags.includes("top-rated") && <Badge className="bg-yellow-500 text-black border-0 text-[10px] gap-1"><Star className="w-3 h-3" />Top Rated</Badge>}
+                                {hotel.tags.includes("best-value") && <Badge className="bg-accent text-accent-foreground border-0 text-[10px] gap-1"><Award className="w-3 h-3" />Best Value</Badge>}
+                              </div>
                             )}
                           </div>
-                          <div className="text-right flex-shrink-0">
-                            <p className="text-xl font-black text-foreground">{currencySymbol}{hotel.price}<span className="text-xs font-normal text-muted-foreground">/night</span></p>
-                            <div className="flex items-center gap-1 justify-end mt-1">
-                              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                              <span className="text-xs font-bold">{hotel.rating}</span>
-                              {hotel.review_count && <span className="text-[10px] text-muted-foreground">({hotel.review_count})</span>}
+                          <div className="flex-1 p-5">
+                            <div className="flex justify-between items-start gap-3">
+                              <div className="min-w-0">
+                                <h3 className="font-bold text-sm text-foreground">{hotel.name}</h3>
+                                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" />{hotel.city}</p>
+                                {hotel.distance_to_center && (
+                                  <p className="text-[10px] text-muted-foreground mt-0.5">{hotel.distance_to_center} from center</p>
+                                )}
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                <p className="text-xl font-black text-foreground">{currencySymbol}{hotel.price}<span className="text-xs font-normal text-muted-foreground">/night</span></p>
+                                <div className="flex items-center gap-1 justify-end mt-1">
+                                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                  <span className="text-xs font-bold">{hotel.rating}</span>
+                                  {hotel.review_count && <span className="text-[10px] text-muted-foreground">({hotel.review_count})</span>}
+                                </div>
+                              </div>
                             </div>
+                            <div className="flex flex-wrap gap-1.5 mt-3">
+                              <Badge variant="outline" className="text-[10px] capitalize">{hotel.room_type}</Badge>
+                              {hotel.free_cancellation && <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 text-[10px] gap-1"><Check className="w-2.5 h-2.5" />Free cancellation</Badge>}
+                              {hotel.breakfast_included && <Badge className="bg-orange-500/15 text-orange-300 border border-orange-500/30 text-[10px] gap-1"><Coffee className="w-2.5 h-2.5" />Breakfast</Badge>}
+                              {hotel.amenities?.slice(0, 4).map((a, k) => (
+                                <Badge key={k} variant="outline" className="text-[10px] gap-1">
+                                  {/wifi/i.test(a) ? <Wifi className="w-2.5 h-2.5" /> : <Check className="w-2.5 h-2.5" />}{a}
+                                </Badge>
+                              ))}
+                            </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setExpandedHotel(isExpanded ? null : i); }}
+                              className="mt-3 flex items-center gap-2 text-xs font-semibold text-accent hover:underline"
+                            >
+                              {isExpanded ? "Hide price comparison" : "Compare prices on 6 booking sites"}
+                              <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                            </button>
+                            {isExpanded && (
+                              <div className="mt-3 grid sm:grid-cols-2 gap-2">
+                                {compares.map((c, k) => (
+                                  <a
+                                    key={k}
+                                    href={c.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg border text-xs transition-all hover:border-accent hover:bg-accent/5 ${c.badge === "lowest" ? "border-green-500/40 bg-green-500/5" : "border-border"}`}
+                                  >
+                                    <div className="flex flex-col">
+                                      <span className="font-bold text-foreground">{c.site}</span>
+                                      {c.cancellation && <span className="text-[10px] text-muted-foreground">{c.cancellation}</span>}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className={`font-black ${c.badge === "lowest" ? "text-green-400" : "text-foreground"}`}>{currencySymbol}{c.price}</span>
+                                      {c.badge === "lowest" && <Badge className="bg-green-500 text-white border-0 text-[9px]">Lowest</Badge>}
+                                      <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                                    </div>
+                                  </a>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <div className="flex flex-wrap gap-1.5 mt-3">
-                          <Badge variant="outline" className="text-[10px] capitalize">{hotel.room_type}</Badge>
-                          {hotel.free_cancellation && <Badge className="bg-green-500/15 text-green-300 border border-green-500/30 text-[10px] gap-1"><Check className="w-2.5 h-2.5" />Free cancellation</Badge>}
-                          {hotel.breakfast_included && <Badge className="bg-orange-500/15 text-orange-300 border border-orange-500/30 text-[10px] gap-1"><Coffee className="w-2.5 h-2.5" />Breakfast</Badge>}
-                          {hotel.amenities?.slice(0, 4).map((a, k) => (
-                            <Badge key={k} variant="outline" className="text-[10px] gap-1">
-                              {/wifi/i.test(a) ? <Wifi className="w-2.5 h-2.5" /> : <Check className="w-2.5 h-2.5" />}{a}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      </CardContent>
+                    </Card>
+                  );
+                });
+              })()}
+
               <div className="flex gap-3 mt-6">
                 <Button disabled={selectedHotel === null || bookingHotel} onClick={async () => { if (selectedHotel !== null) { await bookHotel(hotels[selectedHotel]); setPhase("summary"); } }} className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-full py-6 font-bold gap-2">
                   {bookingHotel ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}{bookingHotel ? "Booking..." : "Book Selected Hotel"}
