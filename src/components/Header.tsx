@@ -53,7 +53,7 @@ const Header = () => {
             MYSTIGO
           </a>
 
-          <nav className="hidden lg:flex items-center space-x-6">
+          <nav className="hidden md:flex items-center space-x-6">
             {navLinks.map((link) => (
               <button
                 key={link.label}
@@ -95,14 +95,14 @@ const Header = () => {
                 START JOURNEY
               </Button>
             )}
-            <button className="lg:hidden text-primary-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
+            <button className="md:hidden text-primary-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
 
         {mobileOpen && (
-          <nav className="lg:hidden mt-4 pb-4 space-y-3">
+          <nav className="md:hidden mt-4 pb-4 space-y-3">
             {navLinks.map((link) => (
               <button
                 key={link.label}
