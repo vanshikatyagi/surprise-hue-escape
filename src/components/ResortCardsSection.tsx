@@ -31,7 +31,7 @@ const ResortCardsSection = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {resorts.map((resort, index) => (
             <Card key={index} onClick={scrollToBooking} className="overflow-hidden group cursor-pointer border-0 shadow-md rounded-xl">
               <div className="relative h-48 md:h-56">
