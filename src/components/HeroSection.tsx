@@ -18,15 +18,15 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/40 to-transparent" />
       </div>
 
-      <div className="absolute top-28 left-16 z-10 text-white/40 text-5xl">☆</div>
-      <div className="absolute top-28 right-16 z-10 text-white/40 text-5xl">☆</div>
+      <div className="absolute top-20 left-6 sm:top-28 sm:left-16 z-10 text-white/40 text-3xl sm:text-5xl">☆</div>
+      <div className="absolute top-20 right-6 sm:top-28 sm:right-16 z-10 text-white/40 text-3xl sm:text-5xl">☆</div>
 
       <div className="relative z-20 text-center px-4 max-w-6xl mx-auto">
-        <h1 className="text-[7rem] sm:text-[10rem] md:text-[12rem] lg:text-[16rem] xl:text-[18rem] font-black leading-[0.85] tracking-tight">
+        <h1 className="text-[3.5rem] xs:text-[4.5rem] sm:text-[7rem] md:text-[10rem] lg:text-[14rem] xl:text-[18rem] font-black leading-[0.85] tracking-tight">
           <span className="text-white drop-shadow-2xl block" style={{ textShadow: '0 4px 30px rgba(0,0,0,0.3)' }}>Mystigo</span>
-          <span className="text-accent drop-shadow-2xl block -mt-4 md:-mt-8" style={{ textShadow: '0 4px 30px rgba(0,0,0,0.3)' }}>Go</span>
+          <span className="text-accent drop-shadow-2xl block -mt-2 sm:-mt-4 md:-mt-8" style={{ textShadow: '0 4px 30px rgba(0,0,0,0.3)' }}>Go</span>
         </h1>
-        <p className="text-xl md:text-2xl text-white/90 font-light mt-4 tracking-wide">Travel agency</p>
+        <p className="text-base sm:text-xl md:text-2xl text-white/90 font-light mt-4 tracking-wide">Travel agency</p>
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
           <Button onClick={scrollToQuiz} className="bg-accent text-black hover:bg-accent/90 rounded-full px-8 py-3 font-semibold text-sm">
             Book Your Mystery Trip
