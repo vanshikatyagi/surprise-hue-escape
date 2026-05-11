@@ -5,9 +5,9 @@ import heroImage from "@/assets/hero-travel.jpg";
 
 const TravelsBeyondSection = () => {
   return (
-    <section id="about" className="flex flex-col lg:flex-row min-h-screen">
+    <section id="about" className="flex flex-col md:flex-row min-h-screen">
       {/* Left Side - Travels Beyond */}
-      <div className="w-full lg:w-1/2 bg-black relative overflow-hidden">
+      <div className="w-full md:w-1/2 bg-black relative overflow-hidden">
         <img
           src={heroImage}
           alt="Adventure landscape"
@@ -15,7 +15,7 @@ const TravelsBeyondSection = () => {
         />
         <div className="absolute inset-0 bg-black/40" />
 
-        <div className="relative z-10 h-full flex flex-col justify-center p-8 lg:p-16">
+        <div className="relative z-10 h-full flex flex-col justify-center p-8 md:p-16">
           <div className="max-w-md">
             <div className="mb-6">
               <span className="text-white/60 text-xs uppercase tracking-widest">Now booking</span>
@@ -32,7 +32,7 @@ const TravelsBeyondSection = () => {
               Travels we curated will lead you to the perfect wonderland in perfect harmony. Let your curiosity lead you to new heights where unforgettable experiences and breathtaking places await.
             </p>
 
-            <h2 className="text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-8">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-white leading-tight mb-8">
               TRAVELS<br />
               BEYOND<br />
               THE ORDINARY
@@ -46,11 +46,11 @@ const TravelsBeyondSection = () => {
       </div>
 
       {/* Right Side - Destination Cards */}
-      <div className="w-full lg:w-1/2 bg-black p-4 lg:p-6">
+      <div className="w-full md:w-1/2 bg-black p-4 md:p-6">
         <div className="space-y-4">
           {/* Dubai Card */}
           <Card className="bg-black border-0 overflow-hidden group cursor-pointer rounded-xl">
-            <div className="relative h-56 lg:h-64">
+            <div className="relative h-56 md:h-64">
               <img
                 src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800"
                 alt="Dubai"
@@ -71,7 +71,7 @@ const TravelsBeyondSection = () => {
 
           {/* France Card */}
           <Card className="bg-black border-0 overflow-hidden group cursor-pointer rounded-xl">
-            <div className="relative h-56 lg:h-64">
+            <div className="relative h-56 md:h-64">
               <img
                 src="https://images.unsplash.com/photo-1431274172761-fca41d930114?w=800&auto=format&fit=crop"
                 alt="France"
