@@ -130,12 +130,14 @@
 
 @layer base {
   * { @apply border-border; }
+  html, body { overflow-x: hidden; }
   body {
     @apply bg-background text-foreground;
     background: hsl(var(--background));
     min-height: 100vh;
     font-feature-settings: "ss01", "cv11";
   }
+  img, video { max-width: 100%; height: auto; }
 }
 
 @layer components {
