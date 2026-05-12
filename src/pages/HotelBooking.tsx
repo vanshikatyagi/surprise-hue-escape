@@ -67,7 +67,11 @@ const HotelBooking = () => {
       });
       if (error) throw error;
       setBookedHotels(prev => new Set(prev).add(index));
-      toast({ title: "Hotel Booked! 🏨", description: `${hotel.name} for ${nights} night${nights !== 1 ? "s" : ""} confirmed. Check your dashboard!` });
+      // Open Booking.com search prefilled with hotel + dates → real booking
+      const q = encodeURIComponent(`${hotel.name} ${hotel.city}`);
+      const bookingUrl = `https://www.booking.com/searchresults.html?ss=${q}&checkin=${cin}&checkout=${cout}&group_adults=2`;
+      window.open(bookingUrl, "_blank", "noopener,noreferrer");
+      toast({ title: "Opening Booking.com 🏨", description: `Complete your stay at ${hotel.name} (${nights} night${nights !== 1 ? "s" : ""}). We saved it to your dashboard.` });
     } catch (e: any) {
       toast({ title: "Booking failed", description: e.message, variant: "destructive" });
     } finally { setBooking(null); }
