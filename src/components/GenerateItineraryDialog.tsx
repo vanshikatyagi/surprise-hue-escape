@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,17 +10,27 @@ import { Map, Sparkles } from "lucide-react";
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  presetAnswers?: Record<string, string>;
 }
 
-const GenerateItineraryDialog = ({ open, onOpenChange }: Props) => {
+const GenerateItineraryDialog = ({ open, onOpenChange, presetAnswers }: Props) => {
   const navigate = useNavigate();
   const [destination, setDestination] = useState("");
   const [budget, setBudget] = useState("");
   const [duration, setDuration] = useState("");
   const [vibe, setVibe] = useState("");
 
+  useEffect(() => {
+    if (open && presetAnswers) {
+      if (presetAnswers.budget) setBudget(presetAnswers.budget);
+      if (presetAnswers.trip_duration) setDuration(presetAnswers.trip_duration);
+      if (presetAnswers.travel_style) setVibe(presetAnswers.travel_style);
+    }
+  }, [open, presetAnswers]);
+
   const handleGenerate = () => {
-    if (!destination.trim()) return;
+    const presetCurrency = presetAnswers?.currency;
+    const dest = destination.trim();
     navigate("/reveal", {
       state: {
         quizData: {
@@ -32,12 +42,13 @@ const GenerateItineraryDialog = ({ open, onOpenChange }: Props) => {
           climate_preference: [],
           activity_preference: [],
           accommodation_type: ["Boutique Hotel"],
-          currency: "USD ($)",
+          currency: presetCurrency || "USD ($)",
           travel_scope: "Surprise Me",
           travel_pace: "Balanced",
         },
-        directDestination: destination.trim(),
+        directDestination: dest || undefined,
         flow: "dashboard",
+        packageTitle: presetAnswers?.package_title,
       },
     });
     onOpenChange(false);
@@ -106,11 +117,10 @@ const GenerateItineraryDialog = ({ open, onOpenChange }: Props) => {
           </div>
           <Button
             onClick={handleGenerate}
-            disabled={!destination.trim()}
             className="w-full bg-accent text-accent-foreground hover:bg-accent/90 font-bold gap-2"
           >
             <Sparkles className="w-4 h-4" />
-            Generate My Itinerary
+            {destination.trim() ? "Generate My Itinerary" : "Surprise Me with a Hidden Gem"}
           </Button>
         </div>
       </DialogContent>

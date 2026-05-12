@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  MapPin, Calendar, Star, Trophy, Plane, Plus, LogOut, Hotel, Map, Sparkles
+  MapPin, Calendar, Star, Trophy, Plane, Plus, LogOut, Hotel, Map, Sparkles, Train
 } from 'lucide-react';
 import GenerateItineraryDialog from '@/components/GenerateItineraryDialog';
 import TravelChatbot from '@/components/TravelChatbot';
@@ -265,6 +265,19 @@ const Dashboard = () => {
                 </Button>
                 <Button variant="outline" className="w-full justify-start text-sm" onClick={() => navigate("/hotels")}>
                   <Hotel className="w-4 h-4 mr-2" /> Browse Hotels
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-sm"
+                  onClick={() => {
+                    const dest = itineraries[0]?.destination || "";
+                    const url = dest
+                      ? `https://www.rome2rio.com/map/?oName=${encodeURIComponent(dest)}`
+                      : `https://www.rome2rio.com/`;
+                    window.open(url, "_blank", "noopener,noreferrer");
+                  }}
+                >
+                  <Train className="w-4 h-4 mr-2" /> Book Transport
                 </Button>
                 <Button variant="outline" className="w-full justify-start text-sm" onClick={() => setShowGenDialog(true)}>
                   <Map className="w-4 h-4 mr-2" /> Generate Itinerary

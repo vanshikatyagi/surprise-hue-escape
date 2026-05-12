@@ -200,12 +200,13 @@ const allSteps: QuizStep[] = [
       { label: "Non-alcoholic only", description: "Mocktails, juices, fresh drinks", icon: GlassWater },
     ],
   },
-  {
-    question: "Where would you prefer to spend more?",
-    subtitle: "We'll prioritize quality where it matters most to you",
-    key: "budget_priority",
-    type: "options",
-    options: [
+    {
+      question: "Where would you prefer to spend more?",
+      subtitle: "Pick all the areas where you want premium quality",
+      key: "budget_priority",
+      type: "options",
+      multiSelect: true,
+      options: [
       { label: "Stay (Hotels)", description: "Better rooms, premium hotels", icon: BedDouble },
       { label: "Food", description: "Fine dining, tasting menus, local feasts", icon: UtensilsCrossed },
       { label: "Experiences", description: "Tours, adventures, hidden access", icon: Sparkle },
@@ -596,7 +597,7 @@ const QuizSection = () => {
                   return (
                     <button
                       key={curr.code}
-                      onClick={() => setSelected([label])}
+                      onClick={() => { setSelected([label]); try { localStorage.setItem("mystigo_currency", label); } catch {} }}
                       className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all duration-200 ${
                         isSelected
                           ? "border-[#2d2d2d] bg-[#2d2d2d]/5 shadow-sm"
