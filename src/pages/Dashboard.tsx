@@ -266,6 +266,19 @@ const Dashboard = () => {
                 <Button variant="outline" className="w-full justify-start text-sm" onClick={() => navigate("/hotels")}>
                   <Hotel className="w-4 h-4 mr-2" /> Browse Hotels
                 </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-sm"
+                  onClick={() => {
+                    const dest = itineraries[0]?.destination || "";
+                    const url = dest
+                      ? `https://www.rome2rio.com/map/?oName=${encodeURIComponent(dest)}`
+                      : `https://www.rome2rio.com/`;
+                    window.open(url, "_blank", "noopener,noreferrer");
+                  }}
+                >
+                  <Train className="w-4 h-4 mr-2" /> Book Transport
+                </Button>
                 <Button variant="outline" className="w-full justify-start text-sm" onClick={() => setShowGenDialog(true)}>
                   <Map className="w-4 h-4 mr-2" /> Generate Itinerary
                 </Button>
