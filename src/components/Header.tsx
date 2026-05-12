@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Moon, LogOut, User, Shield, Map } from "lucide-react";
+import { Menu, X, Moon, Sun, LogOut, User, Shield, Map } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
@@ -17,10 +17,25 @@ const navLinks = [
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin } = useIsAdmin();
+
+  useEffect(() => {
+    const saved = localStorage.getItem("mystigo_theme");
+    const dark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.classList.toggle("dark", dark);
+    setIsDark(dark);
+  }, []);
+
+  const toggleTheme = () => {
+    const next = !isDark;
+    document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("mystigo_theme", next ? "dark" : "light");
+    setIsDark(next);
+  };
 
   const scrollToSection = (id: string) => {
     setMobileOpen(false);
@@ -75,11 +90,12 @@ const Header = () => {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => document.documentElement.classList.toggle("dark")}
+              onClick={toggleTheme}
               className="w-10 h-10 rounded-full bg-primary-glow/20 flex items-center justify-center text-primary-foreground hover:bg-primary-glow/30 transition-colors"
-              title="Toggle dark mode"
+              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              aria-label="Toggle theme"
             >
-              <Moon className="w-4 h-4" />
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
             {user ? (
               <div className="hidden md:flex items-center gap-2">
